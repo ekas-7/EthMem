@@ -1,6 +1,6 @@
 export default function FAQ() {
   return (
-    <section className="bg-gradient-to-br from-[#07120B] to-[#052116] rounded-t-xl sm:rounded-xl p-4 sm:p-8 md:p-16 my-0 sm:my-16 lg:my-24 text-white relative overflow-hidden">
+    <section className="bg-gradient-to-br from-[#07120B] to-[#052116] rounded-t-xl sm:rounded-2xl md:rounded-[3rem] p-4 sm:p-8 md:p-16 my-0 sm:my-16 lg:my-24 text-white relative overflow-hidden">
       {/* subtle grid overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:120px_120px] pointer-events-none"></div>
       {/* decorative orbs */}

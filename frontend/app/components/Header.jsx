@@ -6,7 +6,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-gradient-to-br from-[#0B2F1B] to-[#07120B] rounded-b-xl p-4 sm:p-6 text-white relative overflow-hidden">
+    <header className="bg-gradient-to-br from-[#0B2F1B] to-[#07120B] rounded-b-xl sm:rounded-b-2xl md:rounded-b-[3rem] p-4 sm:p-6 text-white relative overflow-hidden">
       {/* subtle grid overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:120px_120px] pointer-events-none"></div>
 
