@@ -51,31 +51,31 @@ export default function Pricing() {
             </div>
 
             <div className="mt-auto">
-              <p className="text-4xl font-bold mb-6 text-black">$10<span className="text-base font-normal text-black">/mo in ETH</span></p>
-              <button className="w-full bg-white hover:bg-gray-100 text-emerald-700 font-semibold py-3 rounded-full mb-8">Choose Plan</button>
-              <ul className="space-y-4 text-sm text-black">
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3">check_circle</span><span>Everything in Pioneer</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3">check_circle</span><span>Expanded memory storage</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3">check_circle</span><span>Unlimited dApp integrations</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3">check_circle</span><span>Priority support</span></li>
+              <p className="text-3xl sm:text-4xl font-bold mb-6 text-black">$10<span className="text-base font-normal text-black">/mo in ETH</span></p>
+              <button className="w-full bg-white hover:bg-gray-100 text-emerald-700 font-semibold py-3 rounded-full mb-8 text-sm sm:text-base">Choose Plan</button>
+              <ul className="space-y-3 sm:space-y-4 text-sm text-black">
+                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Everything in Pioneer</span></li>
+                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Expanded memory storage</span></li>
+                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Unlimited dApp integrations</span></li>
+                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Priority support</span></li>
               </ul>
             </div>
           </div>
 
           {/* Architect */}
-          <div className="bg-[#071816] p-10 rounded-3xl border border-emerald-900 flex flex-col">
+          <div className="bg-[#071816] p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-emerald-900 flex flex-col">
             <div className="mb-6">
-              <h3 className="text-xl font-semibold">Architect</h3>
+              <h3 className="text-lg sm:text-xl font-semibold">Architect</h3>
               <p className="text-gray-400 text-sm mt-1">For enterprises and dApps</p>
             </div>
 
             <div className="mt-auto">
-              <p className="text-3xl md:text-4xl font-bold mb-6">Custom</p>
-              <button className="w-full bg-transparent border border-emerald-600 hover:bg-emerald-600/10 text-emerald-300 font-semibold py-3 rounded-full mb-8">Contact Sales</button>
-              <ul className="space-y-4 text-sm text-gray-300">
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3">check_circle</span><span>Everything in Voyager</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3">check_circle</span><span>Scalable infrastructure</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3">check_circle</span><span>Dedicated support &amp; SLA</span></li>
+              <p className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6">Custom</p>
+              <button className="w-full bg-transparent border border-emerald-600 hover:bg-emerald-600/10 text-emerald-300 font-semibold py-3 rounded-full mb-8 text-sm sm:text-base">Contact Sales</button>
+              <ul className="space-y-3 sm:space-y-4 text-sm text-gray-300">
+                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Everything in Voyager</span></li>
+                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Scalable infrastructure</span></li>
+                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Dedicated support &amp; SLA</span></li>
               </ul>
             </div>
           </div>
