@@ -7,92 +7,88 @@ export default function Connect() {
       <div className="absolute inset-0 pointer-events-none">
         {/* Desktop floating elements - hidden on mobile */}
         <div className="hidden lg:block">
+          {/* LLM Logos */}
           <div className="absolute top-[15%] left-[8%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
-            <span className="text-3xl font-semibold text-gray-700">zoom</span>
+            <span className="text-2xl font-bold text-gray-700">GPT</span>
           </div>
 
           <div className="absolute top-[20%] right-[15%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <Infinity className="w-16 h-16 text-gray-800" strokeWidth={2} />
+            <span className="text-xl font-bold text-gray-700">Claude</span>
           </div>
 
           <div className="absolute top-[12%] left-[40%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2s' }}>
-            <svg className="w-16 h-16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
-            </svg>
+            <span className="text-xl font-bold text-gray-700">Gemini</span>
           </div>
 
           <div className="absolute top-[45%] left-[5%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
-            <span className="text-5xl font-bold text-gray-700">N</span>
+            <span className="text-xl font-bold text-gray-700">LLaMA</span>
           </div>
 
+          {/* ETH Tech Logos */}
           <div className="absolute bottom-[20%] left-[12%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-            <svg className="w-16 h-16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M0 3.25h5.75v5.75H0zm0 5.75h5.75v5.75H0zm0 5.75h5.75V20H0zm5.75-11.5h5.75v5.75H5.75zm0 5.75h5.75v5.75H5.75zm0 5.75h5.75V20H5.75zm5.75-11.5H17v5.75h-5.5zm0 5.75H17v5.75h-5.5zm0 5.75H17V20h-5.5z"/>
-            </svg>
+            <span className="text-2xl font-bold text-gray-700">ETH</span>
           </div>
 
           <div className="absolute top-[55%] right-[8%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2.5s' }}>
-            <Youtube className="w-16 h-16 text-gray-800" />
+            <span className="text-xl font-bold text-gray-700">IPFS</span>
           </div>
 
           <div className="absolute bottom-[25%] left-[35%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <Video className="w-14 h-14 text-gray-800" />
+            <span className="text-xl font-bold text-gray-700">Web3</span>
           </div>
 
           <div className="absolute bottom-[18%] right-[25%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.8s' }}>
-            <span className="text-4xl font-bold text-gray-700">V</span>
+            <span className="text-xl font-bold text-gray-700">Solidity</span>
           </div>
 
           <div className="absolute bottom-[15%] right-[8%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2.2s' }}>
-            <span className="text-4xl font-bold text-gray-700">VISA</span>
+            <span className="text-xl font-bold text-gray-700">DeFi</span>
           </div>
         </div>
 
         {/* Tablet floating elements - visible on medium screens */}
         <div className="hidden md:block lg:hidden">
           <div className="absolute top-[10%] left-[5%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
-            <span className="text-xl font-semibold text-gray-700">zoom</span>
+            <span className="text-lg font-bold text-gray-700">GPT</span>
           </div>
 
           <div className="absolute top-[15%] right-[8%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <Infinity className="w-12 h-12 text-gray-800" strokeWidth={2} />
+            <span className="text-sm font-bold text-gray-700">Claude</span>
           </div>
 
           <div className="absolute top-[50%] left-[3%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
-            <span className="text-3xl font-bold text-gray-700">N</span>
+            <span className="text-sm font-bold text-gray-700">LLaMA</span>
           </div>
 
           <div className="absolute bottom-[15%] left-[10%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-            <svg className="w-12 h-12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M0 3.25h5.75v5.75H0zm0 5.75h5.75v5.75H0zm0 5.75h5.75V20H0zm5.75-11.5h5.75v5.75H5.75zm0 5.75h5.75v5.75H5.75zm0 5.75h5.75V20H5.75zm5.75-11.5H17v5.75h-5.5zm0 5.75H17v5.75h-5.5zm0 5.75H17V20h-5.5z"/>
-            </svg>
+            <span className="text-lg font-bold text-gray-700">ETH</span>
           </div>
 
           <div className="absolute top-[60%] right-[5%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2s' }}>
-            <Youtube className="w-12 h-12 text-gray-800" />
+            <span className="text-sm font-bold text-gray-700">Web3</span>
           </div>
 
           <div className="absolute bottom-[20%] right-[15%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.8s' }}>
-            <span className="text-2xl font-bold text-gray-700">VISA</span>
+            <span className="text-sm font-bold text-gray-700">DeFi</span>
           </div>
         </div>
 
         {/* Mobile floating elements - visible on small screens only */}
         <div className="block md:hidden">
           <div className="absolute top-[8%] left-[5%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
-            <span className="text-sm font-semibold text-gray-700">zoom</span>
+            <span className="text-xs font-bold text-gray-700">GPT</span>
           </div>
 
           <div className="absolute top-[12%] right-[8%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <Infinity className="w-8 h-8 text-gray-800" strokeWidth={2} />
+            <span className="text-xs font-bold text-gray-700">ETH</span>
           </div>
 
           <div className="absolute bottom-[15%] left-[8%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-            <Youtube className="w-8 h-8 text-gray-800" />
+            <span className="text-xs font-bold text-gray-700">Web3</span>
           </div>
 
           <div className="absolute bottom-[20%] right-[10%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.8s' }}>
-            <span className="text-lg font-bold text-gray-700">V</span>
+            <span className="text-xs font-bold text-gray-700">LLM</span>
           </div>
         </div>
       </div>
