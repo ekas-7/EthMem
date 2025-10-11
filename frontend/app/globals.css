@@ -5,18 +5,19 @@
   --foreground: #171717;
 }
 
-@theme inline {
+/* Theme variables (can be referenced in components) */
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* font variables are injected by next/font in layout.js as --font-geist-sans / --font-geist-mono */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark theme is applied only when the html element has the `dark` class */
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 body {
