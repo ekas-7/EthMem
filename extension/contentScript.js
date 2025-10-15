@@ -1,6 +1,7 @@
 // contentScript.js
 // Inject pageScript into the page context so it can hook fetch/XHR and access JS variables
 (function() {
+  console.log('ext: contentScript running');
   const s = document.createElement('script');
   s.src = chrome.runtime.getURL('pageScript.js');
   s.onload = function() { this.remove(); };
@@ -16,47 +17,132 @@
     }
   }, false);
   
-    // Inject logo image to the left of the mic button when it appears
-    function ensureLogoInserted(micBtn) {
-      if (!micBtn) return;
-      // check if already inserted
-      if (micBtn.previousElementSibling && micBtn.previousElementSibling.classList && micBtn.previousElementSibling.classList.contains('ext-logo-inserted')) return;
-  
-      const img = document.createElement('img');
-      img.src = chrome.runtime.getURL('logo.png');
-      img.alt = 'logo';
-      img.className = 'ext-logo-inserted';
-      img.style.width = '28px';
-      img.style.height = '28px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '50%';
-      img.style.marginRight = '6px';
-      img.style.display = 'inline-block';
-  
-      micBtn.parentElement.insertBefore(img, micBtn);
+  // Improved insertion strategy: locate composer via placeholder/contenteditable, find nearby button group, insert logo
+  function createLogoElement() {
+    const img = document.createElement('img');
+    img.src = chrome.runtime.getURL('logo.png');
+    img.alt = 'logo';
+    img.className = 'ext-logo-inserted';
+    img.style.width = '28px';
+    img.style.height = '28px';
+    img.style.objectFit = 'cover';
+    img.style.borderRadius = '50%';
+    img.style.marginRight = '6px';
+    img.style.display = 'inline-block';
+    return img;
+  }
+
+  function findComposerElement() {
+    const selectors = [
+      '[placeholder="Ask anything"]',
+      '[data-placeholder="Ask anything"]',
+      '#prompt-textarea',
+      'textarea[name="prompt-textarea"]',
+      'div[contenteditable="true"][id*="prompt"]',
+      'div.ProseMirror',
+      '[class*="bg-token-bg-primary"]'
+    ];
+    for (const sel of selectors) {
+      try {
+        const el = document.querySelector(sel);
+        console.log('ext: selector', sel, 'found', !!el, el);
+        if (el) return el.closest('[class*="bg-token-bg-primary"]') || el.closest('div') || el;
+      } catch (e) { console.log('ext: selector error', sel, e); }
     }
-  
-    // Observe for mic/composer button
-    const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (!m.addedNodes) continue;
-        for (const node of m.addedNodes) {
-          try {
-            if (!(node instanceof HTMLElement)) continue;
-            // find mic button (data-testid=composer-speech-button or aria-label="Dictate button")
-            const mic = node.querySelector && (node.querySelector('[data-testid="composer-speech-button"]') || node.querySelector('button[aria-label="Dictate button"]') || node.querySelector('[data-testid="composer-speech-button-container"] button'));
-            if (mic) ensureLogoInserted(mic);
-          } catch (e) {}
-        }
+    return null;
+  }
+
+  function findButtonGroupNearComposer(composerEl) {
+    if (!composerEl) return null;
+    // prefer explicit trailing group
+    const btnCandidates = Array.from(composerEl.querySelectorAll('button'));
+    if (btnCandidates.length === 0) return null;
+
+    // Group buttons by their parent element and pick the parent that has the most buttons (likely the group)
+    const parentCount = new Map();
+    for (const b of btnCandidates) {
+      const p = b.parentElement || b;
+      parentCount.set(p, (parentCount.get(p) || 0) + 1);
+    }
+    let best = null;
+    let bestCount = 0;
+    for (const [p, cnt] of parentCount.entries()) {
+      if (cnt > bestCount) { best = p; bestCount = cnt; }
+    }
+
+    // If best looks like the trailing group (has aria labels or svgs), return it
+    if (best) return best;
+
+    // fallback: return last button's parent
+    return btnCandidates[btnCandidates.length - 1].parentElement || btnCandidates[btnCandidates.length - 1];
+  }
+
+  function insertLogoNearComposer() {
+    try {
+      const composer = findComposerElement();
+      if (!composer) { console.log('ext: composer not found (after trying selectors)'); return false; }
+  const group = findButtonGroupNearComposer(composer);
+      if (!group) { console.log('ext: button group not found inside composer', { composer }); return false; }
+
+      // avoid duplicates
+      if (group.previousElementSibling && group.previousElementSibling.classList && group.previousElementSibling.classList.contains('ext-logo-inserted')) return true;
+
+      const img = createLogoElement();
+  group.parentElement.insertBefore(img, group);
+      console.log('ext: logo inserted', { insertedBefore: group, imgSrc: img.src, composer });
+      return true;
+    } catch (e) {
+      console.error('ext: insert error', e);
+      return false;
+    }
+  }
+
+  const composerObserver = new MutationObserver((mutations) => {
+    // try insertion on any DOM change
+    for (const m of mutations) {
+      if (m.addedNodes && m.addedNodes.length) {
+        if (insertLogoNearComposer()) return;
       }
-    });
-  
-    observer.observe(document.documentElement || document.body, { childList: true, subtree: true });
-  
-    // Also attempt to insert immediately if the mic is already in DOM
-    setTimeout(() => {
-      const existingMic = document.querySelector('[data-testid="composer-speech-button"]') || document.querySelector('button[aria-label="Dictate button"]') || document.querySelector('[data-testid="composer-speech-button-container"] button');
-      if (existingMic) ensureLogoInserted(existingMic);
-    }, 500);
+    }
+  });
+
+  composerObserver.observe(document.documentElement || document.body, { childList: true, subtree: true });
+
+  // initial attempt
+  setTimeout(() => insertLogoNearComposer(), 300);
+
+  // Inject <span class="ext-ekas">ekas</span> into elements matching class substrings 'text-base' and 'mx-auto'
+  function insertEkasSpan(target) {
+    try {
+      if (!target) return false;
+      // avoid duplicates
+      if (target.querySelector('.ext-ekas')) { console.log('ext: ekas already present in', target); return true; }
+      const span = document.createElement('span');
+      span.className = 'ext-ekas';
+      span.textContent = 'ekas';
+      span.style.marginLeft = '6px';
+      span.style.fontWeight = '600';
+      span.style.color = '#0ea5a4';
+      // append at end
+      target.appendChild(span);
+      console.log('ext: ekas inserted into', target);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function scanAndInsertEkas() {
+    const nodes = document.querySelectorAll('[class*="text-base"][class*="mx-auto"]');
+    console.log('ext: scanAndInsertEkas found', nodes.length, 'nodes');
+    for (const n of nodes) insertEkasSpan(n);
+  }
+
+  // run initially and on mutations
+  setTimeout(scanAndInsertEkas, 400);
+  const ekasObserver = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.addedNodes && m.addedNodes.length) scanAndInsertEkas();
+    }
+  });
+  ekasObserver.observe(document.documentElement || document.body, { childList: true, subtree: true });
   
 })();
