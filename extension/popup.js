@@ -25,7 +25,7 @@ async function sendMessageWithInject(tabId, message) {
     return await trySend();
   } catch (err) {
     // If chrome.scripting isn't available (older MV2 or runtime mismatch), surface a clear error
-    console.warn('popup: sendMessage failed, will attempt to inject content script then retry', err);
+    console.table(err);
 
     if (!chrome.scripting || !chrome.scripting.executeScript) {
       console.error('popup: chrome.scripting.executeScript is not available; cannot inject content script');
@@ -111,21 +111,3 @@ if (settingsBtn) {
     // TODO: Add settings functionality
   });
 }
-
-const injectHeaderBtn = document.getElementById('injectHeaderButton');
-if (injectHeaderBtn) {
-  injectHeaderBtn.addEventListener('click', async () => {
-    try {
-      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-      const tab = Array.isArray(tabs) ? tabs[0] : tabs;
-      if (!tab || !tab.id) return;
-      await sendMessageWithInject(tab.id, { action: 'injectHeaderButton' });
-      console.log('popup: injectHeaderButton message sent');
-    } catch (e) {
-      console.error('popup: injectHeaderButton failed', e);
-    }
-  });
-} else {
-  console.warn('popup: #injectHeaderButton element not found in popup.html');
-}
-

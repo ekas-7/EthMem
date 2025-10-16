@@ -128,14 +128,9 @@
     }
   }
 
-  // Listen for messages from popup or background to inject header button
+  // Listen for messages from popup or background
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!msg || !msg.action) return;
-    
-    if (msg.action === 'injectHeaderButton') {
-      const ok = insertLogoInHeader();
-      sendResponse({ ok });
-    }
     
     if (msg.action === 'connectWallet') {
       // Send message to page context to connect wallet
@@ -171,7 +166,41 @@
   // Inject ethAdapter
   injectEthAdapter();
 
-  // Also attempt a one-time insert shortly after load in case header is already present
-  setTimeout(() => insertLogoInHeader(), 300);
+  // Auto-inject header button with retry logic
+  let retryCount = 0;
+  const maxRetries = 20; // Try for ~6 seconds
+  
+  function tryInjectHeader() {
+    const success = insertLogoInHeader();
+    if (!success && retryCount < maxRetries) {
+      retryCount++;
+      setTimeout(tryInjectHeader, 300);
+    } else if (success) {
+      console.log('ext: header button successfully injected');
+      setupHeaderObserver();
+    }
+  }
+
+  // Set up MutationObserver to re-inject if header is removed/changed
+  function setupHeaderObserver() {
+    const observer = new MutationObserver((mutations) => {
+      const pageHeader = document.getElementById('page-header');
+      if (pageHeader && !pageHeader.querySelector('.ext-logo-button')) {
+        console.log('ext: header button removed, re-injecting...');
+        insertLogoInHeader();
+      }
+    });
+
+    // Observe the entire document for changes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    console.log('ext: MutationObserver set up for auto-injection');
+  }
+
+  // Start auto-injection
+  setTimeout(tryInjectHeader, 300);
 
 })();
