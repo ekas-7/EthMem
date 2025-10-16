@@ -4,13 +4,13 @@
   "description": "Decentralized memory for ChatGPT, Claude, and Gemini - Connect your wallet to store conversations on-chain.",
   "version": "0.1.0",
   "permissions": ["scripting", "activeTab", "storage"],
-  "host_permissions": ["https://chat.openai.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
+  "host_permissions": ["https://chat.openai.com/*", "https://chatgpt.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://chat.openai.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
+      "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
       "js": ["contentScript.js"],
       "run_at": "document_start"
     }

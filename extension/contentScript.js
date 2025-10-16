@@ -4,7 +4,7 @@
   console.log('ext: contentScript running');
 
   // Detect which platform we're on
-  const isChatGPT = window.location.hostname.includes('openai.com');
+  const isChatGPT = window.location.hostname.includes('openai.com') || window.location.hostname.includes('chatgpt.com');
   const isClaude = window.location.hostname.includes('claude.ai');
   const isGemini = window.location.hostname.includes('gemini.google.com');
   
@@ -150,10 +150,18 @@
       let insertPosition = null;
 
       if (isChatGPT) {
-        // ChatGPT: Look for #page-header
-        pageHeader = document.getElementById('page-header');
-        if (pageHeader) {
-          insertPosition = 'firstChild';
+        // ChatGPT: Look for the page-header and insert in the left section
+        const header = document.getElementById('page-header');
+        if (header) {
+          // Find the left section with model selector
+          const leftSection = header.querySelector('div.flex.items-center');
+          if (leftSection) {
+            pageHeader = leftSection;
+            insertPosition = 'afterModelSelector';
+          } else {
+            pageHeader = header;
+            insertPosition = 'firstChild';
+          }
         }
       } else if (isClaude) {
         // Claude: Look for header with data-testid="page-header"
@@ -225,6 +233,16 @@
       // Insert based on platform
       if (insertPosition === 'firstChild') {
         pageHeader.insertBefore(wrapper, pageHeader.firstChild);
+      } else if (insertPosition === 'afterModelSelector') {
+        // For ChatGPT: insert after the model selector button
+        const modelSelector = pageHeader.querySelector('button[data-testid="model-switcher-dropdown-button"]');
+        if (modelSelector && modelSelector.nextSibling) {
+          pageHeader.insertBefore(wrapper, modelSelector.nextSibling);
+        } else if (modelSelector) {
+          pageHeader.appendChild(wrapper);
+        } else {
+          pageHeader.insertBefore(wrapper, pageHeader.firstChild);
+        }
       } else if (insertPosition === 'afterBegin') {
         // For Gemini's better positioning
         if (pageHeader.firstChild) {
@@ -303,23 +321,8 @@
   // Set up MutationObserver to re-inject if header is removed/changed
   function setupHeaderObserver() {
     const observer = new MutationObserver((mutations) => {
-      let pageHeader = null;
-      
-      if (isChatGPT) {
-        pageHeader = document.getElementById('page-header');
-      } else if (isClaude) {
-        pageHeader = document.querySelector('header[data-testid="page-header"]');
-      } else if (isGemini) {
-        pageHeader = document.querySelector('.gb_z.gb_td');
-        if (!pageHeader) {
-          const accountBtn = document.querySelector('.gb_B.gb_0a');
-          if (accountBtn) {
-            pageHeader = accountBtn.closest('.gb_z');
-          }
-        }
-      }
-      
-      if (pageHeader && !pageHeader.querySelector('.ext-logo-button')) {
+      // Simply check if button exists in DOM, re-inject if not
+      if (!document.querySelector('.ext-logo-button')) {
         console.log('ext: header button removed, re-injecting...');
         insertLogoInHeader();
       }
