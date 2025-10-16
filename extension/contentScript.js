@@ -1,7 +1,13 @@
 // contentScript.js
-// Minimal content script: only inject a button into #page-header when requested.
+// Inject button into both ChatGPT and Claude headers
 (function() {
-  console.log('ext: minimal contentScript running');
+  console.log('ext: contentScript running');
+
+  // Detect which platform we're on
+  const isChatGPT = window.location.hostname.includes('openai.com');
+  const isClaude = window.location.hostname.includes('claude.ai');
+  
+  console.log('ext: platform detection -', { isChatGPT, isClaude });
 
   // Inject pageScript.js into the page context so it can intercept fetch calls
   function injectPageScript() {
@@ -104,23 +110,64 @@
 
   function insertLogoInHeader() {
     try {
-      const pageHeader = document.getElementById('page-header');
+      let pageHeader = null;
+      let insertPosition = null;
+
+      if (isChatGPT) {
+        // ChatGPT: Look for #page-header
+        pageHeader = document.getElementById('page-header');
+        if (pageHeader) {
+          insertPosition = 'firstChild';
+        }
+      } else if (isClaude) {
+        // Claude: Look for header with data-testid="page-header"
+        pageHeader = document.querySelector('header[data-testid="page-header"]');
+        if (pageHeader) {
+          // Find the actions container (right side with Share button)
+          const actionsContainer = pageHeader.querySelector('[data-testid="chat-actions"]');
+          if (actionsContainer && actionsContainer.parentElement) {
+            insertPosition = 'beforeActions';
+          } else {
+            // Fallback: insert at the end of the header
+            insertPosition = 'lastChild';
+          }
+        }
+      }
+
       if (!pageHeader) {
-        console.log('ext: #page-header not found');
+        console.log('ext: page header not found');
         return false;
       }
+
       if (pageHeader.querySelector('.ext-logo-button')) {
         console.log('ext: logo button already present in header');
         return true;
       }
+
       const wrapper = document.createElement('div');
       wrapper.className = 'ext-logo-wrapper';
       wrapper.setAttribute('data-ext-wrapper', 'true');
       wrapper.style.display = 'inline-flex';
       wrapper.style.alignItems = 'center';
+      
+      if (isClaude) {
+        // Add margin for Claude to separate from other buttons
+        wrapper.style.marginRight = '8px';
+      }
+      
       wrapper.appendChild(createLogoButton());
-      pageHeader.insertBefore(wrapper, pageHeader.firstChild);
-      console.log('ext: logo button inserted into #page-header');
+
+      // Insert based on platform
+      if (insertPosition === 'firstChild') {
+        pageHeader.insertBefore(wrapper, pageHeader.firstChild);
+      } else if (insertPosition === 'beforeActions') {
+        const actionsContainer = pageHeader.querySelector('[data-testid="chat-actions"]');
+        actionsContainer.parentElement.insertBefore(wrapper, actionsContainer.parentElement.lastChild);
+      } else {
+        pageHeader.appendChild(wrapper);
+      }
+
+      console.log(`ext: logo button inserted into ${isChatGPT ? 'ChatGPT' : 'Claude'} header`);
       return true;
     } catch (e) {
       console.warn('ext: insertLogoInHeader error', e);
@@ -184,7 +231,14 @@
   // Set up MutationObserver to re-inject if header is removed/changed
   function setupHeaderObserver() {
     const observer = new MutationObserver((mutations) => {
-      const pageHeader = document.getElementById('page-header');
+      let pageHeader = null;
+      
+      if (isChatGPT) {
+        pageHeader = document.getElementById('page-header');
+      } else if (isClaude) {
+        pageHeader = document.querySelector('header[data-testid="page-header"]');
+      }
+      
       if (pageHeader && !pageHeader.querySelector('.ext-logo-button')) {
         console.log('ext: header button removed, re-injecting...');
         insertLogoInHeader();
@@ -197,7 +251,7 @@
       subtree: true
     });
 
-    console.log('ext: MutationObserver set up for auto-injection');
+    console.log(`ext: MutationObserver set up for ${isChatGPT ? 'ChatGPT' : 'Claude'} auto-injection`);
   }
 
   // Start auto-injection

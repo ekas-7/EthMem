@@ -1,16 +1,16 @@
 {
   "manifest_version": 3,
   "name": "ETHMem",
-  "description": "Reads user messages and assistant responses on chat.openai.com and logs them to the console (dummy route).",
+  "description": "Decentralized memory for ChatGPT and Claude - Connect your wallet to store conversations on-chain.",
   "version": "0.1.0",
   "permissions": ["scripting", "activeTab", "storage"],
-  "host_permissions": ["https://chat.openai.com/*"],
+  "host_permissions": ["https://chat.openai.com/*", "https://claude.ai/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://chat.openai.com/*"],
+      "matches": ["https://chat.openai.com/*", "https://claude.ai/*"],
       "js": ["contentScript.js"],
       "run_at": "document_start"
     }
