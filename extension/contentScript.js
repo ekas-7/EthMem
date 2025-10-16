@@ -18,6 +18,22 @@
     }
   }
 
+  // Inject ethAdapter.js into the page context for wallet connection
+  function injectEthAdapter() {
+    try {
+      const script = document.createElement('script');
+      script.src = chrome.runtime.getURL('ethAdapter.js');
+      script.onload = function() {
+        console.log('ext: ethAdapter.js loaded successfully');
+        this.remove();
+      };
+      (document.head || document.documentElement).appendChild(script);
+      console.log('ext: ethAdapter.js injected into page context');
+    } catch (e) {
+      console.error('ext: failed to inject ethAdapter.js', e);
+    }
+  }
+
   // Listen for messages from pageScript (via window.postMessage)
   window.addEventListener('message', (event) => {
     // Only accept messages from same origin
@@ -115,15 +131,45 @@
   // Listen for messages from popup or background to inject header button
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!msg || !msg.action) return;
+    
     if (msg.action === 'injectHeaderButton') {
       const ok = insertLogoInHeader();
       sendResponse({ ok });
     }
+    
+    if (msg.action === 'connectWallet') {
+      // Send message to page context to connect wallet
+      window.postMessage({ type: 'EXT_CONNECT_WALLET' }, '*');
+      sendResponse({ ok: true });
+    }
+    
     return true;
+  });
+
+  // Listen for wallet connection responses from page context
+  window.addEventListener('message', (event) => {
+    if (event.source !== window) return;
+    
+    if (event.data && event.data.type === 'WALLET_CONNECTED') {
+      console.log('ext: wallet connected:', event.data.payload);
+      // Store wallet info in chrome.storage
+      chrome.storage.local.set({
+        walletConnected: true,
+        walletAddress: event.data.payload.address,
+        chainId: event.data.payload.chainId
+      });
+    }
+    
+    if (event.data && event.data.type === 'WALLET_ERROR') {
+      console.error('ext: wallet connection error:', event.data.payload);
+    }
   });
 
   // Inject the page script immediately
   injectPageScript();
+  
+  // Inject ethAdapter
+  injectEthAdapter();
 
   // Also attempt a one-time insert shortly after load in case header is already present
   setTimeout(() => insertLogoInHeader(), 300);

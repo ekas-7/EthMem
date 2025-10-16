@@ -48,6 +48,69 @@ async function sendMessageWithInject(tabId, message) {
 
 // Guard DOM lookups in case popup.html doesn't include these elements
 
+const connectBtn = document.getElementById('connectBtn');
+if (connectBtn) {
+  // Check if wallet is already connected
+  chrome.storage.local.get(['walletConnected', 'walletAddress'], (result) => {
+    if (result.walletConnected && result.walletAddress) {
+      connectBtn.textContent = `Connected: ${result.walletAddress.substring(0, 6)}...${result.walletAddress.substring(result.walletAddress.length - 4)}`;
+      connectBtn.style.backgroundColor = '#2ec566';
+    }
+  });
+
+  connectBtn.addEventListener('click', async () => {
+    try {
+      const originalText = connectBtn.textContent;
+      connectBtn.textContent = 'Connecting...';
+      connectBtn.disabled = true;
+      
+      // Check if MetaMask is installed
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const tab = Array.isArray(tabs) ? tabs[0] : tabs;
+      if (!tab || !tab.id) {
+        console.warn('popup: no active tab found');
+        connectBtn.textContent = originalText;
+        connectBtn.disabled = false;
+        return;
+      }
+      
+      // Send message to content script to connect wallet
+      await sendMessageWithInject(tab.id, { action: 'connectWallet' });
+      console.log('popup: connectWallet message sent');
+      
+      // Wait for connection status
+      setTimeout(() => {
+        chrome.storage.local.get(['walletConnected', 'walletAddress'], (result) => {
+          if (result.walletConnected && result.walletAddress) {
+            connectBtn.textContent = `Connected: ${result.walletAddress.substring(0, 6)}...${result.walletAddress.substring(result.walletAddress.length - 4)}`;
+            connectBtn.style.backgroundColor = '#2ec566';
+          } else {
+            connectBtn.textContent = originalText;
+          }
+          connectBtn.disabled = false;
+        });
+      }, 2000);
+      
+    } catch (e) {
+      console.error('popup: connectWallet failed', e);
+      connectBtn.textContent = 'Connection Failed';
+      connectBtn.disabled = false;
+      setTimeout(() => {
+        connectBtn.textContent = 'Connect Wallet';
+      }, 2000);
+    }
+  });
+} else {
+  console.warn('popup: #connectBtn element not found in popup.html');
+}
+
+const settingsBtn = document.getElementById('settingsBtn');
+if (settingsBtn) {
+  settingsBtn.addEventListener('click', () => {
+    console.log('popup: settings button clicked');
+    // TODO: Add settings functionality
+  });
+}
 
 const injectHeaderBtn = document.getElementById('injectHeaderButton');
 if (injectHeaderBtn) {
@@ -57,6 +120,7 @@ if (injectHeaderBtn) {
       const tab = Array.isArray(tabs) ? tabs[0] : tabs;
       if (!tab || !tab.id) return;
       await sendMessageWithInject(tab.id, { action: 'injectHeaderButton' });
+      console.log('popup: injectHeaderButton message sent');
     } catch (e) {
       console.error('popup: injectHeaderButton failed', e);
     }

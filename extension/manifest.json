@@ -17,7 +17,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["logo.png", "pageScript.js"],
+      "resources": ["logo.png", "pageScript.js", "ethAdapter.js"],
       "matches": ["<all_urls>"]
     }
   ],

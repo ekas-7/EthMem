@@ -132,4 +132,62 @@
     // ignore
   }
 
+  // Listen for wallet connection requests from content script
+  window.addEventListener('message', async (event) => {
+    if (event.source !== window) return;
+    
+    if (event.data && event.data.type === 'EXT_CONNECT_WALLET') {
+      console.log('pageScript: received wallet connection request');
+      
+      // Wait for ethAdapter to be available
+      let retries = 0;
+      const maxRetries = 50; // 5 seconds max
+      
+      while (!window.ethAdapter && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
+      
+      if (!window.ethAdapter) {
+        console.error('pageScript: ethAdapter not available');
+        window.postMessage({ 
+          type: 'WALLET_ERROR', 
+          payload: { error: 'ethAdapter not loaded' } 
+        }, '*');
+        return;
+      }
+      
+      try {
+        // Connect to MetaMask
+        const result = await window.ethAdapter.connect();
+        
+        if (result.success) {
+          console.log('pageScript: wallet connected successfully');
+          window.postMessage({ 
+            type: 'WALLET_CONNECTED', 
+            payload: {
+              address: result.address,
+              chainId: result.chainId,
+              networkName: window.ethAdapter.getNetworkName(result.chainId)
+            } 
+          }, '*');
+        } else {
+          console.error('pageScript: wallet connection failed:', result.error);
+          window.postMessage({ 
+            type: 'WALLET_ERROR', 
+            payload: { error: result.error } 
+          }, '*');
+        }
+      } catch (error) {
+        console.error('pageScript: wallet connection exception:', error);
+        window.postMessage({ 
+          type: 'WALLET_ERROR', 
+          payload: { error: error.message } 
+        }, '*');
+      }
+    }
+  });
+
+  console.log('pageScript: wallet connection listener initialized');
+
 })();
