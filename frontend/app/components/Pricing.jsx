@@ -10,72 +10,108 @@ export default function Pricing() {
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-block bg-[#06200f] text-emerald-300 text-sm font-semibold px-4 py-1 rounded-full mb-4">
-            PRICING
+            ARCHITECTURE
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 leading-tight">
-            A Plan for Every<br />Decentralized Citizen.
+            Three Core Layers.<br />One Sovereign Identity.
           </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base">Choose how you commit to your decentralized identity — flexible, developer-friendly, and built for web3-first users.</p>
-
-          <div className="inline-flex items-center bg-[#062017] rounded-full p-1 mt-6 shadow-sm">
-            <button className="bg-emerald-400 text-black py-1 px-3 sm:px-4 rounded-full text-sm font-semibold">Pay-as-you-go</button>
-            <button className="py-1 px-3 sm:px-4 rounded-full text-sm text-gray-300">Stake for Access</button>
-          </div>
+          <p className="text-gray-300 max-w-3xl mx-auto text-sm sm:text-base">
+            A browser extension that acts as your agent, on-device AI for private processing, 
+            and a decentralized backend for trustless storage and verification.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
-          {/* Pioneer */}
+          {/* Browser Extension */}
           <div className="bg-[#071816] p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-emerald-900 flex flex-col">
             <div className="mb-6">
-              <h3 className="text-lg sm:text-xl font-semibold">Pioneer</h3>
-              <p className="text-gray-400 text-sm mt-1">For individuals getting started</p>
+              <div className="w-12 h-12 bg-emerald-400/10 rounded-xl flex items-center justify-center mb-4">
+                <span className="material-icons text-emerald-400 text-2xl">extension</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold">The Browser Extension</h3>
+              <p className="text-emerald-400 text-sm mt-1 font-medium">The Frontend</p>
             </div>
 
             <div className="mt-auto">
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6">Free</p>
-              <button className="w-full bg-transparent border border-emerald-600 hover:bg-emerald-600/10 text-emerald-300 font-semibold py-3 rounded-full mb-8 text-sm sm:text-base">Claim Identity</button>
+              <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+                Built with JavaScript and Manifest V3, the extension is your personal AI agent living in the browser.
+              </p>
               <ul className="space-y-3 sm:space-y-4 text-sm text-gray-300">
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Basic memory storage</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Up to 3 dApp integrations</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Community support</span></li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong className="text-white">Capture Conversations:</strong> Securely injects into LLM pages to capture full exchanges</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong className="text-white">Manage UI:</strong> View memories, settings, and trigger ZK-Proof generation</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong className="text-white">Orchestrate:</strong> Command center for AI processing and blockchain interactions</span>
+                </li>
               </ul>
             </div>
           </div>
 
-          {/* Voyager - highlighted */}
+          {/* On-Device AI - highlighted */}
           <div className="bg-emerald-400 p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border-2 border-emerald-300 relative flex flex-col">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">MOST POPULAR</div>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">PRIVACY CORE</div>
             <div className="mb-6">
-              <h3 className="text-lg sm:text-xl font-semibold text-black">Voyager</h3>
-              <p className="text-black text-sm mt-1">For power users and developers</p>
+              <div className="w-12 h-12 bg-emerald-600/20 rounded-xl flex items-center justify-center mb-4">
+                <span className="material-icons text-emerald-900 text-2xl">psychology</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold text-black">The On-Device AI</h3>
+              <p className="text-emerald-900 text-sm mt-1 font-medium">The Private Processor</p>
             </div>
 
             <div className="mt-auto">
-              <p className="text-3xl sm:text-4xl font-bold mb-6 text-black">$10<span className="text-base font-normal text-black">/mo in ETH</span></p>
-              <button className="w-full bg-white hover:bg-gray-100 text-emerald-700 font-semibold py-3 rounded-full mb-8 text-sm sm:text-base">Choose Plan</button>
+              <p className="text-black text-sm mb-6 leading-relaxed">
+                All intelligence happens locally. No conversation data ever leaves your machine.
+              </p>
               <ul className="space-y-3 sm:space-y-4 text-sm text-black">
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Everything in Pioneer</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Expanded memory storage</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Unlimited dApp integrations</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-600 mr-3 text-lg">check_circle</span><span>Priority support</span></li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-600 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong>Transformers.js:</strong> Runs optimized LaMini-Flan-T5 model in ONNX format via WebAssembly</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-600 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong>Local Processing:</strong> Extracts key facts from conversations into structured JSON</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-600 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong>Zero Server Calls:</strong> Complete privacy-first architecture running in your browser</span>
+                </li>
               </ul>
             </div>
           </div>
 
-          {/* Architect */}
+          {/* Decentralized Backend */}
           <div className="bg-[#071816] p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-emerald-900 flex flex-col">
             <div className="mb-6">
-              <h3 className="text-lg sm:text-xl font-semibold">Architect</h3>
-              <p className="text-gray-400 text-sm mt-1">For enterprises and dApps</p>
+              <div className="w-12 h-12 bg-emerald-400/10 rounded-xl flex items-center justify-center mb-4">
+                <span className="material-icons text-emerald-400 text-2xl">lock</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold">The Decentralized Backend</h3>
+              <p className="text-emerald-400 text-sm mt-1 font-medium">The Trust Layer</p>
             </div>
 
             <div className="mt-auto">
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6">Custom</p>
-              <button className="w-full bg-transparent border border-emerald-600 hover:bg-emerald-600/10 text-emerald-300 font-semibold py-3 rounded-full mb-8 text-sm sm:text-base">Contact Sales</button>
+              <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+                Sovereign, portable, and verifiable identity without relying on centralized servers.
+              </p>
               <ul className="space-y-3 sm:space-y-4 text-sm text-gray-300">
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Everything in Voyager</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Scalable infrastructure</span></li>
-                <li className="flex items-start"><span className="material-icons text-emerald-400 mr-3 text-lg">check_circle</span><span>Dedicated support &amp; SLA</span></li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong className="text-white">Storage (Arweave):</strong> Encrypted memories stored permanently on decentralized network</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong className="text-white">Ledger (L2 Blockchain):</strong> Smart contracts link wallet to encrypted memory hash</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <span><strong className="text-white">ZK-Proofs:</strong> Prove facts about yourself without revealing raw data</span>
+                </li>
               </ul>
             </div>
           </div>
