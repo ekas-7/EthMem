@@ -150,17 +150,17 @@
       let insertPosition = null;
 
       if (isChatGPT) {
-        // ChatGPT: Look for the page-header and insert in the left section
+        // ChatGPT: Look for the page-header and insert in the right section
         const header = document.getElementById('page-header');
         if (header) {
-          // Find the left section with model selector
-          const leftSection = header.querySelector('div.flex.items-center');
-          if (leftSection) {
-            pageHeader = leftSection;
-            insertPosition = 'afterModelSelector';
+          // Find the right section with Share button
+          const rightSection = header.querySelector('#conversation-header-actions');
+          if (rightSection && rightSection.parentElement) {
+            pageHeader = rightSection.parentElement;
+            insertPosition = 'beforeActions';
           } else {
             pageHeader = header;
-            insertPosition = 'firstChild';
+            insertPosition = 'lastChild';
           }
         }
       } else if (isClaude) {
@@ -224,36 +224,42 @@
       if (isGemini) {
         wrapper.style.marginRight = '16px';
         wrapper.style.marginLeft = '8px';
-      } else if (isClaude) {
+      } else if (isClaude || isChatGPT) {
         wrapper.style.marginRight = '8px';
       }
       
       wrapper.appendChild(createLogoButton());
 
       // Insert based on platform
-      if (insertPosition === 'firstChild') {
-        pageHeader.insertBefore(wrapper, pageHeader.firstChild);
-      } else if (insertPosition === 'afterModelSelector') {
-        // For ChatGPT: insert after the model selector button
-        const modelSelector = pageHeader.querySelector('button[data-testid="model-switcher-dropdown-button"]');
-        if (modelSelector && modelSelector.nextSibling) {
-          pageHeader.insertBefore(wrapper, modelSelector.nextSibling);
-        } else if (modelSelector) {
-          pageHeader.appendChild(wrapper);
+      try {
+        if (insertPosition === 'firstChild') {
+          if (pageHeader.firstChild) {
+            pageHeader.insertBefore(wrapper, pageHeader.firstChild);
+          } else {
+            pageHeader.appendChild(wrapper);
+          }
+        } else if (insertPosition === 'beforeActions') {
+          // For ChatGPT & Claude: insert before the actions container
+          const actionsContainer = isChatGPT 
+            ? pageHeader.querySelector('#conversation-header-actions')
+            : pageHeader.querySelector('[data-testid="chat-actions"]');
+          if (actionsContainer) {
+            pageHeader.insertBefore(wrapper, actionsContainer);
+          } else {
+            pageHeader.appendChild(wrapper);
+          }
+        } else if (insertPosition === 'afterBegin') {
+          // For Gemini's better positioning
+          if (pageHeader.firstChild) {
+            pageHeader.insertBefore(wrapper, pageHeader.firstChild);
+          } else {
+            pageHeader.appendChild(wrapper);
+          }
         } else {
-          pageHeader.insertBefore(wrapper, pageHeader.firstChild);
-        }
-      } else if (insertPosition === 'afterBegin') {
-        // For Gemini's better positioning
-        if (pageHeader.firstChild) {
-          pageHeader.insertBefore(wrapper, pageHeader.firstChild);
-        } else {
           pageHeader.appendChild(wrapper);
         }
-      } else if (insertPosition === 'beforeActions') {
-        const actionsContainer = pageHeader.querySelector('[data-testid="chat-actions"]');
-        actionsContainer.parentElement.insertBefore(wrapper, actionsContainer.parentElement.lastChild);
-      } else {
+      } catch (insertError) {
+        console.warn('ext: error inserting button, using appendChild as fallback', insertError);
         pageHeader.appendChild(wrapper);
       }
 
