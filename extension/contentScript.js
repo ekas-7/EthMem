@@ -7,6 +7,22 @@
   s.onload = function() { this.remove(); };
   (document.head || document.documentElement).appendChild(s);
 
+  // Fetch the extension logo and expose as data URL on window to avoid CSP issues when page tries to load chrome-extension:// URLs
+  (async function prepareLogoDataUrl(){
+    try {
+      const url = chrome.runtime.getURL('logo.png');
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const reader = new FileReader();
+      reader.onloadend = function() {
+        try { window.__ext_logo_data_url = reader.result; console.log('ext: logo data url ready'); } catch(e){}
+      };
+      reader.readAsDataURL(blob);
+    } catch (e) {
+      console.warn('ext: failed to prepare logo data url', e);
+    }
+  })();
+
   // Listen for messages posted from the page script
   window.addEventListener('message', (event) => {
     if (event.source !== window) return;
@@ -110,6 +126,20 @@
 
   // initial attempt
   setTimeout(() => insertLogoNearComposer(), 300);
+
+  // Listen for messages from popup
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!msg || !msg.action) return;
+    if (msg.action === 'injectLogo') {
+      const ok = insertLogoNearComposer();
+      sendResponse({ ok });
+    }
+    if (msg.action === 'injectEkas') {
+      scanAndInsertEkas();
+      sendResponse({ ok: true });
+    }
+    return true;
+  });
 
   // Inject <span class="ext-ekas">ekas</span> into elements matching class substrings 'text-base' and 'mx-auto'
   function insertEkasSpan(target) {

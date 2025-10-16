@@ -20,4 +20,9 @@
     "48": "logo.png",
     "128": "logo.png"
   }
+  ,
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ETHMem"
+  }
 }
