@@ -1,45 +1,180 @@
 export default function Testimonials() {
   return (
     <section className="my-12 sm:my-16 lg:my-24 px-4">
-      <div className="text-center mb-8 sm:mb-12">
-        <div className="inline-block bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full mb-4">
-          TESTIMONIALS
+      <div className="text-center mb-8 sm:mb-16">
+        <div className="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-4 py-2 rounded-full mb-6 shadow-lg">
+          MEET THE BUILDERS
         </div>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
-          What our users<br />are building.
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight bg-gradient-to-r from-gray-900 via-emerald-800 to-teal-800 bg-clip-text text-transparent">
+          Built by passionate<br />developers
         </h2>
+        <p className="text-gray-600 mt-4 text-lg max-w-2xl mx-auto">
+          Three builders pushing the boundaries of Web3 and AI
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
-          <p className="text-gray-500 text-sm sm:text-base mb-6">"EthMem gives my AI agent a persistent, verifiable memory. It's the missing piece for creating truly autonomous agents on the blockchain. My users now have full ownership of their data."</p>
-          <div className="flex items-center">
-            <img alt="Avatar" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-4 ring-2 ring-white shadow" src="/globe.svg" />
-            <div>
-              <p className="font-semibold text-gray-800 text-sm sm:text-base">Alex (0x4a...b3)</p>
-              <p className="text-xs sm:text-sm text-gray-500">Builder, InsightDAO</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10 max-w-7xl mx-auto">
+        {/* Ekas Card */}
+        <div className="group relative bg-gradient-to-br from-white to-emerald-50 p-8 sm:p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-emerald-100">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
+          
+          <div className="relative">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center">
+                <div className="relative">
+                  <img 
+                    alt="Ekas" 
+                    className="w-20 h-20 rounded-2xl mr-4 ring-4 ring-emerald-200 shadow-lg object-cover group-hover:ring-emerald-400 transition-all duration-300" 
+                    src="/testimonals/ekas.jpg" 
+                  />
+                  <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
+                    21
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900 group-hover:text-emerald-700 transition-colors">@ekas_7</h3>
+                  <p className="text-sm text-emerald-600 font-semibold"> Dev</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 min-h-[100px]">
+              "Passionate about building decentralized solutions that put users in control of their data. Creating the future of AI memory systems on the blockchain, one block at a time."
+            </p>
+
+            <div className="flex gap-3 pt-4 border-t border-emerald-100">
+              <a 
+                href="https://x.com/ekas_7" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Twitter
+              </a>
+              <a 
+                href="https://github.com/ekas-7" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
-          <p className="text-gray-500 text-sm sm:text-base mb-6">"As an artist, I'm using EthMem to create dynamic NFTs that evolve based on interactions with their owners. It brings a new level of life and provenance to digital art."</p>
-          <div className="flex items-center">
-            <img alt="Avatar" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-4 ring-2 ring-white shadow" src="/file.svg" />
-            <div>
-              <p className="font-semibold text-gray-800 text-sm sm:text-base">Clara</p>
-              <p className="text-xs sm:text-sm text-gray-500">NFT Artist</p>
+        {/* Rishi Card */}
+        <div className="group relative bg-gradient-to-br from-white to-teal-50 p-8 sm:p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-teal-100">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-400/20 to-blue-400/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
+          
+          <div className="relative">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center">
+                <div className="relative">
+                  <img 
+                    alt="Rishi" 
+                    className="w-20 h-20 rounded-2xl mr-4 ring-4 ring-teal-200 shadow-lg object-cover group-hover:ring-teal-400 transition-all duration-300" 
+                    src="/testimonals/rishi.jpg" 
+                  />
+                  <div className="absolute -bottom-2 -right-2 bg-teal-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
+                    18
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900 group-hover:text-teal-700 transition-colors">@Rishi2220</h3>
+                  <p className="text-sm text-teal-600 font-semibold"> Dev</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 min-h-[100px]">
+              "Dedicated to pushing the boundaries of what's possible with Web3 and AI. Building tools that empower developers to create smarter, more intuitive decentralized applications."
+            </p>
+
+            <div className="flex gap-3 pt-4 border-t border-teal-100">
+              <a 
+                href="https://x.com/Rishi2220" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-teal-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Twitter
+              </a>
+              <a 
+                href="https://github.com/Rishi2220" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-teal-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
-          <p className="text-gray-500 text-sm sm:text-base mb-6">"Finally, my personal AI assistant remembers my preferences across different dApps without me having to re-configure everything. This is the future of user experience in web3."</p>
-          <div className="flex items-center">
-            <img alt="Avatar" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-4 ring-2 ring-white shadow" src="/next.svg" />
-            <div>
-              <p className="font-semibold text-gray-800 text-sm sm:text-base">DAO Jones</p>
-              <p className="text-xs sm:text-sm text-gray-500">DeFi User</p>
+        {/* Arya Card */}
+        <div className="group relative bg-gradient-to-br from-white to-blue-50 p-8 sm:p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-blue-100">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
+          
+          <div className="relative">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center">
+                <div className="relative">
+                  <img 
+                    alt="Arya" 
+                    className="w-20 h-20 rounded-2xl mr-4 ring-4 ring-blue-200 shadow-lg object-cover group-hover:ring-blue-400 transition-all duration-300" 
+                    src="/testimonals/arya.jpg" 
+                  />
+                  <div className="absolute -bottom-2 -right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
+                    21
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900 group-hover:text-blue-700 transition-colors">@arya1230</h3>
+                  <p className="text-sm text-blue-600 font-semibold"> Dev</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 min-h-[100px]">
+              "Exploring the intersection of blockchain technology and artificial intelligence. Committed to creating transparent, user-owned solutions that redefine how we interact with AI."
+            </p>
+
+            <div className="flex gap-3 pt-4 border-t border-blue-100">
+              <a 
+                href="https://x.com/arya1230" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Twitter
+              </a>
+              <a 
+                href="https://github.com/arya1230" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub
+              </a>
             </div>
           </div>
         </div>
