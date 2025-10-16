@@ -177,29 +177,39 @@
           }
         }
       } else if (isGemini) {
-        // Gemini: Better targeting of the header area
-        // Look for the main Gemini header with model selector
-        const geminiHeader = document.querySelector('header');
-        if (geminiHeader) {
-          // Try to find the left side of the header (where model name is)
-          const leftSection = geminiHeader.querySelector('div:first-child');
-          if (leftSection) {
-            pageHeader = leftSection;
-            insertPosition = 'afterBegin'; // Insert at the start of left section
+        // Gemini: Target the logo container area
+        const logoContainer = document.querySelector('.pill-ui-logo-container');
+        if (logoContainer && logoContainer.parentElement) {
+          pageHeader = logoContainer.parentElement;
+          insertPosition = 'afterLogo';
+        }
+        
+        // Fallback: Try the Google bar with user profile
+        if (!pageHeader) {
+          const googleBar = document.querySelector('div[role="banner"]');
+          if (googleBar) {
+            const rightSection = googleBar.querySelector('div:last-child');
+            if (rightSection) {
+              pageHeader = rightSection;
+              insertPosition = 'beforeProfile';
+            }
           }
         }
         
-        // Fallback to Google bar if main header not found
+        // Second fallback: Try the .gb_z container
         if (!pageHeader) {
-          pageHeader = document.querySelector('.gb_z.gb_td');
-          if (!pageHeader) {
-            const accountBtn = document.querySelector('.gb_B.gb_0a');
-            if (accountBtn) {
-              pageHeader = accountBtn.closest('.gb_z');
-            }
-          }
+          pageHeader = document.querySelector('.gb_z.gb_td') || document.querySelector('.gb_z');
           if (pageHeader) {
             insertPosition = 'firstChild';
+          }
+        }
+        
+        // Last fallback: Any header element
+        if (!pageHeader) {
+          const anyHeader = document.querySelector('header');
+          if (anyHeader) {
+            pageHeader = anyHeader;
+            insertPosition = 'lastChild';
           }
         }
       }
@@ -248,8 +258,30 @@
           } else {
             pageHeader.appendChild(wrapper);
           }
+        } else if (insertPosition === 'afterLogo') {
+          // For Gemini: insert after the logo container
+          const logoContainer = pageHeader.querySelector('.pill-ui-logo-container');
+          if (logoContainer && logoContainer.nextSibling) {
+            pageHeader.insertBefore(wrapper, logoContainer.nextSibling);
+          } else if (logoContainer) {
+            pageHeader.appendChild(wrapper);
+          } else {
+            pageHeader.appendChild(wrapper);
+          }
+        } else if (insertPosition === 'beforeProfile') {
+          // For Gemini: insert before the profile/account icons
+          // Look for common Google bar elements
+          const profileIcon = pageHeader.querySelector('a[aria-label*="Google Account"], a[aria-label*="Google apps"], .gb_B, .gb_0a');
+          if (profileIcon) {
+            pageHeader.insertBefore(wrapper, profileIcon);
+          } else if (pageHeader.lastChild) {
+            // Insert before the last child as fallback
+            pageHeader.insertBefore(wrapper, pageHeader.lastChild);
+          } else {
+            pageHeader.appendChild(wrapper);
+          }
         } else if (insertPosition === 'afterBegin') {
-          // For Gemini's better positioning
+          // For other scenarios
           if (pageHeader.firstChild) {
             pageHeader.insertBefore(wrapper, pageHeader.firstChild);
           } else {
