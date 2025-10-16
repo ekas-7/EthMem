@@ -1,5 +1,5 @@
 "use client";
-import { Video, Infinity, Youtube } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Connect() {
   return (
@@ -8,87 +8,125 @@ export default function Connect() {
         {/* Desktop floating elements - hidden on mobile */}
         <div className="hidden lg:block">
           {/* LLM Logos */}
-          <div className="absolute top-[15%] left-[8%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
-            <span className="text-2xl font-bold text-gray-700">GPT</span>
+          <div className="absolute top-[15%] left-[8%] w-32 h-32 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/chatgpt.png" alt="GPT" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute top-[20%] right-[15%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <span className="text-xl font-bold text-gray-700">Claude</span>
+          <div className="absolute top-[20%] right-[15%] w-32 h-32 p-4 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '1s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/claude.jpeg" alt="Claude" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute top-[12%] left-[40%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2s' }}>
-            <span className="text-xl font-bold text-gray-700">Gemini</span>
+          <div className="absolute top-[12%] left-[40%] w-32 h-32 p-6 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '2s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/gemini.png" alt="Gemini" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute top-[45%] left-[5%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
-            <span className="text-xl font-bold text-gray-700">LLaMA</span>
+          <div className="absolute top-[45%] left-[5%] w-32 h-32 p-4 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/logo.png" alt="LLaMA" fill className="object-contain" />
+            </div>
           </div>
 
           {/* ETH Tech Logos */}
-          <div className="absolute bottom-[20%] left-[12%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-            <span className="text-2xl font-bold text-gray-700">ETH</span>
+          <div className="absolute bottom-[20%] left-[12%] w-32 h-32 bg-white  p-2 rounded-full shadow-lg animate-float" style={{ animationDelay: '1.5s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/eth.svg" alt="ETH" fill className="" />
+            </div>
           </div>
 
-          <div className="absolute top-[55%] right-[8%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2.5s' }}>
-            <span className="text-xl font-bold text-gray-700">IPFS</span>
+          <div className="absolute top-[55%] right-[8%] w-32 h-32 p-4 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '2.5s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/ipfs.png" alt="IPFS" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute bottom-[25%] left-[35%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <span className="text-xl font-bold text-gray-700">Web3</span>
+          <div className="absolute bottom-[25%] left-[35%] w-32 h-32 pt-6 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '1s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/llama.png" alt="Web3" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute bottom-[18%] right-[25%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.8s' }}>
-            <span className="text-xl font-bold text-gray-700">Solidity</span>
+          <div className="absolute bottom-[18%] right-[25%] w-32 h-32 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0.8s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/solidity.png" alt="Solidity" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute bottom-[15%] right-[8%] w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2.2s' }}>
-            <span className="text-xl font-bold text-gray-700">DeFi</span>
+          <div className="absolute bottom-[15%] right-[8%] w-32 h-32 p-4 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '2.2s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-3 flex items-center justify-center">
+              <Image src="/ethglobal.jpg" alt="DeFi" fill className="object-contain" />
+            </div>
           </div>
         </div>
 
         {/* Tablet floating elements - visible on medium screens */}
         <div className="hidden md:block lg:hidden">
-          <div className="absolute top-[10%] left-[5%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
-            <span className="text-lg font-bold text-gray-700">GPT</span>
+          <div className="absolute top-[10%] left-[5%] w-24 h-24 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-2 flex items-center justify-center">
+              <Image src="/chatgpt.png" alt="GPT" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute top-[15%] right-[8%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <span className="text-sm font-bold text-gray-700">Claude</span>
+          <div className="absolute top-[15%] right-[8%] w-24 h-24 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '1s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-2 flex items-center justify-center">
+              <Image src="/claude.jpeg" alt="Claude" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute top-[50%] left-[3%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
-            <span className="text-sm font-bold text-gray-700">LLaMA</span>
+          <div className="absolute top-[50%] left-[3%] w-24 h-24 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-2 flex items-center justify-center">
+              <Image src="/logo.png" alt="LLaMA" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute bottom-[15%] left-[10%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-            <span className="text-lg font-bold text-gray-700">ETH</span>
+          <div className="absolute bottom-[15%] left-[10%] w-24 h-24 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '1.5s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-2 flex items-center justify-center">
+              <Image src="/eth.svg" alt="ETH" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute top-[60%] right-[5%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '2s' }}>
-            <span className="text-sm font-bold text-gray-700">Web3</span>
+          <div className="absolute top-[60%] right-[5%] w-24 h-24 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '2s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-2 flex items-center justify-center">
+              <Image src="/globe.svg" alt="Web3" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute bottom-[20%] right-[15%] w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.8s' }}>
-            <span className="text-sm font-bold text-gray-700">DeFi</span>
+          <div className="absolute bottom-[20%] right-[15%] w-24 h-24  bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0.8s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-2 flex items-center justify-center">
+              <Image src="/ethglobal.jpg" alt="DeFi" fill className="object-contain" />
+            </div>
           </div>
         </div>
 
         {/* Mobile floating elements - visible on small screens only */}
         <div className="block md:hidden">
-          <div className="absolute top-[8%] left-[5%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
-            <span className="text-xs font-bold text-gray-700">GPT</span>
+          <div className="absolute top-[8%] left-[5%] w-16 h-16 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-1 flex items-center justify-center">
+              <Image src="/chatgpt.png" alt="GPT" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute top-[12%] right-[8%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-            <span className="text-xs font-bold text-gray-700">ETH</span>
+          <div className="absolute top-[12%] right-[8%] w-16 h-16 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '1s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-1 flex items-center justify-center">
+              <Image src="/eth.svg" alt="ETH" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute bottom-[15%] left-[8%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-            <span className="text-xs font-bold text-gray-700">Web3</span>
+          <div className="absolute bottom-[15%] left-[8%] w-16 h-16 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '1.5s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-1 flex items-center justify-center">
+              <Image src="/globe.svg" alt="Web3" fill className="object-contain" />
+            </div>
           </div>
 
-          <div className="absolute bottom-[20%] right-[10%] w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center animate-float" style={{ animationDelay: '0.8s' }}>
-            <span className="text-xs font-bold text-gray-700">LLM</span>
+          <div className="absolute bottom-[20%] right-[10%] w-16 h-16 bg-white rounded-full shadow-lg animate-float" style={{ animationDelay: '0.8s' }}>
+            <div className="relative w-full h-full overflow-hidden rounded-full p-1 flex items-center justify-center">
+              <Image src="/logo.png" alt="LLM" fill className="object-contain" />
+            </div>
           </div>
         </div>
       </div>
