@@ -1,13 +1,14 @@
 // contentScript.js
-// Inject button into both ChatGPT and Claude headers
+// Inject button into ChatGPT, Claude, and Gemini headers
 (function() {
   console.log('ext: contentScript running');
 
   // Detect which platform we're on
   const isChatGPT = window.location.hostname.includes('openai.com');
   const isClaude = window.location.hostname.includes('claude.ai');
+  const isGemini = window.location.hostname.includes('gemini.google.com');
   
-  console.log('ext: platform detection -', { isChatGPT, isClaude });
+  console.log('ext: platform detection -', { isChatGPT, isClaude, isGemini });
 
   // Inject pageScript.js into the page context so it can intercept fetch calls
   function injectPageScript() {
@@ -65,42 +66,77 @@
     btn.style.alignItems = 'center';
     btn.style.justifyContent = 'center';
     btn.style.gap = '8px';
-    btn.style.height = '36px';
-    btn.style.padding = '6px 14px';
     btn.style.border = 'none';
-    btn.style.borderRadius = '18px'; // Half of height for perfect pill shape
-    btn.style.background = '#303030';
     btn.style.cursor = 'pointer';
-    btn.style.transition = 'background 0.2s ease';
+    btn.style.transition = 'all 0.2s ease';
     btn.title = 'ETHMem';
 
-    // Hover effect
-    btn.addEventListener('mouseenter', () => {
-      btn.style.background = '#404040';
-    });
-    btn.addEventListener('mouseleave', () => {
+    // Platform-specific styling
+    if (isGemini) {
+      // Gemini: More compact, rounded button to match Google's style
+      btn.style.height = '32px';
+      btn.style.padding = '4px 12px';
+      btn.style.borderRadius = '16px';
+      btn.style.background = 'rgba(255, 255, 255, 0.1)';
+      btn.style.backdropFilter = 'blur(10px)';
+      btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+      
+      btn.addEventListener('mouseenter', () => {
+        btn.style.background = 'rgba(255, 255, 255, 0.15)';
+        btn.style.transform = 'scale(1.02)';
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.background = 'rgba(255, 255, 255, 0.1)';
+        btn.style.transform = 'scale(1)';
+      });
+    } else {
+      // ChatGPT & Claude: Original dark style
+      btn.style.height = '36px';
+      btn.style.padding = '6px 14px';
+      btn.style.borderRadius = '18px';
       btn.style.background = '#303030';
-    });
+      
+      btn.addEventListener('mouseenter', () => {
+        btn.style.background = '#404040';
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.background = '#303030';
+      });
+    }
 
     const img = document.createElement('img');
     img.src = chrome.runtime.getURL('logo.png');
     img.alt = '';
     img.setAttribute('aria-hidden', 'true');
-    img.style.width = '24px';
-    img.style.height = '24px';
     img.style.objectFit = 'cover';
     img.style.borderRadius = '50%';
     img.style.flexShrink = '0';
+    
+    // Platform-specific image size
+    if (isGemini) {
+      img.style.width = '20px';
+      img.style.height = '20px';
+    } else {
+      img.style.width = '24px';
+      img.style.height = '24px';
+    }
 
     const label = document.createElement('span');
     label.className = 'ext-logo-label';
     label.textContent = 'ethmem';
     label.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-    label.style.fontSize = '14px';
     label.style.fontWeight = '600';
-    label.style.color = '#fff';
     label.style.letterSpacing = '0.01em';
     label.style.userSelect = 'none';
+    
+    // Platform-specific text styling
+    if (isGemini) {
+      label.style.fontSize = '13px';
+      label.style.color = 'rgba(255, 255, 255, 0.95)';
+    } else {
+      label.style.fontSize = '14px';
+      label.style.color = '#fff';
+    }
 
     btn.appendChild(img);
     btn.appendChild(label);
@@ -132,6 +168,32 @@
             insertPosition = 'lastChild';
           }
         }
+      } else if (isGemini) {
+        // Gemini: Better targeting of the header area
+        // Look for the main Gemini header with model selector
+        const geminiHeader = document.querySelector('header');
+        if (geminiHeader) {
+          // Try to find the left side of the header (where model name is)
+          const leftSection = geminiHeader.querySelector('div:first-child');
+          if (leftSection) {
+            pageHeader = leftSection;
+            insertPosition = 'afterBegin'; // Insert at the start of left section
+          }
+        }
+        
+        // Fallback to Google bar if main header not found
+        if (!pageHeader) {
+          pageHeader = document.querySelector('.gb_z.gb_td');
+          if (!pageHeader) {
+            const accountBtn = document.querySelector('.gb_B.gb_0a');
+            if (accountBtn) {
+              pageHeader = accountBtn.closest('.gb_z');
+            }
+          }
+          if (pageHeader) {
+            insertPosition = 'firstChild';
+          }
+        }
       }
 
       if (!pageHeader) {
@@ -150,8 +212,11 @@
       wrapper.style.display = 'inline-flex';
       wrapper.style.alignItems = 'center';
       
-      if (isClaude) {
-        // Add margin for Claude to separate from other buttons
+      // Platform-specific wrapper styling
+      if (isGemini) {
+        wrapper.style.marginRight = '16px';
+        wrapper.style.marginLeft = '8px';
+      } else if (isClaude) {
         wrapper.style.marginRight = '8px';
       }
       
@@ -160,6 +225,13 @@
       // Insert based on platform
       if (insertPosition === 'firstChild') {
         pageHeader.insertBefore(wrapper, pageHeader.firstChild);
+      } else if (insertPosition === 'afterBegin') {
+        // For Gemini's better positioning
+        if (pageHeader.firstChild) {
+          pageHeader.insertBefore(wrapper, pageHeader.firstChild);
+        } else {
+          pageHeader.appendChild(wrapper);
+        }
       } else if (insertPosition === 'beforeActions') {
         const actionsContainer = pageHeader.querySelector('[data-testid="chat-actions"]');
         actionsContainer.parentElement.insertBefore(wrapper, actionsContainer.parentElement.lastChild);
@@ -167,7 +239,7 @@
         pageHeader.appendChild(wrapper);
       }
 
-      console.log(`ext: logo button inserted into ${isChatGPT ? 'ChatGPT' : 'Claude'} header`);
+      console.log(`ext: logo button inserted into ${isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : 'Gemini'} header`);
       return true;
     } catch (e) {
       console.warn('ext: insertLogoInHeader error', e);
@@ -237,6 +309,14 @@
         pageHeader = document.getElementById('page-header');
       } else if (isClaude) {
         pageHeader = document.querySelector('header[data-testid="page-header"]');
+      } else if (isGemini) {
+        pageHeader = document.querySelector('.gb_z.gb_td');
+        if (!pageHeader) {
+          const accountBtn = document.querySelector('.gb_B.gb_0a');
+          if (accountBtn) {
+            pageHeader = accountBtn.closest('.gb_z');
+          }
+        }
       }
       
       if (pageHeader && !pageHeader.querySelector('.ext-logo-button')) {
@@ -251,7 +331,8 @@
       subtree: true
     });
 
-    console.log(`ext: MutationObserver set up for ${isChatGPT ? 'ChatGPT' : 'Claude'} auto-injection`);
+    const platformName = isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : 'Gemini';
+    console.log(`ext: MutationObserver set up for ${platformName} auto-injection`);
   }
 
   // Start auto-injection

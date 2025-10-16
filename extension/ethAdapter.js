@@ -1,7 +1,4 @@
-/**
- * Ethereum Adapter for MetaMask Wallet Connection
- * Handles wallet connection, account management, and blockchain interactions
- */
+
 
 class EthAdapter {
   constructor() {
