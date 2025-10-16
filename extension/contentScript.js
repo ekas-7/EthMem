@@ -97,14 +97,32 @@
     try {
       const composer = findComposerElement();
       if (!composer) { console.log('ext: composer not found (after trying selectors)'); return false; }
-  const group = findButtonGroupNearComposer(composer);
+
+      // Try the exact container you showed: 'flex items-center gap-2 [grid-area:trailing]'
+      let targetContainer = composer.querySelector('[class*="flex"][class*="items-center"][class*="gap-2"][class*="grid-area:trailing"]');
+      if (!targetContainer) {
+        // fallback to any element with flex items-center gap-2 inside the composer
+        targetContainer = composer.querySelector('[class*="flex"][class*="items-center"][class*="gap-2"]');
+      }
+
+      if (targetContainer) {
+        if (targetContainer.querySelector('.ext-logo-inserted')) { console.log('ext: logo already present in targetContainer'); return true; }
+        const img = createLogoElement();
+        // insert as first child so it appears left-aligned inside this flex container
+        targetContainer.insertBefore(img, targetContainer.firstChild);
+        console.log('ext: logo inserted into targetContainer', { targetContainer, imgSrc: img.src });
+        return true;
+      }
+
+      // Fallback to previous button-group based insertion
+      const group = findButtonGroupNearComposer(composer);
       if (!group) { console.log('ext: button group not found inside composer', { composer }); return false; }
 
       // avoid duplicates
       if (group.previousElementSibling && group.previousElementSibling.classList && group.previousElementSibling.classList.contains('ext-logo-inserted')) return true;
 
       const img = createLogoElement();
-  group.parentElement.insertBefore(img, group);
+      group.parentElement.insertBefore(img, group);
       console.log('ext: logo inserted', { insertedBefore: group, imgSrc: img.src, composer });
       return true;
     } catch (e) {
