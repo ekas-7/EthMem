@@ -19,12 +19,23 @@ export default function HowItWorks() {
         {/* Pale outer card */}
         <div className="bg-gray-100 rounded-2xl sm:rounded-3xl p-6 sm:p-12 lg:p-16 shadow-inner flex justify-center items-center">
           {/* Inner white card with subtle shadow */}
-          <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 lg:p-8 shadow-2xl w-full max-w-lg">
+          <div className="bg-gray-50 rounded-lg sm:rounded-xl p-4 sm:p-6 lg:p-8 shadow-2xl w-full max-w-lg text-center">
             <img
-              alt="EthMem dashboard"
-              src="/next.svg"
-              className="block mx-auto w-full h-auto rounded-md"
+              alt="EthMem browser extension"
+              src="/extension.png"
+              className="block mx-auto w-48 sm:w-56 md:w-72 h-auto rounded-md mb-6"
             />
+            <p className="text-sm text-gray-600 mb-6">Download our browser extension to get started — it enables EthMem to connect with your browser and persist memory securely.</p>
+            <div className="flex justify-center">
+              <a
+                href="#" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-5 py-2 rounded-md text-sm font-medium text-gray-800 bg-gray-200 hover:bg-gray-300"
+              >
+                Download extension
+              </a>
+            </div>
           </div>
         </div>
       </div>
