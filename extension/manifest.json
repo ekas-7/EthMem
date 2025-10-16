@@ -15,12 +15,17 @@
       "run_at": "document_start"
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["logo.png", "pageScript.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "icons": {
     "16": "logo.png",
     "48": "logo.png",
     "128": "logo.png"
-  }
-  ,
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "ETHMem"
