@@ -1,3 +1,6 @@
+import { HiCheckCircle } from 'react-icons/hi2';
+import { HiPuzzlePiece, HiCpuChip, HiLockClosed } from 'react-icons/hi2';
+
 export default function Pricing() {
   return (
     <section className="bg-gradient-to-br from-[#07120B] to-[#052116] rounded-xl sm:rounded-2xl md:rounded-[3rem] p-4 sm:p-8 md:p-16 my-12 sm:my-16 lg:my-24 text-white relative overflow-hidden">
@@ -25,9 +28,7 @@ export default function Pricing() {
           {/* Browser Extension */}
           <div className="bg-[#071816] p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-emerald-900 flex flex-col">
             <div className="mb-6">
-              <div className="w-12 h-12 bg-emerald-400/10 rounded-xl flex items-center justify-center mb-4">
-                <span className="material-icons text-emerald-400 text-2xl">extension</span>
-              </div>
+              
               <h3 className="text-lg sm:text-xl font-semibold">The Browser Extension</h3>
               <p className="text-emerald-400 text-sm mt-1 font-medium">The Frontend</p>
             </div>
@@ -38,15 +39,15 @@ export default function Pricing() {
               </p>
               <ul className="space-y-3 sm:space-y-4 text-sm text-gray-300">
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <HiCheckCircle className="text-emerald-400 mr-3 text-lg flex-shrink-0 mt-0.5" />
                   <span><strong className="text-white">Capture Conversations:</strong> Securely injects into LLM pages to capture full exchanges</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <HiCheckCircle className="text-emerald-400 mr-3 text-lg flex-shrink-0 mt-0.5" />
                   <span><strong className="text-white">Manage UI:</strong> View memories, settings, and trigger ZK-Proof generation</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <HiCheckCircle className="text-emerald-400 mr-3 text-lg flex-shrink-0 mt-0.5" />
                   <span><strong className="text-white">Orchestrate:</strong> Command center for AI processing and blockchain interactions</span>
                 </li>
               </ul>
@@ -54,32 +55,29 @@ export default function Pricing() {
           </div>
 
           {/* On-Device AI - highlighted */}
-          <div className="bg-emerald-400 p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border-2 border-emerald-300 relative flex flex-col">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">PRIVACY CORE</div>
+          <div className="bg-gradient-to-br from-teal-600 to-emerald-700 p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border-2 border-teal-400/50 relative flex flex-col shadow-xl shadow-teal-500/20">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-teal-700 text-xs font-bold px-3 py-1 rounded-full shadow-lg">PRIVACY CORE</div>
             <div className="mb-6">
-              <div className="w-12 h-12 bg-emerald-600/20 rounded-xl flex items-center justify-center mb-4">
-                <span className="material-icons text-emerald-900 text-2xl">psychology</span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-black">The On-Device AI</h3>
-              <p className="text-emerald-900 text-sm mt-1 font-medium">The Private Processor</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-white">The On-Device AI</h3>
+              <p className="text-teal-100 text-sm mt-1 font-medium">The Private Processor</p>
             </div>
 
             <div className="mt-auto">
-              <p className="text-black text-sm mb-6 leading-relaxed">
+              <p className="text-white/90 text-sm mb-6 leading-relaxed">
                 All intelligence happens locally. No conversation data ever leaves your machine.
               </p>
-              <ul className="space-y-3 sm:space-y-4 text-sm text-black">
+              <ul className="space-y-3 sm:space-y-4 text-sm text-white/90">
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-600 mr-3 text-lg flex-shrink-0">check_circle</span>
-                  <span><strong>Transformers.js:</strong> Runs optimized LaMini-Flan-T5 model in ONNX format via WebAssembly</span>
+                  <HiCheckCircle className="text-teal-200 mr-3 text-lg flex-shrink-0 mt-0.5" />
+                  <span><strong className="text-white">Transformers.js:</strong> Runs optimized LaMini-Flan-T5 model in ONNX format via WebAssembly</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-600 mr-3 text-lg flex-shrink-0">check_circle</span>
-                  <span><strong>Local Processing:</strong> Extracts key facts from conversations into structured JSON</span>
+                  <HiCheckCircle className="text-teal-200 mr-3 text-lg flex-shrink-0 mt-0.5" />
+                  <span><strong className="text-white">Local Processing:</strong> Extracts key facts from conversations into structured JSON</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-600 mr-3 text-lg flex-shrink-0">check_circle</span>
-                  <span><strong>Zero Server Calls:</strong> Complete privacy-first architecture running in your browser</span>
+                  <HiCheckCircle className="text-teal-200 mr-3 text-lg flex-shrink-0 mt-0.5" />
+                  <span><strong className="text-white">Zero Server Calls:</strong> Complete privacy-first architecture running in your browser</span>
                 </li>
               </ul>
             </div>
@@ -88,9 +86,7 @@ export default function Pricing() {
           {/* Decentralized Backend */}
           <div className="bg-[#071816] p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-emerald-900 flex flex-col">
             <div className="mb-6">
-              <div className="w-12 h-12 bg-emerald-400/10 rounded-xl flex items-center justify-center mb-4">
-                <span className="material-icons text-emerald-400 text-2xl">lock</span>
-              </div>
+              
               <h3 className="text-lg sm:text-xl font-semibold">The Decentralized Backend</h3>
               <p className="text-emerald-400 text-sm mt-1 font-medium">The Trust Layer</p>
             </div>
@@ -101,15 +97,15 @@ export default function Pricing() {
               </p>
               <ul className="space-y-3 sm:space-y-4 text-sm text-gray-300">
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <HiCheckCircle className="text-emerald-400 mr-3 text-lg flex-shrink-0 mt-0.5" />
                   <span><strong className="text-white">Storage (Arweave):</strong> Encrypted memories stored permanently on decentralized network</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <HiCheckCircle className="text-emerald-400 mr-3 text-lg flex-shrink-0 mt-0.5" />
                   <span><strong className="text-white">Ledger (L2 Blockchain):</strong> Smart contracts link wallet to encrypted memory hash</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="material-icons text-emerald-400 mr-3 text-lg flex-shrink-0">check_circle</span>
+                  <HiCheckCircle className="text-emerald-400 mr-3 text-lg flex-shrink-0 mt-0.5" />
                   <span><strong className="text-white">ZK-Proofs:</strong> Prove facts about yourself without revealing raw data</span>
                 </li>
               </ul>
