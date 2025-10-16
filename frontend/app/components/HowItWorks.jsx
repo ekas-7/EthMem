@@ -12,7 +12,7 @@ export default function HowItWorks() {
       </h2>
 
       <p className="text-sm sm:text-base md:text-lg text-gray-500 max-w-2xl mx-auto mb-8 sm:mb-12">
-        zKMem connects to your favorite LLMs and dApps, creating a unified, persistent memory layer that is cryptographically tied to your blockchain identity. All your data is stored decentrally, giving you full ownership and control.
+  EthMem connects to your favorite LLMs and dApps, creating a unified, persistent memory layer that is cryptographically tied to your blockchain identity. All your data is stored decentrally, giving you full ownership and control.
       </p>
 
       <div className="max-w-3xl mx-auto">
@@ -21,7 +21,7 @@ export default function HowItWorks() {
           {/* Inner white card with subtle shadow */}
           <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 lg:p-8 shadow-2xl w-full max-w-lg">
             <img
-              alt="zKMem dashboard"
+              alt="EthMem dashboard"
               src="/next.svg"
               className="block mx-auto w-full h-auto rounded-md"
             />

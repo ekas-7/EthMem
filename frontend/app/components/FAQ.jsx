@@ -21,7 +21,7 @@ export default function FAQ() {
               <span className="inline-flex items-center justify-center h-6 w-6 sm:h-8 sm:w-8 bg-emerald-600/10 ring-1 ring-emerald-400/20 rounded-full text-emerald-200 text-sm sm:text-base">+</span>
             </summary>
             <div className="px-4 sm:px-6 pb-4">
-              <p className="text-gray-400 mt-2 text-sm sm:text-base">Your data is encrypted and stored on decentralized networks like IPFS. Only you, with your cryptographic keys, can access and decrypt your memory. zKMem as a service never has access to your raw data.</p>
+              <p className="text-gray-400 mt-2 text-sm sm:text-base">Your data is encrypted and stored on decentralized networks like IPFS. Only you, with your cryptographic keys, can access and decrypt your memory. EthMem as a service never has access to your raw data.</p>
             </div>
           </details>
           <details className="bg-gradient-to-br from-[#07120B] to-[#0E1620] rounded-2xl p-0 overflow-hidden">
@@ -39,7 +39,7 @@ export default function FAQ() {
               <span className="inline-flex items-center justify-center h-6 w-6 sm:h-8 sm:w-8 bg-emerald-600/10 ring-1 ring-emerald-400/20 rounded-full text-emerald-200 text-sm sm:text-base">+</span>
             </summary>
             <div className="px-4 sm:px-6 pb-4">
-              <p className="text-gray-400 mt-2 text-sm sm:text-base">Yes! zKMem is designed to be model-agnostic. You can connect it to centralized models like those from OpenAI or to decentralized, open-source models running locally or on decentralized compute networks.</p>
+              <p className="text-gray-400 mt-2 text-sm sm:text-base">Yes! EthMem is designed to be model-agnostic. You can connect it to centralized models like those from OpenAI or to decentralized, open-source models running locally or on decentralized compute networks.</p>
             </div>
           </details>
           <details className="bg-gradient-to-br from-[#07120B] to-[#0E1620] rounded-2xl p-0 overflow-hidden">

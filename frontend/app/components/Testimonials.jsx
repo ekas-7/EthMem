@@ -12,7 +12,7 @@ export default function Testimonials() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
-          <p className="text-gray-500 text-sm sm:text-base mb-6">"zKMem gives my AI agent a persistent, verifiable memory. It's the missing piece for creating truly autonomous agents on the blockchain. My users now have full ownership of their data."</p>
+          <p className="text-gray-500 text-sm sm:text-base mb-6">"EthMem gives my AI agent a persistent, verifiable memory. It's the missing piece for creating truly autonomous agents on the blockchain. My users now have full ownership of their data."</p>
           <div className="flex items-center">
             <img alt="Avatar" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-4 ring-2 ring-white shadow" src="/globe.svg" />
             <div>
@@ -23,7 +23,7 @@ export default function Testimonials() {
         </div>
 
         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
-          <p className="text-gray-500 text-sm sm:text-base mb-6">"As an artist, I'm using zKMem to create dynamic NFTs that evolve based on interactions with their owners. It brings a new level of life and provenance to digital art."</p>
+          <p className="text-gray-500 text-sm sm:text-base mb-6">"As an artist, I'm using EthMem to create dynamic NFTs that evolve based on interactions with their owners. It brings a new level of life and provenance to digital art."</p>
           <div className="flex items-center">
             <img alt="Avatar" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-4 ring-2 ring-white shadow" src="/file.svg" />
             <div>

@@ -1,10 +1,10 @@
-# zKMem
+# EthMem
 
 ## Unified LLM Memory — Your Blockchain Identity
 
 Tagline: Merge your digital mind with your decentralized self.
 
-Description: zKMem unlocks a new layer of digital continuity by turning a user's LLM memory into a portable, cryptographically-secured identity. Interactions, learned context, and personal insights can be carried across apps while remaining owned by the user.
+Description: EthMem unlocks a new layer of digital continuity by turning a user's LLM memory into a portable, cryptographically-secured identity. Interactions, learned context, and personal insights can be carried across apps while remaining owned by the user.
 
 Key principles:
 - Private-by-design: no central servers required for identity storage

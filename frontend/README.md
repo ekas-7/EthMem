@@ -1,4 +1,4 @@
-This is the zKMem frontend — a [Next.js](https://nextjs.org) project implementing a unified LLM memory layer tied to blockchain identities.
+This is the EthMem frontend — a [Next.js](https://nextjs.org) project implementing a unified LLM memory layer tied to blockchain identities.
 
 ## Getting Started
 

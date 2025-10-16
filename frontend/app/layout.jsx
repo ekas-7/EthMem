@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "zKMem",
-  description: "zKMem — Unified LLM Memory tied to your blockchain identity",
+  title: "EthMem",
+  description: "EthMem — Unified LLM Memory tied to your blockchain identity",
 };
 
 export default function RootLayout({ children }) {

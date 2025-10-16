@@ -1,7 +1,7 @@
 export default function Sidebar() {
   return (
     <aside className="w-72 bg-sidebar-dark min-h-screen p-6 hidden md:block">
-      <div className="text-2xl font-bold text-emerald-300 mb-8">zKMem</div>
+  <div className="text-2xl font-bold text-emerald-300 mb-8">EthMem</div>
       <nav className="space-y-3 text-sm text-sidebar-text">
         <a className="block px-3 py-2 rounded-md bg-emerald-700/10" href="/dashboard">Dashboard</a>
         <a className="block px-3 py-2 rounded-md hover:bg-white/5" href="#">Insights</a>

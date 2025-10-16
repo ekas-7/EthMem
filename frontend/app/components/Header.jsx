@@ -17,15 +17,10 @@ export default function Header() {
       <div className="relative z-10 max-w-7xl mx-auto">
         <nav className="px-2 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/5 rounded-lg flex items-center justify-center">
-              <div className="grid grid-cols-2 gap-1">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#0B2F1B] rounded-full"></div>
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#0B2F1B] rounded-full"></div>
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#0B2F1B] rounded-full"></div>
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#0B2F1B] rounded-full"></div>
-              </div>
+            <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center overflow-hidden">
+              <img src="/logo.png" alt="EthMem logo" className="h-6 w-6 sm:h-10 sm:w-10 object-contain" />
             </div>
-            <span className="text-white text-xl sm:text-2xl font-semibold">zKMem</span>
+            <span className="text-white text-xl sm:text-3xl font-semibold">ETHMem</span>
           </div>
 
           {/* Desktop Navigation */}

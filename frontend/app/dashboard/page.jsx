@@ -7,7 +7,7 @@ import UsagePie from "./components/UsagePie";
 import ConnectedLLMs from "./components/ConnectedLLMs";
 
 export const metadata = {
-  title: "Dashboard - zKMem",
+  title: "Dashboard - EthMem",
 };
 
 export default function DashboardPage() {
