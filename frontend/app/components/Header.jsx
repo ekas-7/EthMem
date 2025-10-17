@@ -1,9 +1,18 @@
 "use client";
 import { Rocket, User, ArrowRight, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import ConnectWallet from '../../components/ConnectWallet';
+import { useWallet } from '../../hooks/useWallet';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isConnected } = useWallet();
+  const router = useRouter();
+
+  const handleGoToDashboard = () => {
+    router.push('/dashboard');
+  };
 
   return (
     <header className="bg-gradient-to-br from-[#0B2F1B] to-[#07120B] rounded-b-xl sm:rounded-b-2xl md:rounded-b-[3rem] p-4 sm:p-6 text-white relative overflow-hidden">
@@ -25,6 +34,14 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
+            {isConnected && (
+              <button 
+                onClick={handleGoToDashboard}
+                className="hover:text-white transition-colors"
+              >
+                Dashboard
+              </button>
+            )}
             <a className="hover:text-white transition-colors" href="#">Features</a>
             <a className="hover:text-white transition-colors" href="#">Resources</a>
             <a className="hover:text-white transition-colors" href="#">Support</a>
@@ -34,10 +51,7 @@ export default function Header() {
 
           {/* Desktop Connect Button */}
           <div className="hidden md:block">
-            <button className="bg-emerald-400 hover:bg-emerald-500 text-black font-semibold py-2 px-5 rounded-full flex items-center gap-2">
-              <span>Connect Wallet</span>
-              <User size={16} />
-            </button>
+            <ConnectWallet />
           </div>
 
           {/* Mobile Menu Button */}
@@ -53,15 +67,25 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden bg-black/20 backdrop-blur-sm rounded-lg mx-2 sm:mx-6 mb-4 p-4">
             <div className="flex flex-col space-y-4 text-sm font-medium text-gray-300">
+              {isConnected && (
+                <button 
+                  onClick={() => {
+                    handleGoToDashboard();
+                    setIsMenuOpen(false);
+                  }}
+                  className="hover:text-white transition-colors py-2 text-left"
+                >
+                  Dashboard
+                </button>
+              )}
               <a className="hover:text-white transition-colors py-2" href="#">Features</a>
               <a className="hover:text-white transition-colors py-2" href="#">Resources</a>
               <a className="hover:text-white transition-colors py-2" href="#">Support</a>
               <a className="hover:text-white transition-colors py-2" href="#">Pricing</a>
               <a className="hover:text-white transition-colors py-2" href="#">Contact</a>
-              <button className="bg-emerald-400 hover:bg-emerald-500 text-black font-semibold py-2 px-4 rounded-full flex items-center justify-center gap-2 mt-4">
-                <span>Connect Wallet</span>
-                <User size={16} />
-              </button>
+              <div className="mt-4">
+                <ConnectWallet className="w-full justify-center" />
+              </div>
             </div>
           </div>
         )}
@@ -84,10 +108,17 @@ export default function Header() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 px-4">
-            <button className="bg-emerald-400 hover:bg-emerald-500 text-black px-4 sm:px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition-all">
-              <span className="text-sm sm:text-base">Claim Your Decentralized Memory</span>
-              <Rocket size={16} />
-            </button>
+            {isConnected ? (
+              <button 
+                onClick={handleGoToDashboard}
+                className="bg-emerald-400 hover:bg-emerald-500 text-black px-4 sm:px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition-all"
+              >
+                <span className="text-sm sm:text-base">Access Dashboard</span>
+                <Rocket size={16} />
+              </button>
+            ) : (
+              <ConnectWallet className="bg-emerald-400 hover:bg-emerald-500 text-black px-4 sm:px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition-all" />
+            )}
 
             <button className="bg-white/5 hover:bg-white/10 text-white px-4 sm:px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
               <span className="text-sm sm:text-base">Learn More</span>
