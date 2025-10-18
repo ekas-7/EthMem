@@ -1,5 +1,26 @@
 // modelManagement.js - Model Management Logic
 
+// Load Transformers.js from CDN
+let transformersLoaded = false;
+let transformersModule = null;
+
+async function loadTransformers() {
+  if (transformersLoaded && transformersModule) {
+    return transformersModule;
+  }
+  
+  try {
+    // Use importScripts equivalent for extension context
+    transformersModule = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+    transformersLoaded = true;
+    console.log('Transformers.js loaded successfully');
+    return transformersModule;
+  } catch (error) {
+    console.error('Failed to load Transformers.js:', error);
+    throw error;
+  }
+}
+
 // Available models configuration
 const MODELS = [
   {
@@ -295,8 +316,8 @@ async function downloadModel(modelId) {
   renderModels();
   
   try {
-    // Import Transformers.js dynamically
-    const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+    // Load Transformers.js
+    const { pipeline, env } = await loadTransformers();
     
     // Configure environment
     env.allowLocalModels = false;
@@ -356,8 +377,8 @@ async function loadModel(modelId) {
   }
   
   try {
-    // Import Transformers.js
-    const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+    // Load Transformers.js
+    const { pipeline, env } = await loadTransformers();
     
     const model = MODELS.find(m => m.id === modelId);
     
