@@ -1,27 +1,30 @@
 // contentScript.js
-// Inject button into ChatGPT, Claude, and Gemini headers
+// Main content script - Handles UI injection and message forwarding
 (function() {
-  console.log('ext: contentScript running');
+  console.log('[EthMem] contentScript running');
 
   // Detect which platform we're on
   const isChatGPT = window.location.hostname.includes('openai.com') || window.location.hostname.includes('chatgpt.com');
   const isClaude = window.location.hostname.includes('claude.ai');
   const isGemini = window.location.hostname.includes('gemini.google.com');
   
-  console.log('ext: platform detection -', { isChatGPT, isClaude, isGemini });
+  console.log('[EthMem] platform detection -', { isChatGPT, isClaude, isGemini });
+
+  // Track processed messages to avoid duplicates
+  const processedMessages = new Set();
 
   // Inject pageScript.js into the page context so it can intercept fetch calls
   function injectPageScript() {
     try {
       const script = document.createElement('script');
-      script.src = chrome.runtime.getURL('pageScript.js');
+      script.src = chrome.runtime.getURL('src/page/pageScript.js');
       script.onload = function() {
         this.remove();
       };
       (document.head || document.documentElement).appendChild(script);
-      console.log('ext: pageScript.js injected into page context');
+      console.log('[EthMem] pageScript.js injected into page context');
     } catch (e) {
-      console.error('ext: failed to inject pageScript.js', e);
+      console.error('[EthMem] failed to inject pageScript.js', e);
     }
   }
 
@@ -29,15 +32,27 @@
   function injectEthAdapter() {
     try {
       const script = document.createElement('script');
-      script.src = chrome.runtime.getURL('ethAdapter.js');
+      script.src = chrome.runtime.getURL('src/page/ethAdapter.js');
       script.onload = function() {
-        console.log('ext: ethAdapter.js loaded successfully');
+        console.log('[EthMem] ethAdapter.js loaded successfully');
         this.remove();
       };
       (document.head || document.documentElement).appendChild(script);
-      console.log('ext: ethAdapter.js injected into page context');
+      console.log('[EthMem] ethAdapter.js injected into page context');
     } catch (e) {
-      console.error('ext: failed to inject ethAdapter.js', e);
+      console.error('[EthMem] failed to inject ethAdapter.js', e);
+    }
+  }
+
+  // Inject memory viewer UI script
+  function injectMemoryViewer() {
+    try {
+      const script = document.createElement('script');
+      script.src = chrome.runtime.getURL('src/ui/memoryViewer.js');
+      (document.head || document.documentElement).appendChild(script);
+      console.log('[EthMem] memoryViewer.js injected');
+    } catch (e) {
+      console.error('[EthMem] failed to inject memoryViewer.js', e);
     }
   }
 
@@ -47,14 +62,53 @@
     if (event.source !== window) return;
     
     if (event.data && event.data.type === 'CHATGPT_LOG') {
-      console.log('ext: intercepted chat data:', event.data.payload);
-      // TODO: Send this data to background script or process it
-      // chrome.runtime.sendMessage({ type: 'CHAT_DATA', data: event.data.payload });
+      const payload = event.data.payload;
+      
+      // If it's a user message, send for memory extraction
+      if (payload.type === 'USER_MESSAGE' && payload.userMessage) {
+        const messageKey = payload.userMessage + payload.timestamp;
+        
+        // Avoid duplicate processing
+        if (processedMessages.has(messageKey)) {
+          return;
+        }
+        processedMessages.add(messageKey);
+        
+        // Clean up old entries (keep last 100)
+        if (processedMessages.size > 100) {
+          const entries = Array.from(processedMessages);
+          processedMessages.clear();
+          entries.slice(-50).forEach(e => processedMessages.add(e));
+        }
+        
+        console.log('[EthMem] User message detected, sending for extraction:', payload.userMessage.substring(0, 100));
+        
+        // Send to background for memory extraction
+        chrome.runtime.sendMessage({
+          type: 'EXTRACT_MEMORY',
+          payload: {
+            text: payload.userMessage,
+            messageId: payload.timestamp.toString(),
+            platform: isChatGPT ? 'chatgpt' : isClaude ? 'claude' : 'gemini',
+            url: window.location.href,
+            timestamp: payload.timestamp
+          }
+        }).then(response => {
+          if (response && response.success) {
+            console.log('[EthMem] Memory extracted:', response.memory);
+          }
+        }).catch(error => {
+          console.error('[EthMem] Error extracting memory:', error);
+        });
+      }
     }
 
     if (event.data && event.data.type === 'EXT_LOGO_CLICK') {
-      console.log('ext: logo button clicked');
-      // TODO: Handle logo click - open popup, navigate, etc.
+      console.log('[EthMem] logo button clicked');
+      // Open memory viewer
+      if (window.EthMemViewer) {
+        window.EthMemViewer.open();
+      }
     }
   });
 
@@ -69,11 +123,10 @@
     btn.style.border = 'none';
     btn.style.cursor = 'pointer';
     btn.style.transition = 'all 0.2s ease';
-    btn.title = 'ETHMem';
+    btn.title = 'ETHMem - View Your Memories';
 
     // Platform-specific styling
     if (isGemini) {
-      // Gemini: More compact, rounded button to match Google's style
       btn.style.height = '32px';
       btn.style.padding = '4px 12px';
       btn.style.borderRadius = '16px';
@@ -90,7 +143,6 @@
         btn.style.transform = 'scale(1)';
       });
     } else {
-      // ChatGPT & Claude: Original dark style
       btn.style.height = '36px';
       btn.style.padding = '6px 14px';
       btn.style.borderRadius = '18px';
@@ -105,14 +157,13 @@
     }
 
     const img = document.createElement('img');
-    img.src = chrome.runtime.getURL('logo.png');
+    img.src = chrome.runtime.getURL('assets/logo.png');
     img.alt = '';
     img.setAttribute('aria-hidden', 'true');
     img.style.objectFit = 'cover';
     img.style.borderRadius = '50%';
     img.style.flexShrink = '0';
     
-    // Platform-specific image size
     if (isGemini) {
       img.style.width = '20px';
       img.style.height = '20px';
@@ -129,7 +180,6 @@
     label.style.letterSpacing = '0.01em';
     label.style.userSelect = 'none';
     
-    // Platform-specific text styling
     if (isGemini) {
       label.style.fontSize = '13px';
       label.style.color = 'rgba(255, 255, 255, 0.95)';
@@ -140,7 +190,14 @@
 
     btn.appendChild(img);
     btn.appendChild(label);
-    btn.addEventListener('click', (e) => { e.stopPropagation(); try { window.postMessage({ type: 'EXT_LOGO_CLICK' }, '*'); } catch (err) {} });
+    btn.addEventListener('click', (e) => { 
+      e.stopPropagation(); 
+      try { 
+        window.postMessage({ type: 'EXT_LOGO_CLICK' }, '*'); 
+      } catch (err) {
+        console.error('[EthMem] Error posting logo click:', err);
+      } 
+    });
     return btn;
   }
 
@@ -150,10 +207,8 @@
       let insertPosition = null;
 
       if (isChatGPT) {
-        // ChatGPT: Look for the page-header and insert in the right section
         const header = document.getElementById('page-header');
         if (header) {
-          // Find the right section with Share button
           const rightSection = header.querySelector('#conversation-header-actions');
           if (rightSection && rightSection.parentElement) {
             pageHeader = rightSection.parentElement;
@@ -164,27 +219,22 @@
           }
         }
       } else if (isClaude) {
-        // Claude: Look for header with data-testid="page-header"
         pageHeader = document.querySelector('header[data-testid="page-header"]');
         if (pageHeader) {
-          // Find the actions container (right side with Share button)
           const actionsContainer = pageHeader.querySelector('[data-testid="chat-actions"]');
           if (actionsContainer && actionsContainer.parentElement) {
             insertPosition = 'beforeActions';
           } else {
-            // Fallback: insert at the end of the header
             insertPosition = 'lastChild';
           }
         }
       } else if (isGemini) {
-        // Gemini: Target the logo container area
         const logoContainer = document.querySelector('.pill-ui-logo-container');
         if (logoContainer && logoContainer.parentElement) {
           pageHeader = logoContainer.parentElement;
           insertPosition = 'afterLogo';
         }
         
-        // Fallback: Try the Google bar with user profile
         if (!pageHeader) {
           const googleBar = document.querySelector('div[role="banner"]');
           if (googleBar) {
@@ -196,7 +246,6 @@
           }
         }
         
-        // Second fallback: Try the .gb_z container
         if (!pageHeader) {
           pageHeader = document.querySelector('.gb_z.gb_td') || document.querySelector('.gb_z');
           if (pageHeader) {
@@ -204,7 +253,6 @@
           }
         }
         
-        // Last fallback: Any header element
         if (!pageHeader) {
           const anyHeader = document.querySelector('header');
           if (anyHeader) {
@@ -215,12 +263,12 @@
       }
 
       if (!pageHeader) {
-        console.log('ext: page header not found');
+        console.log('[EthMem] page header not found');
         return false;
       }
 
       if (pageHeader.querySelector('.ext-logo-button')) {
-        console.log('ext: logo button already present in header');
+        console.log('[EthMem] logo button already present in header');
         return true;
       }
 
@@ -230,7 +278,6 @@
       wrapper.style.display = 'inline-flex';
       wrapper.style.alignItems = 'center';
       
-      // Platform-specific wrapper styling
       if (isGemini) {
         wrapper.style.marginRight = '16px';
         wrapper.style.marginLeft = '8px';
@@ -240,7 +287,6 @@
       
       wrapper.appendChild(createLogoButton());
 
-      // Insert based on platform
       try {
         if (insertPosition === 'firstChild') {
           if (pageHeader.firstChild) {
@@ -249,7 +295,6 @@
             pageHeader.appendChild(wrapper);
           }
         } else if (insertPosition === 'beforeActions') {
-          // For ChatGPT & Claude: insert before the actions container
           const actionsContainer = isChatGPT 
             ? pageHeader.querySelector('#conversation-header-actions')
             : pageHeader.querySelector('[data-testid="chat-actions"]');
@@ -259,7 +304,6 @@
             pageHeader.appendChild(wrapper);
           }
         } else if (insertPosition === 'afterLogo') {
-          // For Gemini: insert after the logo container
           const logoContainer = pageHeader.querySelector('.pill-ui-logo-container');
           if (logoContainer && logoContainer.nextSibling) {
             pageHeader.insertBefore(wrapper, logoContainer.nextSibling);
@@ -269,21 +313,11 @@
             pageHeader.appendChild(wrapper);
           }
         } else if (insertPosition === 'beforeProfile') {
-          // For Gemini: insert before the profile/account icons
-          // Look for common Google bar elements
           const profileIcon = pageHeader.querySelector('a[aria-label*="Google Account"], a[aria-label*="Google apps"], .gb_B, .gb_0a');
           if (profileIcon) {
             pageHeader.insertBefore(wrapper, profileIcon);
           } else if (pageHeader.lastChild) {
-            // Insert before the last child as fallback
             pageHeader.insertBefore(wrapper, pageHeader.lastChild);
-          } else {
-            pageHeader.appendChild(wrapper);
-          }
-        } else if (insertPosition === 'afterBegin') {
-          // For other scenarios
-          if (pageHeader.firstChild) {
-            pageHeader.insertBefore(wrapper, pageHeader.firstChild);
           } else {
             pageHeader.appendChild(wrapper);
           }
@@ -291,14 +325,14 @@
           pageHeader.appendChild(wrapper);
         }
       } catch (insertError) {
-        console.warn('ext: error inserting button, using appendChild as fallback', insertError);
+        console.warn('[EthMem] error inserting button, using appendChild as fallback', insertError);
         pageHeader.appendChild(wrapper);
       }
 
-      console.log(`ext: logo button inserted into ${isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : 'Gemini'} header`);
+      console.log(`[EthMem] logo button inserted into ${isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : 'Gemini'} header`);
       return true;
     } catch (e) {
-      console.warn('ext: insertLogoInHeader error', e);
+      console.warn('[EthMem] insertLogoInHeader error', e);
       return false;
     }
   }
@@ -308,7 +342,6 @@
     if (!msg || !msg.action) return;
     
     if (msg.action === 'connectWallet') {
-      // Send message to page context to connect wallet
       window.postMessage({ type: 'EXT_CONNECT_WALLET' }, '*');
       sendResponse({ ok: true });
     }
@@ -321,8 +354,7 @@
     if (event.source !== window) return;
     
     if (event.data && event.data.type === 'WALLET_CONNECTED') {
-      console.log('ext: wallet connected:', event.data.payload);
-      // Store wallet info in chrome.storage
+      console.log('[EthMem] wallet connected:', event.data.payload);
       chrome.storage.local.set({
         walletConnected: true,
         walletAddress: event.data.payload.address,
@@ -331,19 +363,18 @@
     }
     
     if (event.data && event.data.type === 'WALLET_ERROR') {
-      console.error('ext: wallet connection error:', event.data.payload);
+      console.error('[EthMem] wallet connection error:', event.data.payload);
     }
   });
 
-  // Inject the page script immediately
+  // Inject scripts
   injectPageScript();
-  
-  // Inject ethAdapter
   injectEthAdapter();
+  injectMemoryViewer();
 
   // Auto-inject header button with retry logic
   let retryCount = 0;
-  const maxRetries = 20; // Try for ~6 seconds
+  const maxRetries = 20;
   
   function tryInjectHeader() {
     const success = insertLogoInHeader();
@@ -351,7 +382,7 @@
       retryCount++;
       setTimeout(tryInjectHeader, 300);
     } else if (success) {
-      console.log('ext: header button successfully injected');
+      console.log('[EthMem] header button successfully injected');
       setupHeaderObserver();
     }
   }
@@ -359,21 +390,19 @@
   // Set up MutationObserver to re-inject if header is removed/changed
   function setupHeaderObserver() {
     const observer = new MutationObserver((mutations) => {
-      // Simply check if button exists in DOM, re-inject if not
       if (!document.querySelector('.ext-logo-button')) {
-        console.log('ext: header button removed, re-injecting...');
+        console.log('[EthMem] header button removed, re-injecting...');
         insertLogoInHeader();
       }
     });
 
-    // Observe the entire document for changes
     observer.observe(document.body, {
       childList: true,
       subtree: true
     });
 
     const platformName = isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : 'Gemini';
-    console.log(`ext: MutationObserver set up for ${platformName} auto-injection`);
+    console.log(`[EthMem] MutationObserver set up for ${platformName} auto-injection`);
   }
 
   // Start auto-injection

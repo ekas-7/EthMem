@@ -1,36 +1,56 @@
 {
   "manifest_version": 3,
   "name": "ETHMem",
-  "description": "Decentralized memory for ChatGPT, Claude, and Gemini - Connect your wallet to store conversations on-chain.",
-  "version": "0.1.0",
+  "description": "Decentralized memory for ChatGPT, Claude, and Gemini - AI-powered memory extraction and on-chain storage.",
+  "version": "0.2.0",
   "permissions": ["scripting", "activeTab", "storage"],
-  "host_permissions": ["https://chat.openai.com/*", "https://chatgpt.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*"
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background/background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
-      "js": ["contentScript.js"],
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": ["src/content/contentScript.js"],
       "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["logo.png", "pageScript.js", "ethAdapter.js", "modelManagement.html", "modelManagement.js", "transformersLoader.html", "transformers.min.js", "transformersLoaderScript.js"],
+      "resources": [
+        "assets/logo.png",
+        "src/page/pageScript.js",
+        "src/page/ethAdapter.js",
+        "src/ui/memoryViewer.js",
+        "src/ui/modelManagement.html",
+        "src/ui/modelManagement.js",
+        "src/ui/transformersLoader.html",
+        "src/lib/transformers.min.js",
+        "src/lib/transformersLoaderScript.js"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
   "icons": {
-    "16": "logo.png",
-    "48": "logo.png",
-    "128": "logo.png"
+    "16": "assets/logo.png",
+    "48": "assets/logo.png",
+    "128": "assets/logo.png"
   },
   "action": {
-    "default_popup": "popup.html",
-    "default_title": "ETHMem"
+    "default_popup": "src/popup/popup.html",
+    "default_title": "ETHMem - AI Memory Manager"
   }
 }
