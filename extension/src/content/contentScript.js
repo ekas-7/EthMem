@@ -80,92 +80,179 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
       z-index: 10001;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      animation: fadeIn 0.2s ease;
     `;
     
     const modal = document.createElement('div');
     modal.style.cssText = `
-      background: #1a1a1a;
+      background: linear-gradient(135deg, #0f2419 0%, #111714 100%);
+      border: 1px solid #29382f;
       border-radius: 16px;
       width: 90%;
-      max-width: 800px;
-      max-height: 80vh;
+      max-width: 900px;
+      max-height: 85vh;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      animation: slideUp 0.3s ease;
     `;
     
+    // Header with logo
     const header = document.createElement('div');
     header.style.cssText = `
       padding: 20px 24px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #29382f;
+      background: linear-gradient(135deg, #0f2419 0%, #111714 100%);
       display: flex;
       justify-content: space-between;
       align-items: center;
     `;
     
+    const titleSection = document.createElement('div');
+    titleSection.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    `;
+    
+    // Add logo
+    const logo = document.createElement('img');
+    logo.src = chrome.runtime.getURL('assets/logo.png');
+    logo.style.cssText = `
+      width: 32px;
+      height: 32px;
+    `;
+    
+    const titleText = document.createElement('div');
     const title = document.createElement('h2');
-    title.textContent = 'EthMem - Your Memories';
+    title.textContent = 'Your Memories';
     title.style.cssText = `
       margin: 0;
       font-size: 20px;
-      font-weight: 600;
+      font-weight: 700;
       color: #fff;
+      letter-spacing: -0.015em;
     `;
+    
+    const subtitle = document.createElement('div');
+    subtitle.textContent = memories.length + ' memories stored';
+    subtitle.style.cssText = `
+      font-size: 12px;
+      color: #38e078;
+      margin-top: 2px;
+      font-weight: 500;
+    `;
+    
+    titleText.appendChild(title);
+    titleText.appendChild(subtitle);
+    titleSection.appendChild(logo);
+    titleSection.appendChild(titleText);
     
     const closeBtn = document.createElement('button');
     closeBtn.textContent = '✕';
     closeBtn.style.cssText = `
-      background: none;
+      background: #29382f;
       border: none;
-      color: #999;
-      font-size: 24px;
+      color: #b8c5be;
+      font-size: 20px;
       cursor: pointer;
       padding: 0;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 8px;
       transition: all 0.2s;
     `;
-    closeBtn.onmouseover = () => { closeBtn.style.background = '#333'; closeBtn.style.color = '#fff'; };
-    closeBtn.onmouseout = () => { closeBtn.style.background = 'none'; closeBtn.style.color = '#999'; };
-    closeBtn.onclick = () => viewer.remove();
+    closeBtn.onmouseover = () => { 
+      closeBtn.style.background = '#354a3f'; 
+      closeBtn.style.color = '#fff'; 
+    };
+    closeBtn.onmouseout = () => { 
+      closeBtn.style.background = '#29382f'; 
+      closeBtn.style.color = '#b8c5be'; 
+    };
+    closeBtn.onclick = () => {
+      viewer.style.animation = 'fadeOut 0.2s ease';
+      setTimeout(() => viewer.remove(), 200);
+    };
     
-    header.appendChild(title);
+    header.appendChild(titleSection);
     header.appendChild(closeBtn);
     
     const content = document.createElement('div');
     content.style.cssText = `
       padding: 24px;
       overflow-y: auto;
-      max-height: calc(80vh - 80px);
+      max-height: calc(85vh - 100px);
+      background: #111714;
     `;
+    
+    // Add scrollbar styling
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+      @keyframes slideUp {
+        from { 
+          opacity: 0;
+          transform: translateY(20px); 
+        }
+        to { 
+          opacity: 1;
+          transform: translateY(0); 
+        }
+      }
+      #ethmem-viewer ::-webkit-scrollbar {
+        width: 8px;
+      }
+      #ethmem-viewer ::-webkit-scrollbar-track {
+        background: #1a2a23;
+        border-radius: 4px;
+      }
+      #ethmem-viewer ::-webkit-scrollbar-thumb {
+        background: #29382f;
+        border-radius: 4px;
+      }
+      #ethmem-viewer ::-webkit-scrollbar-thumb:hover {
+        background: #354a3f;
+      }
+    `;
+    document.head.appendChild(style);
     
     if (memories.length === 0) {
       const empty = document.createElement('div');
       empty.style.cssText = `
         text-align: center;
-        padding: 40px;
-        color: #999;
+        padding: 60px 20px;
+        color: #b8c5be;
       `;
       empty.innerHTML = `
-        <div style="font-size: 48px; margin-bottom: 16px;">🧠</div>
-        <div style="font-size: 18px; font-weight: 500; margin-bottom: 8px;">No memories yet</div>
-        <div style="font-size: 14px;">Start chatting and EthMem will automatically capture your memories</div>
+        <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;">🧠</div>
+        <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #fff;">No memories yet</div>
+        <div style="font-size: 14px; color: #b8c5be; max-width: 400px; margin: 0 auto; line-height: 1.5;">
+          Start chatting and EthMem will automatically capture and store your memories locally and on-chain.
+        </div>
       `;
       content.appendChild(empty);
     } else {
       const grid = document.createElement('div');
       grid.style.cssText = `
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 16px;
       `;
       
@@ -183,91 +270,184 @@
     document.body.appendChild(viewer);
     
     viewer.onclick = (e) => {
-      if (e.target === viewer) viewer.remove();
+      if (e.target === viewer) {
+        viewer.style.animation = 'fadeOut 0.2s ease';
+        setTimeout(() => viewer.remove(), 200);
+      }
     };
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   function createMemoryCard(memory) {
     const card = document.createElement('div');
     card.style.cssText = `
-      background: #2a2a2a;
+      background: linear-gradient(135deg, #1a2a23 0%, #15201a 100%);
+      border: 1px solid #29382f;
       border-radius: 12px;
-      padding: 16px;
-      border-left: 4px solid ${getCategoryColor(memory.category)};
-      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 18px;
+      transition: all 0.2s ease;
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
     `;
+
+    // Hover effect
     card.onmouseover = () => {
+      card.style.borderColor = '#38e078';
       card.style.transform = 'translateY(-2px)';
-      card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+      card.style.boxShadow = '0 8px 16px rgba(56, 224, 120, 0.08)';
     };
     card.onmouseout = () => {
+      card.style.borderColor = '#29382f';
       card.style.transform = 'translateY(0)';
       card.style.boxShadow = 'none';
     };
-    
+
+    // Safely pick displayed values from different memory shapes
+    const displayValue = (memory.entity !== undefined && memory.entity !== null)
+      ? String(memory.entity)
+      : (memory.value !== undefined && memory.value !== null)
+        ? String(memory.value)
+        : (memory.source !== undefined && memory.source !== null)
+          ? String(memory.source)
+          : JSON.stringify(memory);
+
+    // Prefer a readable context: metadata context string, or source snippet
+    let displayContext = '';
+    if (memory.context) {
+      if (typeof memory.context === 'string') displayContext = memory.context;
+      else if (memory.context.conversationId) displayContext = memory.context.conversationId;
+      else displayContext = JSON.stringify(memory.context);
+    } else if (memory.source && typeof memory.source === 'string') {
+      displayContext = memory.source;
+    }
+
+    // Confidence handling (metadata.confidence preferred)
+    const confRaw = (memory.metadata && typeof memory.metadata.confidence === 'number')
+      ? memory.metadata.confidence
+      : (typeof memory.confidence === 'number' ? memory.confidence : 0);
+    const conf = Math.max(0, Math.min(1, Number(confRaw) || 0));
+    const confPct = Math.round(conf * 100);
+
+    // Category badge
     const categoryBadge = document.createElement('div');
-    categoryBadge.textContent = memory.category;
+    categoryBadge.textContent = String(memory.category || 'unknown').toUpperCase();
     categoryBadge.style.cssText = `
       display: inline-block;
-      padding: 4px 8px;
+      padding: 6px 10px;
       background: ${getCategoryColor(memory.category)}22;
       color: ${getCategoryColor(memory.category)};
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      border: 1px solid ${getCategoryColor(memory.category)}33;
     `;
-    
+
+    // Value
     const value = document.createElement('div');
-    value.textContent = memory.value;
+    value.innerHTML = escapeHtml(displayValue);
     value.style.cssText = `
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 17px;
+      font-weight: 600;
       color: #fff;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      line-height: 1.3;
+      letter-spacing: -0.015em;
+      word-break: break-word;
     `;
-    
-    const context = document.createElement('div');
-    context.textContent = memory.context ? `"${memory.context}"` : '';
-    context.style.cssText = `
-      font-size: 13px;
-      color: #999;
-      font-style: italic;
-      margin-bottom: 8px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    `;
-    
+
+    card.appendChild(categoryBadge);
+    card.appendChild(value);
+
+    if (displayContext) {
+      const contextEl = document.createElement('div');
+      contextEl.innerHTML = escapeHtml(displayContext.length > 200 ? displayContext.slice(0, 200) + '...' : displayContext);
+      contextEl.style.cssText = `
+        font-size: 13px;
+        color: #b8c5be;
+        font-style: italic;
+        margin-bottom: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.4;
+      `;
+      card.appendChild(contextEl);
+    }
+
+    // Footer with timestamp and confidence
     const footer = document.createElement('div');
     footer.style.cssText = `
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11px;
-      color: #666;
-      margin-top: 8px;
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid #29382f;
     `;
-    
+
     const timestamp = document.createElement('span');
-    timestamp.textContent = formatTimestamp(memory.timestamp);
-    
-    const confidence = document.createElement('span');
-    confidence.textContent = `${Math.round(memory.confidence * 100)}%`;
-    confidence.style.color = getCategoryColor(memory.category);
-    
+    timestamp.textContent = formatTimestamp(memory.timestamp || Date.now());
+    timestamp.style.cssText = `
+      font-size: 11px;
+      color: #b8c5be;
+      font-weight: 500;
+    `;
+
+    const confidence = document.createElement('div');
+    confidence.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    `;
+
+    const confidenceBar = document.createElement('div');
+    confidenceBar.style.cssText = `
+      width: 56px;
+      height: 6px;
+      background: #29382f;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #213028;
+    `;
+
+    const confidenceFill = document.createElement('div');
+    confidenceFill.style.cssText = `
+      width: ${confPct}%;
+      height: 100%;
+      background: ${getCategoryColor(memory.category)};
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    `;
+    confidenceBar.appendChild(confidenceFill);
+
+    const confidenceText = document.createElement('span');
+    confidenceText.textContent = `${confPct}%`;
+    confidenceText.style.cssText = `
+      color: ${getCategoryColor(memory.category)};
+      font-weight: 600;
+      min-width: 36px;
+      text-align: right;
+    `;
+
+    confidence.appendChild(confidenceBar);
+    confidence.appendChild(confidenceText);
+
     footer.appendChild(timestamp);
     footer.appendChild(confidence);
-    
-    card.appendChild(categoryBadge);
-    card.appendChild(value);
-    if (memory.context) card.appendChild(context);
     card.appendChild(footer);
-    
+
     return card;
   }
 
