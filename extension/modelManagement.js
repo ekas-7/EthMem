@@ -1,24 +1,100 @@
 // modelManagement.js - Model Management Logic
 
-// Load Transformers.js from CDN
-let transformersLoaded = false;
-let transformersModule = null;
+// Transformers.js loader using sandboxed iframe
+let transformersIframe = null;
+let transformersReady = false;
+let messageId = 0;
+let pendingMessages = new Map();
 
-async function loadTransformers() {
-  if (transformersLoaded && transformersModule) {
-    return transformersModule;
+/**
+ * Initialize the sandboxed iframe for Transformers.js
+ */
+function initTransformersIframe() {
+  if (transformersIframe) {
+    return transformersIframe;
   }
   
-  try {
-    // Use importScripts equivalent for extension context
-    transformersModule = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-    transformersLoaded = true;
-    console.log('Transformers.js loaded successfully');
-    return transformersModule;
-  } catch (error) {
-    console.error('Failed to load Transformers.js:', error);
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    const iframe = document.createElement('iframe');
+    iframe.src = chrome.runtime.getURL('transformersLoader.html');
+    iframe.style.display = 'none';
+    iframe.sandbox = 'allow-scripts allow-same-origin';
+    
+    // Listen for messages from iframe
+    window.addEventListener('message', (event) => {
+      if (event.source !== iframe.contentWindow) return;
+      
+      const { type, messageId: msgId, success, error, result, progress, model } = event.data;
+      
+      if (type === 'TRANSFORMERS_READY') {
+        console.log('Transformers.js ready in sandbox');
+        transformersReady = true;
+        resolve(iframe);
+      } else if (type === 'TRANSFORMERS_ERROR') {
+        console.error('Transformers.js error:', error);
+        reject(new Error(error));
+      } else if (type === 'MODEL_LOADED' || type === 'INFERENCE_RESULT' || type === 'MODEL_PROGRESS') {
+        const handler = pendingMessages.get(msgId);
+        if (handler) {
+          if (type === 'MODEL_PROGRESS') {
+            handler.onProgress && handler.onProgress(progress);
+          } else {
+            if (success) {
+              handler.resolve(result || { success: true, model });
+            } else {
+              handler.reject(new Error(error));
+            }
+            if (type !== 'MODEL_PROGRESS') {
+              pendingMessages.delete(msgId);
+            }
+          }
+        }
+      }
+    });
+    
+    document.body.appendChild(iframe);
+    transformersIframe = iframe;
+    
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      if (!transformersReady) {
+        reject(new Error('Transformers.js load timeout'));
+      }
+    }, 30000);
+  });
+}
+
+/**
+ * Send message to sandboxed iframe
+ */
+function sendToTransformers(type, data, onProgress) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!transformersIframe) {
+        await initTransformersIframe();
+      }
+      
+      const msgId = messageId++;
+      pendingMessages.set(msgId, { resolve, reject, onProgress });
+      
+      transformersIframe.contentWindow.postMessage({
+        type,
+        messageId: msgId,
+        ...data
+      }, '*');
+      
+      // Timeout after 5 minutes for model downloads
+      setTimeout(() => {
+        if (pendingMessages.has(msgId)) {
+          pendingMessages.delete(msgId);
+          reject(new Error('Operation timeout'));
+        }
+      }, 300000);
+      
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 // Available models configuration
@@ -316,44 +392,40 @@ async function downloadModel(modelId) {
   renderModels();
   
   try {
-    // Load Transformers.js
-    const { pipeline, env } = await loadTransformers();
-    
-    // Configure environment
-    env.allowLocalModels = false;
-    env.allowRemoteModels = true;
-    
     const model = MODELS.find(m => m.id === modelId);
     
-    // Create pipeline with progress callback
     console.log(`Loading pipeline: ${model.task} with model: ${model.fullName}`);
     
-    // Simulate progress (Transformers.js doesn't provide real progress yet)
-    const progressInterval = setInterval(() => {
-      if (modelStates[modelId].status === 'downloading') {
-        modelStates[modelId].progress = Math.min(modelStates[modelId].progress + 5, 95);
-        updateProgressBar(modelId, modelStates[modelId].progress);
+    // Load model in sandboxed iframe with progress callback
+    await sendToTransformers('LOAD_MODEL', {
+      task: model.task,
+      model: model.fullName
+    }, (progress) => {
+      // Update progress from actual download
+      if (progress && progress.progress !== undefined) {
+        const percent = Math.round(progress.progress);
+        modelStates[modelId].progress = percent;
+        updateProgressBar(modelId, percent);
       }
-    }, 500);
+    });
     
-    // Download and cache the model
-    const generator = await pipeline(model.task, model.fullName);
-    
-    clearInterval(progressInterval);
-    
-    // Update state to downloaded
-    modelStates[modelId].status = 'downloaded';
+    // Update state to downloaded and loaded
+    modelStates[modelId].status = 'loaded';
     modelStates[modelId].progress = 100;
     modelStates[modelId].downloadedAt = Date.now();
+    modelStates[modelId].lastUsed = Date.now();
+    activeModel = modelId;
     await saveModelStates();
     
-    console.log(`Model ${modelId} downloaded successfully!`);
+    console.log(`Model ${modelId} downloaded and loaded successfully!`);
     renderModels();
     
-    // Auto-load if it's the first model
-    if (!activeModel) {
-      await loadModel(modelId);
-    }
+    // Send message to background/content scripts
+    chrome.runtime.sendMessage({
+      type: 'MODEL_LOADED',
+      modelId: modelId,
+      modelName: model.fullName
+    });
     
   } catch (error) {
     console.error(`Error downloading model ${modelId}:`, error);
@@ -377,15 +449,17 @@ async function loadModel(modelId) {
   }
   
   try {
-    // Load Transformers.js
-    const { pipeline, env } = await loadTransformers();
-    
     const model = MODELS.find(m => m.id === modelId);
     
-    // Create pipeline
-    const generator = await pipeline(model.task, model.fullName);
+    // Load model in sandboxed iframe
+    await sendToTransformers('LOAD_MODEL', {
+      task: model.task,
+      model: model.fullName
+    }, (progress) => {
+      console.log('Loading progress:', progress);
+    });
     
-    // Store in memory (we'll use chrome.storage for the reference)
+    // Update state
     modelStates[modelId].status = 'loaded';
     modelStates[modelId].lastUsed = Date.now();
     activeModel = modelId;
