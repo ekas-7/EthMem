@@ -112,86 +112,140 @@
     }
   });
 
-  function createLogoButton() {
+  function createLogoButton(isTextbar = false) {
     const btn = document.createElement('button');
-    btn.className = 'ext-logo-button';
-    btn.setAttribute('aria-label', 'Open ETHMem');
-    btn.style.display = 'inline-flex';
-    btn.style.alignItems = 'center';
-    btn.style.justifyContent = 'center';
-    btn.style.gap = '8px';
-    btn.style.border = 'none';
-    btn.style.cursor = 'pointer';
-    btn.style.transition = 'all 0.2s ease';
-    btn.title = 'ETHMem - View Your Memories';
+    btn.className = isTextbar ? 'ext-logo-button-textbar' : 'ext-logo-button';
+    btn.setAttribute('aria-label', 'EthMem Memories');
+    btn.title = 'EthMem - View Your Memories';
 
-    // Platform-specific styling
-    if (isGemini) {
-      btn.style.height = '32px';
-      btn.style.padding = '4px 12px';
-      btn.style.borderRadius = '16px';
-      btn.style.background = 'rgba(255, 255, 255, 0.1)';
-      btn.style.backdropFilter = 'blur(10px)';
-      btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+    if (isTextbar && isChatGPT) {
+      // ChatGPT textbar button styling (matches Attach, Search, Study buttons)
+      btn.style.cssText = `
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
+        min-width: 32px;
+        padding: 8px;
+        border-radius: 18px;
+        border: 1px solid rgb(86, 88, 105);
+        background: transparent;
+        color: rgb(172, 172, 190);
+        font-size: 13px;
+        font-weight: 600;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        cursor: pointer;
+        transition: background 0.2s ease, opacity 0.2s ease;
+        white-space: nowrap;
+        gap: 6px;
+      `;
       
       btn.addEventListener('mouseenter', () => {
-        btn.style.background = 'rgba(255, 255, 255, 0.15)';
-        btn.style.transform = 'scale(1.02)';
+        btn.style.background = 'rgb(52, 53, 65)';
+        btn.style.opacity = '0.8';
       });
       btn.addEventListener('mouseleave', () => {
-        btn.style.background = 'rgba(255, 255, 255, 0.1)';
-        btn.style.transform = 'scale(1)';
+        btn.style.background = 'transparent';
+        btn.style.opacity = '1';
       });
     } else {
-      btn.style.height = '36px';
-      btn.style.padding = '6px 14px';
-      btn.style.borderRadius = '18px';
-      btn.style.background = '#303030';
-      
-      btn.addEventListener('mouseenter', () => {
-        btn.style.background = '#404040';
-      });
-      btn.addEventListener('mouseleave', () => {
+      // Header button styling
+      btn.style.display = 'inline-flex';
+      btn.style.alignItems = 'center';
+      btn.style.justifyContent = 'center';
+      btn.style.gap = '8px';
+      btn.style.border = 'none';
+      btn.style.cursor = 'pointer';
+      btn.style.transition = 'all 0.2s ease';
+
+      // Platform-specific styling
+      if (isGemini) {
+        btn.style.height = '32px';
+        btn.style.padding = '4px 12px';
+        btn.style.borderRadius = '16px';
+        btn.style.background = 'rgba(255, 255, 255, 0.1)';
+        btn.style.backdropFilter = 'blur(10px)';
+        btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+        
+        btn.addEventListener('mouseenter', () => {
+          btn.style.background = 'rgba(255, 255, 255, 0.15)';
+          btn.style.transform = 'scale(1.02)';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.background = 'rgba(255, 255, 255, 0.1)';
+          btn.style.transform = 'scale(1)';
+        });
+      } else {
+        btn.style.height = '36px';
+        btn.style.padding = '6px 14px';
+        btn.style.borderRadius = '18px';
         btn.style.background = '#303030';
-      });
+        
+        btn.addEventListener('mouseenter', () => {
+          btn.style.background = '#404040';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.background = '#303030';
+        });
+      }
     }
 
+    // Create logo icon (SVG embedded or img)
     const img = document.createElement('img');
-    img.src = chrome.runtime.getURL('assets/logo.png');
+    img.src = chrome.runtime.getURL('../../assets/logo.png');
     img.alt = '';
     img.setAttribute('aria-hidden', 'true');
-    img.style.objectFit = 'cover';
-    img.style.borderRadius = '50%';
+    img.style.objectFit = 'contain';
     img.style.flexShrink = '0';
     
-    if (isGemini) {
+    if (isTextbar && isChatGPT) {
       img.style.width = '20px';
       img.style.height = '20px';
+    } else if (isGemini) {
+      img.style.width = '20px';
+      img.style.height = '20px';
+      img.style.borderRadius = '50%';
     } else {
       img.style.width = '24px';
       img.style.height = '24px';
-    }
-
-    const label = document.createElement('span');
-    label.className = 'ext-logo-label';
-    label.textContent = 'ethmem';
-    label.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-    label.style.fontWeight = '600';
-    label.style.letterSpacing = '0.01em';
-    label.style.userSelect = 'none';
-    
-    if (isGemini) {
-      label.style.fontSize = '13px';
-      label.style.color = 'rgba(255, 255, 255, 0.95)';
-    } else {
-      label.style.fontSize = '14px';
-      label.style.color = '#fff';
+      img.style.borderRadius = '50%';
     }
 
     btn.appendChild(img);
-    btn.appendChild(label);
+
+    // Add label for textbar buttons or non-textbar
+    if (!isTextbar || !isChatGPT) {
+      const label = document.createElement('span');
+      label.className = 'ext-logo-label';
+      label.textContent = 'ethmem';
+      label.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+      label.style.fontWeight = '600';
+      label.style.letterSpacing = '0.01em';
+      label.style.userSelect = 'none';
+      
+      if (isGemini) {
+        label.style.fontSize = '13px';
+        label.style.color = 'rgba(255, 255, 255, 0.95)';
+      } else {
+        label.style.fontSize = '14px';
+        label.style.color = '#fff';
+      }
+      btn.appendChild(label);
+    } else {
+      // Add "Memory" text label for textbar button (shown inline, can be hidden with CSS class if needed)
+      const label = document.createElement('span');
+      label.textContent = 'Memory';
+      label.style.paddingLeft = '4px';
+      label.style.paddingRight = '4px';
+      label.style.fontWeight = '600';
+      label.style.whiteSpace = 'nowrap';
+      label.className = 'ethmem-textbar-label';
+      btn.appendChild(label);
+    }
+
     btn.addEventListener('click', (e) => { 
       e.stopPropagation(); 
+      e.preventDefault();
       try { 
         window.postMessage({ type: 'EXT_LOGO_CLICK' }, '*'); 
       } catch (err) {
@@ -199,6 +253,69 @@
       } 
     });
     return btn;
+  }
+
+  // Function to inject button into ChatGPT composer textbar
+  function insertLogoInTextbar() {
+    if (!isChatGPT) return false; // Only for ChatGPT
+    
+    try {
+      // Find the composer footer actions container
+      const composerFooter = document.querySelector('[data-testid="composer-footer-actions"]');
+      if (!composerFooter) {
+        console.log('[EthMem] composer footer not found, retrying...');
+        return false;
+      }
+
+      // Find the buttons container (has Attach, Search, Study buttons)
+      const buttonsContainer = composerFooter.querySelector('.flex.min-w-fit.items-center');
+      if (!buttonsContainer) {
+        console.log('[EthMem] buttons container not found, trying alternative selector...');
+        
+        // Try alternative: find any flex container with buttons
+        const allFlexContainers = composerFooter.querySelectorAll('.flex');
+        console.log('[EthMem] Found flex containers:', allFlexContainers.length);
+        
+        // Look for container with Attach/Search buttons
+        for (let container of allFlexContainers) {
+          if (container.querySelector('[data-testid*="attach"], [data-testid*="search"], [aria-label*="Attach"], [aria-label*="Search"]')) {
+            console.log('[EthMem] Found buttons container via alternative method');
+            
+            // Check if already injected
+            if (container.querySelector('.ext-logo-button-textbar')) {
+              console.log('[EthMem] textbar button already present');
+              return true;
+            }
+            
+            const ethmemButton = createLogoButton(true);
+            container.appendChild(ethmemButton);
+            console.log('[EthMem] textbar button injected successfully (alternative method)');
+            return true;
+          }
+        }
+        
+        console.log('[EthMem] Could not find buttons container');
+        return false;
+      }
+
+      // Check if already injected
+      if (buttonsContainer.querySelector('.ext-logo-button-textbar')) {
+        console.log('[EthMem] textbar button already present');
+        return true;
+      }
+
+      // Create and insert the button
+      const ethmemButton = createLogoButton(true);
+      
+      // Insert after the last button (Study button)
+      buttonsContainer.appendChild(ethmemButton);
+      
+      console.log('[EthMem] textbar button injected successfully');
+      return true;
+    } catch (e) {
+      console.warn('[EthMem] insertLogoInTextbar error', e);
+      return false;
+    }
   }
 
   function insertLogoInHeader() {
@@ -383,16 +500,42 @@
       setTimeout(tryInjectHeader, 300);
     } else if (success) {
       console.log('[EthMem] header button successfully injected');
-      setupHeaderObserver();
+      setupObserver();
     }
   }
 
-  // Set up MutationObserver to re-inject if header is removed/changed
-  function setupHeaderObserver() {
+  // Auto-inject textbar button with retry logic (ChatGPT only)
+  let textbarRetryCount = 0;
+  const textbarMaxRetries = 30; // Increased retries for slower loading
+  
+  function tryInjectTextbar() {
+    if (!isChatGPT) return;
+    
+    const success = insertLogoInTextbar();
+    if (!success && textbarRetryCount < textbarMaxRetries) {
+      textbarRetryCount++;
+      console.log(`[EthMem] Textbar injection attempt ${textbarRetryCount}/${textbarMaxRetries}`);
+      setTimeout(tryInjectTextbar, 500); // Longer delay
+    } else if (success) {
+      console.log('[EthMem] textbar button successfully injected');
+    } else {
+      console.warn('[EthMem] Failed to inject textbar button after', textbarMaxRetries, 'attempts');
+    }
+  }
+
+  // Set up MutationObserver to re-inject if buttons are removed/changed
+  function setupObserver() {
     const observer = new MutationObserver((mutations) => {
+      // Re-inject header button if missing
       if (!document.querySelector('.ext-logo-button')) {
         console.log('[EthMem] header button removed, re-injecting...');
         insertLogoInHeader();
+      }
+      
+      // Re-inject textbar button if missing (ChatGPT only)
+      if (isChatGPT && !document.querySelector('.ext-logo-button-textbar')) {
+        console.log('[EthMem] textbar button removed, re-injecting...');
+        insertLogoInTextbar();
       }
     });
 
@@ -407,5 +550,6 @@
 
   // Start auto-injection
   setTimeout(tryInjectHeader, 300);
+  setTimeout(tryInjectTextbar, 500); // Slight delay for textbar
 
 })();

@@ -109,7 +109,7 @@ if (modelManagementBtn) {
   modelManagementBtn.addEventListener('click', () => {
     console.log('popup: model management button clicked');
     chrome.tabs.create({
-      url: chrome.runtime.getURL('modelManagement.html')
+      url: chrome.runtime.getURL('src/ui/modelManagement.html')
     });
   });
 }

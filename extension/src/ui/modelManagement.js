@@ -16,7 +16,7 @@ function initTransformersIframe() {
   
   return new Promise((resolve, reject) => {
     const iframe = document.createElement('iframe');
-    iframe.src = chrome.runtime.getURL('transformersLoader.html');
+    iframe.src = chrome.runtime.getURL('src/ui/transformersLoader.html');
     iframe.style.display = 'none';
     iframe.sandbox = 'allow-scripts allow-same-origin';
     
