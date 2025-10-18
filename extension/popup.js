@@ -104,6 +104,16 @@ if (connectBtn) {
   console.warn('popup: #connectBtn element not found in popup.html');
 }
 
+const modelManagementBtn = document.getElementById('modelManagementBtn');
+if (modelManagementBtn) {
+  modelManagementBtn.addEventListener('click', () => {
+    console.log('popup: model management button clicked');
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('modelManagement.html')
+    });
+  });
+}
+
 const settingsBtn = document.getElementById('settingsBtn');
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {

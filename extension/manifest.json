@@ -5,6 +5,9 @@
   "version": "0.1.0",
   "permissions": ["scripting", "activeTab", "storage"],
   "host_permissions": ["https://chat.openai.com/*", "https://chatgpt.com/*", "https://claude.ai/*", "https://gemini.google.com/*"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; object-src 'self'; worker-src 'self' blob:;"
+  },
   "background": {
     "service_worker": "background.js"
   },
@@ -17,7 +20,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["logo.png", "pageScript.js", "ethAdapter.js"],
+      "resources": ["logo.png", "pageScript.js", "ethAdapter.js", "modelManagement.html", "modelManagement.js"],
       "matches": ["<all_urls>"]
     }
   ],
