@@ -46,14 +46,271 @@
 
   // Inject memory viewer UI script
   function injectMemoryViewer() {
-    try {
-      const script = document.createElement('script');
-      script.src = chrome.runtime.getURL('src/ui/memoryViewer.js');
-      (document.head || document.documentElement).appendChild(script);
-      console.log('[EthMem] memoryViewer.js injected');
-    } catch (e) {
-      console.error('[EthMem] failed to inject memoryViewer.js', e);
+    // Note: We don't inject this as a script anymore - it will be inline in content script
+    console.log('[EthMem] Memory viewer functions ready (inline)');
+  }
+
+  // Memory viewer functions (inline in content script for chrome.runtime access)
+  function openMemoryViewer() {
+    console.log('[EthMem] Opening memory viewer');
+    
+    // Check if viewer already exists
+    if (document.getElementById('ethmem-viewer')) {
+      console.log('[EthMem] Viewer already open');
+      return;
     }
+    
+    // Request memories from background script
+    chrome.runtime.sendMessage({ type: 'GET_MEMORIES' }).then(response => {
+      const memories = response.memories || [];
+      console.log('[EthMem] Fetched memories:', memories.length);
+      renderMemoryViewer(memories);
+    }).catch(error => {
+      console.error('[EthMem] Error fetching memories:', error);
+      renderMemoryViewer([]);
+    });
+  }
+
+  function renderMemoryViewer(memories) {
+    const viewer = document.createElement('div');
+    viewer.id = 'ethmem-viewer';
+    viewer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 10001;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      background: #1a1a1a;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    `;
+    
+    const header = document.createElement('div');
+    header.style.cssText = `
+      padding: 20px 24px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    `;
+    
+    const title = document.createElement('h2');
+    title.textContent = 'EthMem - Your Memories';
+    title.style.cssText = `
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+    `;
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕';
+    closeBtn.style.cssText = `
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: all 0.2s;
+    `;
+    closeBtn.onmouseover = () => { closeBtn.style.background = '#333'; closeBtn.style.color = '#fff'; };
+    closeBtn.onmouseout = () => { closeBtn.style.background = 'none'; closeBtn.style.color = '#999'; };
+    closeBtn.onclick = () => viewer.remove();
+    
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(80vh - 80px);
+    `;
+    
+    if (memories.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = `
+        text-align: center;
+        padding: 40px;
+        color: #999;
+      `;
+      empty.innerHTML = `
+        <div style="font-size: 48px; margin-bottom: 16px;">🧠</div>
+        <div style="font-size: 18px; font-weight: 500; margin-bottom: 8px;">No memories yet</div>
+        <div style="font-size: 14px;">Start chatting and EthMem will automatically capture your memories</div>
+      `;
+      content.appendChild(empty);
+    } else {
+      const grid = document.createElement('div');
+      grid.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+      `;
+      
+      memories.forEach(memory => {
+        const card = createMemoryCard(memory);
+        grid.appendChild(card);
+      });
+      
+      content.appendChild(grid);
+    }
+    
+    modal.appendChild(header);
+    modal.appendChild(content);
+    viewer.appendChild(modal);
+    document.body.appendChild(viewer);
+    
+    viewer.onclick = (e) => {
+      if (e.target === viewer) viewer.remove();
+    };
+  }
+
+  function createMemoryCard(memory) {
+    const card = document.createElement('div');
+    card.style.cssText = `
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 16px;
+      border-left: 4px solid ${getCategoryColor(memory.category)};
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    `;
+    card.onmouseover = () => {
+      card.style.transform = 'translateY(-2px)';
+      card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+    };
+    card.onmouseout = () => {
+      card.style.transform = 'translateY(0)';
+      card.style.boxShadow = 'none';
+    };
+    
+    const categoryBadge = document.createElement('div');
+    categoryBadge.textContent = memory.category;
+    categoryBadge.style.cssText = `
+      display: inline-block;
+      padding: 4px 8px;
+      background: ${getCategoryColor(memory.category)}22;
+      color: ${getCategoryColor(memory.category)};
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    `;
+    
+    const value = document.createElement('div');
+    value.textContent = memory.value;
+    value.style.cssText = `
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+      margin-bottom: 8px;
+    `;
+    
+    const context = document.createElement('div');
+    context.textContent = memory.context ? `"${memory.context}"` : '';
+    context.style.cssText = `
+      font-size: 13px;
+      color: #999;
+      font-style: italic;
+      margin-bottom: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    `;
+    
+    const footer = document.createElement('div');
+    footer.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #666;
+      margin-top: 8px;
+    `;
+    
+    const timestamp = document.createElement('span');
+    timestamp.textContent = formatTimestamp(memory.timestamp);
+    
+    const confidence = document.createElement('span');
+    confidence.textContent = `${Math.round(memory.confidence * 100)}%`;
+    confidence.style.color = getCategoryColor(memory.category);
+    
+    footer.appendChild(timestamp);
+    footer.appendChild(confidence);
+    
+    card.appendChild(categoryBadge);
+    card.appendChild(value);
+    if (memory.context) card.appendChild(context);
+    card.appendChild(footer);
+    
+    return card;
+  }
+
+  function getCategoryColor(category) {
+    const colors = {
+      name: '#10b981',
+      location: '#3b82f6',
+      age: '#8b5cf6',
+      occupation: '#f59e0b',
+      food: '#ef4444',
+      hobby: '#ec4899',
+      skill: '#06b6d4',
+      language: '#14b8a6',
+      education: '#6366f1',
+      relationship: '#f97316',
+      preference: '#a855f7',
+      health: '#84cc16',
+      contact: '#22c55e',
+      event: '#f43f5e',
+      goal: '#eab308',
+      opinion: '#64748b',
+      experience: '#0ea5e9',
+      planning: '#3b82f6'
+    };
+    return colors[category] || '#6b7280';
+  }
+
+  function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return date.toLocaleDateString();
   }
 
   // Listen for messages from pageScript (via window.postMessage)
@@ -105,10 +362,8 @@
 
     if (event.data && event.data.type === 'EXT_LOGO_CLICK') {
       console.log('[EthMem] logo button clicked');
-      // Open memory viewer
-      if (window.EthMemViewer) {
-        window.EthMemViewer.open();
-      }
+      // Open memory viewer (now inline)
+      openMemoryViewer();
     }
   });
 
@@ -232,9 +487,9 @@
       }
       btn.appendChild(label);
     } else {
-      // Add "Memory" text label for textbar button (shown inline, can be hidden with CSS class if needed)
+      // Add "ethmem" text label for textbar button
       const label = document.createElement('span');
-      label.textContent = 'Memory';
+      label.textContent = 'ethmem';
       label.style.paddingLeft = '4px';
       label.style.paddingRight = '4px';
       label.style.fontWeight = '600';
@@ -489,11 +744,18 @@
   injectEthAdapter();
   injectMemoryViewer();
 
-  // Auto-inject header button with retry logic
+  // Auto-inject header button with retry logic (Claude and Gemini only, NOT ChatGPT)
   let retryCount = 0;
   const maxRetries = 20;
   
   function tryInjectHeader() {
+    // Skip header button for ChatGPT (we use textbar button instead)
+    if (isChatGPT) {
+      console.log('[EthMem] Skipping header button for ChatGPT (using textbar button)');
+      setupObserver();
+      return;
+    }
+    
     const success = insertLogoInHeader();
     if (!success && retryCount < maxRetries) {
       retryCount++;
@@ -526,16 +788,18 @@
   // Set up MutationObserver to re-inject if buttons are removed/changed
   function setupObserver() {
     const observer = new MutationObserver((mutations) => {
-      // Re-inject header button if missing
-      if (!document.querySelector('.ext-logo-button')) {
-        console.log('[EthMem] header button removed, re-injecting...');
-        insertLogoInHeader();
-      }
-      
-      // Re-inject textbar button if missing (ChatGPT only)
-      if (isChatGPT && !document.querySelector('.ext-logo-button-textbar')) {
-        console.log('[EthMem] textbar button removed, re-injecting...');
-        insertLogoInTextbar();
+      // For ChatGPT: only watch textbar button
+      if (isChatGPT) {
+        if (!document.querySelector('.ext-logo-button-textbar')) {
+          console.log('[EthMem] textbar button removed, re-injecting...');
+          insertLogoInTextbar();
+        }
+      } else {
+        // For Claude/Gemini: watch header button
+        if (!document.querySelector('.ext-logo-button')) {
+          console.log('[EthMem] header button removed, re-injecting...');
+          insertLogoInHeader();
+        }
       }
     });
 
