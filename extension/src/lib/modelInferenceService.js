@@ -13,81 +13,145 @@ class ModelInferenceService {
     this.transformersReady = false;
     this.pendingMessages = new Map();
     this.messageId = 0;
+    this.iframeReadyResolve = null;
+    this.iframeReadyReject = null;
+    
+    // Set up global message listener for transformers iframe
+    this.setupGlobalListener();
+  }
+
+  /**
+   * Setup global listener for transformers iframe messages
+   */
+  setupGlobalListener() {
+    window.addEventListener('message', (event) => {
+      // Check if this is a message from the transformers iframe
+      // Use ID check since iframe reference might not be set yet
+      const iframe = document.getElementById('ethmem-transformers-iframe');
+      if (!iframe || event.source !== iframe.contentWindow) {
+        return;
+      }
+      
+      // Store iframe reference if not already set
+      if (!this.transformersIframe) {
+        this.transformersIframe = iframe;
+      }
+      
+      const { type, messageId: msgId, success, error, result, progress, model } = event.data;
+      
+      if (type === 'TRANSFORMERS_READY') {
+        console.log('[ModelInferenceService] Transformers.js ready');
+        this.transformersReady = true;
+        if (this.iframeReadyResolve) {
+          this.iframeReadyResolve(this.transformersIframe);
+          this.iframeReadyResolve = null;
+          this.iframeReadyReject = null;
+        }
+      } else if (type === 'TRANSFORMERS_ERROR') {
+        console.error('[ModelInferenceService] Transformers error:', error);
+        if (this.iframeReadyReject) {
+          this.iframeReadyReject(new Error(error));
+          this.iframeReadyResolve = null;
+          this.iframeReadyReject = null;
+        }
+      } else if (type === 'MODEL_LOADED' || type === 'INFERENCE_RESULT' || type === 'MODEL_PROGRESS' || type === 'MODEL_UNLOADED') {
+        const handler = this.pendingMessages.get(msgId);
+        if (handler) {
+          if (type === 'MODEL_PROGRESS') {
+            handler.onProgress && handler.onProgress(progress);
+          } else {
+            if (success) {
+              handler.resolve(result || { success: true, model });
+            } else {
+              handler.reject(new Error(error));
+            }
+            if (type !== 'MODEL_PROGRESS') {
+              this.pendingMessages.delete(msgId);
+            }
+          }
+        }
+      }
+    });
   }
 
   /**
    * Initialize the service
+   * Note: This runs in page context, cannot access chrome.storage
    */
   async initialize() {
     console.log('[ModelInferenceService] Initializing...');
     
-    // Load active model from storage
-    const { activeModel } = await chrome.storage.local.get(['activeModel']);
-    this.activeModel = activeModel || null;
+    // Active model will be set when inference is requested
+    console.log('[ModelInferenceService] Ready for inference requests');
     
-    console.log('[ModelInferenceService] Active model:', this.activeModel);
-    
-    // Initialize transformers iframe
-    await this.initTransformersIframe();
-    
-    return this.activeModel;
+    return true;
   }
 
   /**
    * Initialize sandboxed iframe for Transformers.js
+   * Note: This runs in page context, so we need to request the iframe from content script
    */
   async initTransformersIframe() {
-    if (this.transformersIframe) {
+    if (this.transformersIframe && this.transformersReady) {
       return this.transformersIframe;
     }
     
     return new Promise((resolve, reject) => {
-      const iframe = document.createElement('iframe');
-      iframe.src = chrome.runtime.getURL('src/ui/transformersLoader.html');
-      iframe.style.display = 'none';
-      iframe.sandbox = 'allow-scripts allow-same-origin';
+      // Store resolve/reject for when TRANSFORMERS_READY arrives
+      this.iframeReadyResolve = resolve;
+      this.iframeReadyReject = reject;
       
-      // Listen for messages from iframe
-      window.addEventListener('message', (event) => {
-        if (event.source !== iframe.contentWindow) return;
+      // Check if iframe already exists (created by content script)
+      let iframe = document.getElementById('ethmem-transformers-iframe');
+      
+      if (!iframe) {
+        // Request content script to create the iframe
+        console.log('[ModelInferenceService] Requesting transformers iframe from content script');
+        window.postMessage({
+          type: 'REQUEST_TRANSFORMERS_IFRAME',
+          source: 'ethmem-page-script'
+        }, '*');
         
-        const { type, messageId: msgId, success, error, result, progress, model } = event.data;
-        
-        if (type === 'TRANSFORMERS_READY') {
-          console.log('[ModelInferenceService] Transformers.js ready');
-          this.transformersReady = true;
-          resolve(iframe);
-        } else if (type === 'TRANSFORMERS_ERROR') {
-          console.error('[ModelInferenceService] Transformers error:', error);
-          reject(new Error(error));
-        } else if (type === 'MODEL_LOADED' || type === 'INFERENCE_RESULT' || type === 'MODEL_PROGRESS' || type === 'MODEL_UNLOADED') {
-          const handler = this.pendingMessages.get(msgId);
-          if (handler) {
-            if (type === 'MODEL_PROGRESS') {
-              handler.onProgress && handler.onProgress(progress);
-            } else {
-              if (success) {
-                handler.resolve(result || { success: true, model });
-              } else {
-                handler.reject(new Error(error));
-              }
-              if (type !== 'MODEL_PROGRESS') {
-                this.pendingMessages.delete(msgId);
-              }
-            }
+        // Wait for iframe to be created
+        const checkIframe = setInterval(() => {
+          iframe = document.getElementById('ethmem-transformers-iframe');
+          if (iframe) {
+            clearInterval(checkIframe);
+            this.transformersIframe = iframe;
+            console.log('[ModelInferenceService] Transformers iframe found, waiting for ready signal');
           }
+        }, 100);
+        
+        // Timeout after 30 seconds
+        setTimeout(() => {
+          clearInterval(checkIframe);
+          if (!this.transformersReady && this.iframeReadyReject) {
+            this.iframeReadyReject(new Error('Transformers iframe creation timeout'));
+            this.iframeReadyResolve = null;
+            this.iframeReadyReject = null;
+          }
+        }, 30000);
+      } else {
+        // Iframe exists, store reference
+        this.transformersIframe = iframe;
+        console.log('[ModelInferenceService] Transformers iframe already exists, waiting for ready signal');
+        
+        // If already ready, resolve immediately
+        if (this.transformersReady) {
+          resolve(iframe);
+          this.iframeReadyResolve = null;
+          this.iframeReadyReject = null;
+        } else {
+          // Otherwise wait for ready signal with timeout
+          setTimeout(() => {
+            if (!this.transformersReady && this.iframeReadyReject) {
+              this.iframeReadyReject(new Error('Transformers.js load timeout'));
+              this.iframeReadyResolve = null;
+              this.iframeReadyReject = null;
+            }
+          }, 30000);
         }
-      });
-      
-      document.body.appendChild(iframe);
-      this.transformersIframe = iframe;
-      
-      // Timeout after 30 seconds
-      setTimeout(() => {
-        if (!this.transformersReady) {
-          reject(new Error('Transformers.js load timeout'));
-        }
-      }, 30000);
+      }
     });
   }
 
@@ -143,22 +207,21 @@ class ModelInferenceService {
         await this.unloadModel();
       }
 
+      // Map model ID to full model name and task
+      const modelConfig = this.getModelConfig(this.activeModel);
+      
+      console.log(`[ModelInferenceService] Loading ${modelConfig.fullName} for task ${modelConfig.task}`);
+
       // Load new model
       const result = await this.sendToTransformers('LOAD_MODEL', {
+        model: modelConfig.fullName,
+        task: modelConfig.task,
         modelId: this.activeModel
       }, onProgress);
 
       this.modelInstance = result.model;
       console.log('[ModelInferenceService] Model loaded successfully');
       
-      // Update model state
-      const { modelStates } = await chrome.storage.local.get(['modelStates']);
-      if (modelStates && modelStates[this.activeModel]) {
-        modelStates[this.activeModel].status = 'loaded';
-        modelStates[this.activeModel].lastUsed = Date.now();
-        await chrome.storage.local.set({ modelStates });
-      }
-
       return true;
 
     } catch (error) {
@@ -187,13 +250,6 @@ class ModelInferenceService {
 
       this.modelInstance = null;
       
-      // Update model state
-      const { modelStates } = await chrome.storage.local.get(['modelStates']);
-      if (modelStates && modelStates[this.activeModel]) {
-        modelStates[this.activeModel].status = 'downloaded';
-        await chrome.storage.local.set({ modelStates });
-      }
-
       console.log('[ModelInferenceService] Model unloaded, VRAM freed');
 
     } catch (error) {
@@ -204,6 +260,7 @@ class ModelInferenceService {
   /**
    * Set active model (user selection from UI)
    * @param {string} modelId - Model ID to activate
+   * Note: This runs in page context, cannot save to chrome.storage
    */
   async setActiveModel(modelId) {
     console.log(`[ModelInferenceService] Setting active model: ${modelId}`);
@@ -215,10 +272,29 @@ class ModelInferenceService {
 
     this.activeModel = modelId;
     
-    // Save to storage
-    await chrome.storage.local.set({ activeModel: modelId });
-    
     console.log('[ModelInferenceService] Active model updated');
+  }
+
+  /**
+   * Get model configuration by ID
+   */
+  getModelConfig(modelId) {
+    const configs = {
+      'lamini-flan-t5': {
+        fullName: 'Xenova/LaMini-Flan-T5-783M',
+        task: 'text2text-generation'
+      },
+      'flan-t5-base': {
+        fullName: 'Xenova/flan-t5-base',
+        task: 'text2text-generation'
+      },
+      'phi-3-mini': {
+        fullName: 'Xenova/Phi-3-mini-4k-instruct',
+        task: 'text-generation'
+      }
+    };
+    
+    return configs[modelId] || configs['flan-t5-base'];
   }
 
   /**
@@ -507,6 +583,86 @@ JSON:`;
 
 // Create singleton instance
 const modelInferenceService = new ModelInferenceService();
+
+// Listen for inference requests from content script
+window.addEventListener('message', async (event) => {
+  if (event.source !== window) return;
+  
+  if (event.data?.type === 'RUN_MODEL_INFERENCE' && event.data?.source === 'ethmem-content-script') {
+    console.log('[ModelInferenceService] Received inference request from content script');
+    
+    const { messageId, payload } = event.data;
+    const { prompt, modelId, task } = payload;
+    
+    try {
+      // Ensure model is loaded
+      if (!modelInferenceService.activeModel || modelInferenceService.activeModel !== modelId) {
+        console.log('[ModelInferenceService] Setting active model to:', modelId);
+        await modelInferenceService.setActiveModel(modelId);
+      }
+      
+      if (!modelInferenceService.isReady()) {
+        console.log('[ModelInferenceService] Model not ready, loading...');
+        const loaded = await modelInferenceService.loadActiveModel((progress) => {
+          console.log('[ModelInferenceService] Loading progress:', progress);
+        });
+        
+        if (!loaded) {
+          throw new Error('Failed to load model');
+        }
+      }
+      
+      console.log('[ModelInferenceService] Running inference for task:', task);
+      
+      // Run inference
+      const result = await modelInferenceService.sendToTransformers('RUN_INFERENCE', {
+        modelId: modelId,
+        input: prompt,
+        task: task
+      });
+      
+      console.log('[ModelInferenceService] Inference complete:', result);
+      
+      // Extract text from result (handle different model output formats)
+      let outputText = result;
+      if (Array.isArray(result) && result.length > 0) {
+        // Text2text-generation returns array of objects
+        outputText = result[0].generated_text || result[0].text || JSON.stringify(result[0]);
+      } else if (result.generated_text) {
+        outputText = result.generated_text;
+      } else if (result.text) {
+        outputText = result.text;
+      }
+      
+      console.log('[ModelInferenceService] Extracted output text:', outputText);
+      
+      // Send response back to content script
+      window.postMessage({
+        type: 'MODEL_INFERENCE_RESPONSE',
+        messageId: messageId,
+        response: {
+          success: true,
+          result: outputText
+        }
+      }, '*');
+      
+    } catch (error) {
+      console.error('[ModelInferenceService] Inference error:', error);
+      
+      // Send error response
+      window.postMessage({
+        type: 'MODEL_INFERENCE_RESPONSE',
+        messageId: messageId,
+        response: {
+          success: false,
+          error: error.message
+        }
+      }, '*');
+    }
+  }
+});
+
+console.log('[ModelInferenceService] Loaded and listening for inference requests');
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {

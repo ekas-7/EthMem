@@ -718,6 +718,24 @@
       showInjectionBadge(event.data.memories);
     }
 
+    // Handle transformers iframe request from page script
+    if (event.data?.type === 'REQUEST_TRANSFORMERS_IFRAME' && event.data?.source === 'ethmem-page-script') {
+      console.log('[EthMem] Page script requesting transformers iframe');
+      
+      // Check if iframe already exists
+      if (!document.getElementById('ethmem-transformers-iframe')) {
+        const iframe = document.createElement('iframe');
+        iframe.id = 'ethmem-transformers-iframe';
+        iframe.src = chrome.runtime.getURL('src/ui/transformersLoader.html');
+        iframe.style.display = 'none';
+        iframe.sandbox = 'allow-scripts allow-same-origin';
+        document.body.appendChild(iframe);
+        console.log('[EthMem] Transformers iframe created');
+      } else {
+        console.log('[EthMem] Transformers iframe already exists');
+      }
+    }
+
     if (event.data && event.data.type === 'EXT_LOGO_CLICK') {
       console.log('[EthMem] logo button clicked');
       // Open memory viewer (now inline)
@@ -1069,11 +1087,45 @@
 
   // Listen for messages from popup or background
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (!msg || !msg.action) return;
+    if (!msg || !msg.action && !msg.type) return;
     
     if (msg.action === 'connectWallet') {
       window.postMessage({ type: 'EXT_CONNECT_WALLET' }, '*');
       sendResponse({ ok: true });
+    }
+    
+    // Handle model inference request from background script
+    if (msg.type === 'RUN_MODEL_INFERENCE') {
+      console.log('[EthMem Content] Received model inference request, forwarding to page context');
+      
+      // Forward to page context and wait for response
+      const messageId = Date.now() + Math.random();
+      
+      const responseHandler = (event) => {
+        if (event.source !== window) return;
+        if (event.data?.type === 'MODEL_INFERENCE_RESPONSE' && event.data?.messageId === messageId) {
+          console.log('[EthMem Content] Received inference response from page context');
+          window.removeEventListener('message', responseHandler);
+          sendResponse(event.data.response);
+        }
+      };
+      
+      window.addEventListener('message', responseHandler);
+      
+      // Forward to page context
+      window.postMessage({
+        type: 'RUN_MODEL_INFERENCE',
+        source: 'ethmem-content-script',
+        messageId: messageId,
+        payload: msg.payload
+      }, '*');
+      
+      // Timeout after 30 seconds
+      setTimeout(() => {
+        window.removeEventListener('message', responseHandler);
+      }, 30000);
+      
+      return true; // Keep channel open for async response
     }
     
     return true;

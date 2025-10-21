@@ -28,6 +28,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   
+  if (message.type === 'GET_ALL_MEMORIES') {
+    handleGetMemories(sendResponse); // Same as GET_MEMORIES
+    return true;
+  }
+  
   if (message.type === 'GET_MEMORY_STATS') {
     handleGetStats(sendResponse);
     return true;
@@ -42,22 +47,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     handleClearAll(sendResponse);
     return true;
   }
+  
+  if (message.type === 'RUN_MODEL_INFERENCE') {
+    handleModelInference(message.payload, sendResponse);
+    return true;
+  }
 });
 
 /**
  * Handle memory extraction request
  */
 async function handleExtractMemory(payload, sendResponse) {
+  console.log('[EthMem Background] handleExtractMemory called with payload:', payload);
+  
   try {
     const { text, messageId, platform, url, timestamp } = payload;
     
-    console.log('[EthMem] Extracting memory from:', text.substring(0, 50));
+    console.log('[EthMem Background] Extracting memory from:', text);
     
     // Extract memory using the extractor module
     const memory = await extractMemory(text);
     
+    console.log('[EthMem Background] Extraction result:', memory);
+    
     if (!memory) {
-      console.log('[EthMem] No memory extracted');
+      console.log('[EthMem Background] No memory extracted');
       sendResponse({ success: false, message: 'No memory extracted' });
       return;
     }
@@ -66,7 +80,7 @@ async function handleExtractMemory(payload, sendResponse) {
     const duplicate = await isDuplicate(memory);
     
     if (duplicate) {
-      console.log('[EthMem] Duplicate memory, skipping');
+      console.log('[EthMem Background] Duplicate memory, skipping');
       sendResponse({ success: false, message: 'Duplicate memory' });
       return;
     }
@@ -74,7 +88,7 @@ async function handleExtractMemory(payload, sendResponse) {
     // Save to IndexedDB
     await saveMemory(memory);
     
-    console.log('[EthMem] Memory saved successfully:', memory.id);
+    console.log('[EthMem Background] Memory saved successfully:', memory.id);
     
     // Send success response
     sendResponse({
@@ -83,7 +97,8 @@ async function handleExtractMemory(payload, sendResponse) {
     });
     
   } catch (error) {
-    console.error('[EthMem] Error in handleExtractMemory:', error);
+    console.error('[EthMem Background] Error in handleExtractMemory:', error);
+    console.error('[EthMem Background] Error stack:', error.stack);
     sendResponse({
       success: false,
       error: error.message
@@ -172,6 +187,79 @@ async function handleClearAll(sendResponse) {
     
   } catch (error) {
     console.error('[EthMem] Error in handleClearAll:', error);
+    sendResponse({
+      success: false,
+      error: error.message
+    });
+  }
+}
+
+/**
+ * Handle model inference request
+ */
+async function handleModelInference(payload, sendResponse) {
+  try {
+    const { prompt, modelId, task } = payload;
+    
+    console.log('[EthMem Background] Running model inference for task:', task);
+    console.log('[EthMem Background] Model ID:', modelId);
+    console.log('[EthMem Background] Prompt preview:', prompt.substring(0, 200) + '...');
+    
+    // Get model states to verify model is loaded
+    const { modelStates } = await chrome.storage.local.get(['modelStates']);
+    const modelState = modelStates?.[modelId];
+    
+    if (!modelState || modelState.status !== 'loaded') {
+      console.warn('[EthMem Background] Model not loaded:', modelId, modelState);
+      sendResponse({
+        success: false,
+        error: 'Model not loaded'
+      });
+      return;
+    }
+    
+    console.log('[EthMem Background] Model is loaded, finding active ChatGPT tab...');
+    
+    // Find the active ChatGPT tab to send inference request through content script
+    const tabs = await chrome.tabs.query({ url: 'https://chatgpt.com/*' });
+    
+    if (tabs.length === 0) {
+      console.warn('[EthMem Background] No ChatGPT tab found for model inference');
+      sendResponse({
+        success: false,
+        error: 'No ChatGPT tab found - model inference requires active ChatGPT tab'
+      });
+      return;
+    }
+    
+    const tab = tabs[0];
+    console.log('[EthMem Background] Sending inference request to tab:', tab.id);
+    
+    // Send inference request to content script, which will forward to page context
+    chrome.tabs.sendMessage(tab.id, {
+      type: 'RUN_MODEL_INFERENCE',
+      payload: {
+        prompt,
+        modelId,
+        task
+      }
+    }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('[EthMem Background] Error sending to content script:', chrome.runtime.lastError);
+        sendResponse({
+          success: false,
+          error: chrome.runtime.lastError.message
+        });
+        return;
+      }
+      
+      console.log('[EthMem Background] Model inference response:', response);
+      sendResponse(response);
+    });
+    
+  } catch (error) {
+    console.error('[EthMem Background] Error in handleModelInference:', error);
+    console.error('[EthMem Background] Stack:', error.stack);
     sendResponse({
       success: false,
       error: error.message

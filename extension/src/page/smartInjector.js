@@ -55,6 +55,7 @@
             
             // Get user's message
             const userMessage = body.messages[body.messages.length - 1].content.parts[0];
+            console.log('[SmartInjector] User message:', userMessage);
             
             // Get relevant memories
             const relevantMemories = await getRelevantMemories(userMessage);
@@ -62,6 +63,8 @@
             if (relevantMemories.length > 0) {
               // Build context
               const context = buildContext(relevantMemories);
+              
+              console.log('[SmartInjector] Context to inject:', context);
               
               // Inject system message
               body.messages.unshift({
@@ -72,6 +75,8 @@
                   parts: [context]
                 }
               });
+
+              console.log('[SmartInjector] Modified message body:', JSON.stringify(body.messages, null, 2));
 
               // Update request body
               clonedOptions.body = JSON.stringify(body);
@@ -134,15 +139,24 @@
    * Rank memories by keyword matching (fallback when model not available in page context)
    */
   function rankMemoriesByKeywords(userMessage, memories, topN = 5) {
+    console.log('[SmartInjector] Ranking memories using keyword matching');
+    console.log('[SmartInjector] User message:', userMessage);
+    console.log('[SmartInjector] Available memories:', memories);
+    
     const messageLower = userMessage.toLowerCase();
     const keywords = messageLower.split(/\s+/);
 
+    console.log('[SmartInjector] Keywords:', keywords);
+
     const scored = memories.map(mem => {
-      const memText = `${mem.category} ${mem.entity} ${mem.context || ''}`.toLowerCase();
+      const memText = `${mem.category} ${mem.entity} ${mem.source || ''}`.toLowerCase();
       
       let score = 0;
       keywords.forEach(kw => {
-        if (memText.includes(kw)) score++;
+        if (memText.includes(kw)) {
+          score++;
+          console.log(`[SmartInjector] Keyword "${kw}" matched in memory:`, mem.entity);
+        }
       });
 
       // Boost recent memories
@@ -158,11 +172,15 @@
       return { memory: mem, score };
     });
 
-    return scored
+    const topMemories = scored
       .filter(s => s.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, topN)
       .map(s => s.memory);
+
+    console.log('[SmartInjector] Top ranked memories:', topMemories);
+    
+    return topMemories;
   }
 
   /**
@@ -176,11 +194,12 @@
     let context = "Personal context about the user:\n\n";
     
     memories.forEach(mem => {
-      context += `• ${mem.category}: ${mem.entity}`;
-      if (mem.context) {
-        context += ` (${mem.context})`;
+      // Use description if available (e.g., "User loves mangoes"), otherwise use entity
+      if (mem.description) {
+        context += `• ${mem.description}\n`;
+      } else {
+        context += `• ${mem.category}: ${mem.entity}\n`;
       }
-      context += `\n`;
     });
 
     context += `\nUse this information to personalize your responses naturally.`;

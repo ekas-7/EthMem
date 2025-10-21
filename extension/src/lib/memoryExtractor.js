@@ -14,112 +14,164 @@ const CATEGORIES = [
 ];
 
 /**
- * Extract memory from text using Laflan mini model
+ * Extract memory from text using AI model
  * @param {string} text - User's message text
  * @returns {Promise<Object|null>} - Extracted memory or null
  */
 async function extractMemory(text) {
+  console.log('[MemoryExtractor] extractMemory called with text:', text);
+  
   try {
-    console.log('[EthMem] Extracting memory from text:', text.substring(0, 100));
+    console.log('[MemoryExtractor] Building extraction prompt...');
     
     // Prepare prompt for the model
     const prompt = buildExtractionPrompt(text);
     
+    console.log('[MemoryExtractor] Prompt built, running model inference...');
+    
     // Send to model for inference
     const result = await runModelInference(prompt);
     
+    console.log('[MemoryExtractor] Model inference result:', result);
+    
     if (!result || Object.keys(result).length === 0) {
-      console.log('[EthMem] No memory extracted');
+      console.log('[MemoryExtractor] No memory extracted from model');
       return null;
     }
     
     // Validate and normalize result
+    console.log('[MemoryExtractor] Validating and normalizing result...');
     const memory = validateAndNormalizeMemory(result, text);
     
     if (memory) {
-      console.log('[EthMem] Memory extracted successfully:', memory);
+      console.log('[MemoryExtractor] Memory extracted successfully:', memory);
+    } else {
+      console.log('[MemoryExtractor] Validation failed, no memory created');
     }
     
     return memory;
     
   } catch (error) {
-    console.error('[EthMem] Error extracting memory:', error);
+    console.error('[MemoryExtractor] Error extracting memory:', error);
+    console.error('[MemoryExtractor] Error stack:', error.stack);
     return null;
   }
 }
 
 /**
  * Build extraction prompt for the model
+ * Optimized for T5 models which need simple, direct prompts
  */
 function buildExtractionPrompt(text) {
-  return `Extract structured information from this text. Return JSON only.
-If no information can be extracted, return empty JSON {}.
-
-Categories: ${CATEGORIES.join(', ')}
-
-Rules:
-- Only extract clear, factual information
-- Assign confidence score (0.0 to 1.0)
-- If unsure, return empty JSON
-- Extract only ONE main piece of information
-
-Text: "${text}"
-
-Response format:
-{
-  "category": "location",
-  "entity": "delhi",
-  "confidence": 0.95
-}
-
-JSON:`;
+  // T5 models work best with task prefixes and simple instructions
+  return `extract personal fact: ${text}`;
 }
 
 /**
  * Run model inference
- * For now, we'll use a mock implementation
- * TODO: Replace with actual Laflan mini model
+ * This function is called from background script context via importScripts
+ * It needs to communicate with the ChatGPT tab to run inference
  */
 async function runModelInference(prompt) {
-  // Check if model is loaded in the sandboxed iframe
-  const modelLoaded = await checkModelStatus();
+  // Check if active model is set
+  const { activeModel, modelStates } = await chrome.storage.local.get(['activeModel', 'modelStates']);
   
-  if (!modelLoaded) {
-    console.log('[EthMem] Model not loaded, using pattern-based extraction');
+  if (!activeModel) {
+    console.log('[MemoryExtractor] No active model set, using pattern-based extraction');
     return patternBasedExtraction(prompt);
   }
   
-  // TODO: Send to actual model
-  // For now, use pattern-based fallback
-  return patternBasedExtraction(prompt);
-}
-
-/**
- * Check if model is loaded
- */
-async function checkModelStatus() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['modelLoaded'], (result) => {
-      resolve(result.modelLoaded || false);
-    });
-  });
-}
-
-/**
- * Pattern-based extraction (fallback when model is not loaded)
- * This is a simple rule-based system until the model is fully integrated
- */
-function patternBasedExtraction(prompt) {
-  console.log('[EthMem] Running pattern-based extraction');
-  // Extract the text from prompt
-  const textMatch = prompt.match(/Text: "(.+?)"/);
-  if (!textMatch) return {};
+  // Check if active model is loaded
+  const modelState = modelStates?.[activeModel];
+  if (!modelState || modelState.status !== 'loaded') {
+    console.log('[MemoryExtractor] Active model not loaded, using pattern-based extraction');
+    return patternBasedExtraction(prompt);
+  }
   
-  const text = textMatch[1].toLowerCase();
+  console.log('[MemoryExtractor] Using AI model for extraction:', activeModel);
+  
+  try {
+    // Find ChatGPT tab to send inference request
+    const tabs = await chrome.tabs.query({ url: 'https://chatgpt.com/*' });
+    
+    if (tabs.length === 0) {
+      console.warn('[MemoryExtractor] No ChatGPT tab found, using pattern fallback');
+      return patternBasedExtraction(prompt);
+    }
+    
+    const tab = tabs[0];
+    console.log('[MemoryExtractor] Sending inference request to tab:', tab.id);
+    
+    // Send to content script which will forward to page context
+    const response = await chrome.tabs.sendMessage(tab.id, {
+      type: 'RUN_MODEL_INFERENCE',
+      payload: {
+        prompt: prompt,
+        modelId: activeModel,
+        task: 'extraction'
+      }
+    });
+    
+    console.log('[MemoryExtractor] Received response from tab:', response);
+    
+    if (response?.success && response?.result) {
+      console.log('[MemoryExtractor] Model extraction result:', response.result);
+      
+      // If result is empty or just whitespace, use pattern fallback
+      if (!response.result || response.result.trim() === '' || response.result === '{}') {
+        console.warn('[MemoryExtractor] Model returned empty result, using pattern fallback');
+        return patternBasedExtraction(text);
+      }
+      
+      return parseModelOutput(response.result);
+    } else {
+      console.warn('[MemoryExtractor] Model inference failed or no result, using pattern fallback');
+      console.warn('[MemoryExtractor] Response was:', JSON.stringify(response));
+      return patternBasedExtraction(text);
+    }
+    
+  } catch (error) {
+    console.error('[MemoryExtractor] Model inference error:', error);
+    return patternBasedExtraction(prompt);
+  }
+}
+
+/**
+ * Parse model output to extract JSON
+ */
+function parseModelOutput(output) {
+  try {
+    // Try to find JSON in the output
+    const jsonMatch = output.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn('[EthMem] No JSON found in model output');
+      return {};
+    }
+    
+    const result = JSON.parse(jsonMatch[0]);
+    console.log('[EthMem] Parsed model result:', result);
+    return result;
+    
+  } catch (error) {
+    console.error('[EthMem] Failed to parse model output:', error);
+    return {};
+  }
+}
+
+/**
+ * Pattern-based extraction (fallback when model is not available)
+ * This is a simple rule-based system as fallback
+ */
+function patternBasedExtraction(text) {
+  console.log('[EthMem] Running pattern-based extraction on:', text);
+  
+  if (!text) return {};
+  
+  const lowerText = text.toLowerCase();
   
   // Location patterns
-  if (text.match(/\b(live in|from|in)\s+([a-z]+)/i)) {
-    const match = text.match(/\b(live in|from|in)\s+([a-z]+)/i);
+  if (lowerText.match(/\b(live in|from|in)\s+([a-z]+)/i)) {
+    const match = lowerText.match(/\b(live in|from|in)\s+([a-z]+)/i);
     return {
       category: 'location',
       entity: match[2],
@@ -128,8 +180,8 @@ function patternBasedExtraction(prompt) {
   }
   
   // Name patterns
-  if (text.match(/\b(my name is|i am|i'm|call me)\s+([a-z]+)/i)) {
-    const match = text.match(/\b(my name is|i am|i'm|call me)\s+([a-z]+)/i);
+  if (lowerText.match(/\b(my name is|i am|i'm|call me)\s+([a-z]+)/i)) {
+    const match = lowerText.match(/\b(my name is|i am|i'm|call me)\s+([a-z]+)/i);
     return {
       category: 'name',
       entity: match[2],
@@ -138,8 +190,8 @@ function patternBasedExtraction(prompt) {
   }
   
   // Age patterns
-  if (text.match(/\b(i am|i'm|age)\s+(\d+)\s*(years?|yrs?|old)?/i)) {
-    const match = text.match(/\b(i am|i'm|age)\s+(\d+)/i);
+  if (lowerText.match(/\b(i am|i'm|age)\s+(\d+)\s*(years?|yrs?|old)?/i)) {
+    const match = lowerText.match(/\b(i am|i'm|age)\s+(\d+)/i);
     return {
       category: 'age',
       entity: match[2],
@@ -148,8 +200,8 @@ function patternBasedExtraction(prompt) {
   }
   
   // Occupation patterns
-  if (text.match(/\b(i am a|i'm a|i work as|my job is)\s+([a-z\s]+)/i)) {
-    const match = text.match(/\b(i am a|i'm a|i work as|my job is)\s+([a-z\s]+)/i);
+  if (lowerText.match(/\b(i am a|i'm a|i work as|my job is)\s+([a-z\s]+)/i)) {
+    const match = lowerText.match(/\b(i am a|i'm a|i work as|my job is)\s+([a-z\s]+)/i);
     return {
       category: 'occupation',
       entity: match[2].trim(),
@@ -157,19 +209,33 @@ function patternBasedExtraction(prompt) {
     };
   }
   
-  // Food preferences
-  if (text.match(/\b(i like|i love|i enjoy|favorite food|favourite food)\s+([a-z\s]+)/i)) {
-    const match = text.match(/\b(i like|i love|i enjoy|favorite food|favourite food)\s+([a-z\s]+)/i);
+  // Food preferences - improved to capture context
+  if (lowerText.match(/\b(i like|i love|i enjoy|i hate|i dislike|favorite food|favourite food)\s+([a-z\s]+)/i)) {
+    const match = lowerText.match(/\b(i like|i love|i enjoy|i hate|i dislike|favorite food|favourite food)\s+([a-z\s]+)/i);
+    const sentiment = match[1].toLowerCase();
+    const food = match[2].trim();
+    
+    // Build contextual description
+    let description = '';
+    if (sentiment.includes('love') || sentiment.includes('favorite') || sentiment.includes('favourite')) {
+      description = `User loves ${food}`;
+    } else if (sentiment.includes('like') || sentiment.includes('enjoy')) {
+      description = `User likes ${food}`;
+    } else if (sentiment.includes('hate') || sentiment.includes('dislike')) {
+      description = `User dislikes ${food}`;
+    }
+    
     return {
       category: 'food',
-      entity: match[2].trim(),
-      confidence: 0.75
+      entity: food,
+      description: description,
+      confidence: 0.85
     };
   }
   
   // Hobbies
-  if (text.match(/\b(hobby|hobbies|i enjoy|i like to|i love to)\s+([a-z\s]+)/i)) {
-    const match = text.match(/\b(hobby|hobbies|i enjoy|i like to|i love to)\s+([a-z\s]+)/i);
+  if (lowerText.match(/\b(hobby|hobbies|i enjoy|i like to|i love to)\s+([a-z\s]+)/i)) {
+    const match = lowerText.match(/\b(hobby|hobbies|i enjoy|i like to|i love to)\s+([a-z\s]+)/i);
     return {
       category: 'hobby',
       entity: match[2].trim(),
@@ -178,8 +244,8 @@ function patternBasedExtraction(prompt) {
   }
   
   // Skills
-  if (text.match(/\b(i know|i can|skilled in|expert in)\s+([a-z\s]+)/i)) {
-    const match = text.match(/\b(i know|i can|skilled in|expert in)\s+([a-z\s]+)/i);
+  if (lowerText.match(/\b(i know|i can|skilled in|expert in)\s+([a-z\s]+)/i)) {
+    const match = lowerText.match(/\b(i know|i can|skilled in|expert in)\s+([a-z\s]+)/i);
     return {
       category: 'skill',
       entity: match[2].trim(),
@@ -188,8 +254,8 @@ function patternBasedExtraction(prompt) {
   }
   
   // Languages
-  if (text.match(/\b(i speak|i know|fluent in|language)\s+([a-z]+)/i)) {
-    const match = text.match(/\b(i speak|i know|fluent in|language)\s+([a-z]+)/i);
+  if (lowerText.match(/\b(i speak|i know|fluent in|language)\s+([a-z]+)/i)) {
+    const match = lowerText.match(/\b(i speak|i know|fluent in|language)\s+([a-z]+)/i);
     return {
       category: 'language',
       entity: match[2],
@@ -198,8 +264,8 @@ function patternBasedExtraction(prompt) {
   }
   
   // Travel
-  if (text.match(/\b(visited|been to|traveled to|went to)\s+([a-z\s]+)/i)) {
-    const match = text.match(/\b(visited|been to|traveled to|went to)\s+([a-z\s]+)/i);
+  if (lowerText.match(/\b(visited|been to|traveled to|went to)\s+([a-z\s]+)/i)) {
+    const match = lowerText.match(/\b(visited|been to|traveled to|went to)\s+([a-z\s]+)/i);
     return {
       category: 'visited',
       entity: match[2].trim(),
@@ -219,7 +285,7 @@ function validateAndNormalizeMemory(result, sourceText) {
     return null;
   }
   
-  const { category, entity, confidence } = result;
+  const { category, entity, confidence, description } = result;
   
   // Validate required fields
   if (!category || !entity) {
@@ -242,21 +308,22 @@ function validateAndNormalizeMemory(result, sourceText) {
   // Generate unique ID
   const id = generateId();
   
-  // Build final memory object
+  // Build final memory object with rich context
   return {
     id,
     timestamp: Date.now(),
     source: sourceText,
     category,
     entity: String(entity).trim(),
+    description: description || null, // Rich description like "User loves mangoes"
     context: {
       conversationId: 'chatgpt-' + Date.now(),
       platform: 'chatgpt'
     },
     metadata: {
       confidence: conf,
-      modelUsed: 'laflan-mini',
-      extractionVersion: '1.0'
+      modelUsed: 'pattern-based',
+      extractionVersion: '2.0'
     },
     status: 'local' // Will be 'synced' or 'on-chain' later
   };
