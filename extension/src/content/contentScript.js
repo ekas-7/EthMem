@@ -47,11 +47,11 @@
   // Inject smart memory injection system
   function injectSmartInjector() {
     try {
-      // Inject memoryRanker first (dependency)
-      const rankerScript = document.createElement('script');
-      rankerScript.src = chrome.runtime.getURL('src/lib/memoryRanker.js');
-      rankerScript.onload = function() {
-        console.log('[EthMem] memoryRanker.js loaded');
+      // Inject modelInferenceService first (dependency)
+      const serviceScript = document.createElement('script');
+      serviceScript.src = chrome.runtime.getURL('src/lib/modelInferenceService.js');
+      serviceScript.onload = function() {
+        console.log('[EthMem] modelInferenceService.js loaded');
         this.remove();
         
         // Then inject smartInjector
@@ -63,7 +63,7 @@
         };
         (document.head || document.documentElement).appendChild(injectorScript);
       };
-      (document.head || document.documentElement).appendChild(rankerScript);
+      (document.head || document.documentElement).appendChild(serviceScript);
     } catch (e) {
       console.error('[EthMem] failed to inject smart injector:', e);
     }
@@ -681,6 +681,31 @@
         window.postMessage({
           messageId: event.data.messageId,
           memories: [],
+          error: error.message,
+          source: 'ethmem-content-script'
+        }, '*');
+      }
+    }
+
+    // Handle active model request from smart injector (page script)
+    if (event.data?.type === 'GET_ACTIVE_MODEL' && event.data?.source === 'ethmem-page-script') {
+      console.log('[EthMem] Smart injector requesting active model');
+      try {
+        const result = await chrome.storage.local.get(['activeModel']);
+        
+        // Send active model back to page script
+        window.postMessage({
+          messageId: event.data.messageId,
+          activeModel: result?.activeModel || null,
+          source: 'ethmem-content-script'
+        }, '*');
+        
+        console.log(`[EthMem] Sent active model: ${result?.activeModel || 'none'}`);
+      } catch (error) {
+        console.error('[EthMem] Failed to fetch active model:', error);
+        window.postMessage({
+          messageId: event.data.messageId,
+          activeModel: null,
           error: error.message,
           source: 'ethmem-content-script'
         }, '*');

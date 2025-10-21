@@ -111,17 +111,27 @@ const MODELS = [
     recommended: true
   },
   {
-    id: 'gemma-3-1b',
-    name: 'Gemma 3 1B Instruct',
-    fullName: 'onnx-community/gemma-3-1b-it-ONNX',
-    task: 'text-generation',
-    description: 'Google\'s Gemma 3 1B instruction-tuned model in ONNX format. Excellent for structured extraction and reasoning tasks.',
-    size: '~1.2GB',
-    requiredMemory: '3GB',
+    id: 'flan-t5-small',
+    name: 'FLAN-T5-Small',
+    fullName: 'Xenova/flan-t5-small',
+    task: 'text2text-generation',
+    description: 'Lightweight text-to-text model from Google. Very fast inference, good for quick memory extraction on low-end devices.',
+    size: '~242MB',
+    requiredMemory: '1GB',
     supportsWebGPU: true,
     recommended: false
-  }
-  // Add more models here in the future
+  },
+  {
+    id: 'flan-t5-base',
+    name: 'FLAN-T5-Base',
+    fullName: 'Xenova/flan-t5-base',
+    task: 'text2text-generation',
+    description: 'Medium-sized instruction-tuned model. Balanced performance and accuracy for structured extraction tasks.',
+    size: '~990MB',
+    requiredMemory: '2.5GB',
+    supportsWebGPU: true,
+    recommended: false
+  },
 ];
 
 // Model status tracking

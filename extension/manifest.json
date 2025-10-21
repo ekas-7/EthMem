@@ -35,7 +35,6 @@
         "src/page/pageScript.js",
         "src/page/ethAdapter.js",
         "src/page/smartInjector.js",
-        "src/lib/memoryRanker.js",
         "src/lib/modelInferenceService.js",
         "src/ui/memoryViewer.js",
         "src/ui/modelManagement.html",

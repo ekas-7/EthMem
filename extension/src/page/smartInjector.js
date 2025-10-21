@@ -8,15 +8,20 @@
 
   // State
   let conversationMemoriesInjected = new Set(); // Track which conversations have memories
-  let modelService = null;
+  let activeModelId = null;
 
   // Initialize
   async function init() {
-    // Initialize model inference service
-    modelService = new ModelInferenceService();
-    await modelService.initialize();
-    
-    console.log('[SmartInjector] Model service initialized');
+    // Get active model from content script (can't access chrome.storage in page context)
+    try {
+      const response = await sendMessageToContentScript({
+        type: 'GET_ACTIVE_MODEL'
+      });
+      activeModelId = response?.activeModel || null;
+      console.log('[SmartInjector] Active model:', activeModelId || 'none');
+    } catch (error) {
+      console.warn('[SmartInjector] Could not get active model:', error);
+    }
 
     // Intercept fetch
     interceptFetch();
@@ -28,11 +33,18 @@
   function interceptFetch() {
     const originalFetch = window.fetch;
 
-    window.fetch = async function(url, options = {}) {
+    window.fetch = async function(url, options) {
+      // Safety check: ensure url is a string
+      if (typeof url !== 'string') {
+        return originalFetch.call(this, url, options);
+      }
+
       // Check if it's a ChatGPT conversation API
-      if (url.includes('/backend-api/conversation') && options.method === 'POST') {
+      if (url.includes('/backend-api/conversation') && options?.method === 'POST') {
         try {
-          const body = JSON.parse(options.body);
+          // Clone options to avoid mutating original
+          const clonedOptions = { ...options };
+          const body = JSON.parse(clonedOptions.body);
           
           // Only inject on first message of conversation
           const conversationId = body.conversation_id || 'new';
@@ -49,7 +61,7 @@
             
             if (relevantMemories.length > 0) {
               // Build context
-              const context = memoryRanker.buildContext(relevantMemories);
+              const context = buildContext(relevantMemories);
               
               // Inject system message
               body.messages.unshift({
@@ -62,7 +74,7 @@
               });
 
               // Update request body
-              options.body = JSON.stringify(body);
+              clonedOptions.body = JSON.stringify(body);
               
               // Mark conversation as injected
               conversationMemoriesInjected.add(conversationId);
@@ -71,6 +83,9 @@
               
               // Notify user
               notifyInjection(relevantMemories);
+              
+              // Call original fetch with modified options
+              return originalFetch.call(this, url, clonedOptions);
             } else {
               console.log('[SmartInjector] No relevant memories found');
             }
@@ -80,8 +95,8 @@
         }
       }
 
-      // Continue with original fetch
-      return originalFetch.apply(this, arguments);
+      // Continue with original fetch (unchanged)
+      return originalFetch.call(this, url, options);
     };
 
     console.log('[SmartInjector] Fetch interceptor installed');
@@ -104,12 +119,8 @@
 
       console.log(`[SmartInjector] Got ${response.memories.length} memories from storage`);
 
-      // Use model service to rank (with fallback to keyword matching)
-      const rankedMemories = await modelService.rankMemories(
-        userMessage, 
-        response.memories,
-        5 // top 5 memories
-      );
+      // Use simple keyword-based ranking (model inference happens in background/content script)
+      const rankedMemories = rankMemoriesByKeywords(userMessage, response.memories, 5);
 
       return rankedMemories;
 
@@ -120,10 +131,60 @@
   }
 
   /**
+   * Rank memories by keyword matching (fallback when model not available in page context)
+   */
+  function rankMemoriesByKeywords(userMessage, memories, topN = 5) {
+    const messageLower = userMessage.toLowerCase();
+    const keywords = messageLower.split(/\s+/);
+
+    const scored = memories.map(mem => {
+      const memText = `${mem.category} ${mem.entity} ${mem.context || ''}`.toLowerCase();
+      
+      let score = 0;
+      keywords.forEach(kw => {
+        if (memText.includes(kw)) score++;
+      });
+
+      // Boost recent memories
+      const age = Date.now() - new Date(mem.timestamp).getTime();
+      const recencyBoost = Math.max(0, 1 - (age / (1000 * 60 * 60 * 24 * 30)));
+      score += recencyBoost * 0.5;
+
+      // Boost high confidence
+      if (mem.metadata?.confidence) {
+        score += mem.metadata.confidence * 0.3;
+      }
+
+      return { memory: mem, score };
+    });
+
+    return scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topN)
+      .map(s => s.memory);
+  }
+
+  /**
    * Build context string from memories
    */
   function buildContext(memories) {
-    return modelService.buildContext(memories);
+    if (!memories || memories.length === 0) {
+      return null;
+    }
+
+    let context = "Personal context about the user:\n\n";
+    
+    memories.forEach(mem => {
+      context += `• ${mem.category}: ${mem.entity}`;
+      if (mem.context) {
+        context += ` (${mem.context})`;
+      }
+      context += `\n`;
+    });
+
+    context += `\nUse this information to personalize your responses naturally.`;
+    return context;
   }
 
   /**
