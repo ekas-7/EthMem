@@ -118,6 +118,6 @@ const settingsBtn = document.getElementById('settingsBtn');
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     console.log('popup: settings button clicked');
-    // TODO: Add settings functionality
+    window.location.href = 'settings.html';
   });
 }

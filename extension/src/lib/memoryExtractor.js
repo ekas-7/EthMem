@@ -10,11 +10,12 @@ const CATEGORIES = [
   'family', 'friend', 'colleague',
   'skill', 'language', 'education',
   'allergy', 'medication', 'condition',
-  'visited', 'planning'
+  'visited', 'planning', 'preference',
+  'relationship', 'goal', 'interest', 'fact'
 ];
 
 /**
- * Extract memory from text using Laflan mini model
+ * Extract memory from text using Cloud AI (OpenAI) or fallback to patterns
  * @param {string} text - User's message text
  * @returns {Promise<Object|null>} - Extracted memory or null
  */
@@ -22,11 +23,29 @@ async function extractMemory(text) {
   try {
     console.log('[EthMem] Extracting memory from text:', text.substring(0, 100));
     
-    // Prepare prompt for the model
-    const prompt = buildExtractionPrompt(text);
+    // Try cloud AI first if API key is configured
+    const config = await loadConfig();
     
-    // Send to model for inference
-    const result = await runModelInference(prompt);
+    if (config.apiKey) {
+      console.log('[EthMem] Attempting cloud AI extraction...');
+      const cloudResult = await extractMemoryWithAI(text, config.apiKey, config.model);
+      
+      if (cloudResult) {
+        // Validate and normalize result
+        const memory = validateAndNormalizeMemory(cloudResult, text);
+        if (memory) {
+          console.log('[EthMem] Memory extracted via cloud AI:', memory);
+          return memory;
+        }
+      }
+      
+      console.log('[EthMem] Cloud AI extraction failed, falling back to patterns');
+    } else {
+      console.log('[EthMem] No API key configured, using pattern-based extraction');
+    }
+    
+    // Fallback to pattern-based extraction
+    const result = patternBasedExtraction(text);
     
     if (!result || Object.keys(result).length === 0) {
       console.log('[EthMem] No memory extracted');
@@ -37,7 +56,7 @@ async function extractMemory(text) {
     const memory = validateAndNormalizeMemory(result, text);
     
     if (memory) {
-      console.log('[EthMem] Memory extracted successfully:', memory);
+      console.log('[EthMem] Memory extracted via patterns:', memory);
     }
     
     return memory;
@@ -106,15 +125,11 @@ async function checkModelStatus() {
 }
 
 /**
- * Pattern-based extraction (fallback when model is not loaded)
- * This is a simple rule-based system until the model is fully integrated
+ * Pattern-based extraction (fallback when cloud AI is not available)
+ * This is a simple rule-based system
  */
-function patternBasedExtraction(prompt) {
-  // Extract the text from prompt
-  const textMatch = prompt.match(/Text: "(.+?)"/);
-  if (!textMatch) return {};
-  
-  const text = textMatch[1].toLowerCase();
+function patternBasedExtraction(inputText) {
+  const text = inputText.toLowerCase();
   
   // Location patterns
   if (text.match(/\b(live in|from|in)\s+([a-z]+)/i)) {
@@ -225,21 +240,26 @@ function validateAndNormalizeMemory(result, sourceText) {
     return null;
   }
   
-  // Validate category
+  // Validate category - allow custom categories from AI but log a warning
   if (!CATEGORIES.includes(category)) {
-    console.warn('[EthMem] Invalid category:', category);
-    return null;
+    console.warn('[EthMem] Unknown category (accepting anyway):', category);
   }
   
   // Validate confidence
   const conf = parseFloat(confidence) || 0.5;
-  if (conf < 0.7) {
+  if (conf < 0.6) {
     console.log('[EthMem] Confidence too low:', conf);
     return null;
   }
   
   // Generate unique ID
   const id = generateId();
+  
+  // Determine model used
+  const modelUsed = result.source === 'cloud-ai' ? result.model || 'gpt-3.5-turbo' : 'pattern-based';
+  
+  // Generate description if not provided
+  const description = result.description || generateDescription(category, entity);
   
   // Build final memory object
   return {
@@ -248,14 +268,15 @@ function validateAndNormalizeMemory(result, sourceText) {
     source: sourceText,
     category,
     entity: String(entity).trim(),
+    description: description,
     context: {
       conversationId: 'chatgpt-' + Date.now(),
       platform: 'chatgpt'
     },
     metadata: {
       confidence: conf,
-      modelUsed: 'laflan-mini',
-      extractionVersion: '1.0'
+      modelUsed: modelUsed,
+      extractionVersion: '2.0'
     },
     status: 'local' // Will be 'synced' or 'on-chain' later
   };
@@ -266,6 +287,36 @@ function validateAndNormalizeMemory(result, sourceText) {
  */
 function generateId() {
   return 'mem-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+/**
+ * Generate human-readable description from category and entity
+ */
+function generateDescription(category, entity) {
+  const templates = {
+    food: `User likes ${entity}`,
+    location: `User is from ${entity}`,
+    name: `User's name is ${entity}`,
+    age: `User is ${entity} years old`,
+    occupation: `User works as ${entity}`,
+    hobby: `User enjoys ${entity}`,
+    skill: `User knows ${entity}`,
+    language: `User speaks ${entity}`,
+    visited: `User has visited ${entity}`,
+    music: `User likes ${entity} music`,
+    movie: `User likes ${entity} movies`,
+    preference: `User prefers ${entity}`,
+    relationship: `User has ${entity}`,
+    goal: `User wants to ${entity}`,
+    interest: `User is interested in ${entity}`,
+    family: `User's family: ${entity}`,
+    friend: `User's friend: ${entity}`,
+    colleague: `User's colleague: ${entity}`,
+    education: `User studied ${entity}`,
+    fact: `User: ${entity}`
+  };
+  
+  return templates[category] || `User: ${entity}`;
 }
 
 // Export for use in background script
