@@ -112,9 +112,11 @@
    */
   async function getRelevantMemories(userMessage) {
     try {
-      // Request memories from content script
+      // Request AI-ranked memories from content script/background
       const response = await sendMessageToContentScript({
-        type: 'GET_ALL_MEMORIES'
+        type: 'GET_RANKED_MEMORIES',
+        userMessage: userMessage,
+        maxMemories: 5
       });
 
       if (!response?.memories || response.memories.length === 0) {
@@ -122,12 +124,8 @@
         return [];
       }
 
-      console.log(`[SmartInjector] Got ${response.memories.length} memories from storage`);
-
-      // Use simple keyword-based ranking (model inference happens in background/content script)
-      const rankedMemories = rankMemoriesByKeywords(userMessage, response.memories, 5);
-
-      return rankedMemories;
+      console.log(`[SmartInjector] Got ${response.memories.length} ranked memories`);
+      return response.memories;
 
     } catch (error) {
       console.error('[SmartInjector] Failed to get memories:', error);

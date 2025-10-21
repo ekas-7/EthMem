@@ -22,6 +22,22 @@ async function extractMemory(text) {
   console.log('[MemoryExtractor] extractMemory called with text:', text);
   
   try {
+    // Try cloud AI extraction first (if enabled)
+    if (typeof extractMemoryWithAI !== 'undefined') {
+      console.log('[MemoryExtractor] Trying cloud AI extraction...');
+      const cloudResult = await extractMemoryWithAI(text);
+      
+      if (cloudResult && cloudResult.entity) {
+        console.log('[MemoryExtractor] Cloud AI extraction successful:', cloudResult);
+        const memory = validateAndNormalizeMemory(cloudResult, text);
+        if (memory) {
+          memory.metadata.modelUsed = 'cloud-ai';
+          return memory;
+        }
+      }
+      console.log('[MemoryExtractor] Cloud AI extraction failed, falling back to local');
+    }
+    
     console.log('[MemoryExtractor] Building extraction prompt...');
     
     // Prepare prompt for the model
@@ -123,7 +139,18 @@ async function runModelInference(prompt) {
         return patternBasedExtraction(text);
       }
       
-      return parseModelOutput(response.result);
+      // Try to parse model output as JSON first
+      const parsedResult = parseModelOutput(response.result);
+      
+      // If parsing succeeded, use the structured result
+      if (parsedResult !== null) {
+        console.log('[MemoryExtractor] Using structured model output');
+        return parsedResult;
+      }
+      
+      // If parsing failed, treat the model output as a description and extract entity
+      console.log('[MemoryExtractor] Model returned plain text, extracting entity from:', response.result);
+      return extractFromPlainText(text, response.result);
     } else {
       console.warn('[MemoryExtractor] Model inference failed or no result, using pattern fallback');
       console.warn('[MemoryExtractor] Response was:', JSON.stringify(response));
@@ -138,14 +165,15 @@ async function runModelInference(prompt) {
 
 /**
  * Parse model output to extract JSON
+ * If model returns plain text instead of JSON, return null to trigger fallback
  */
 function parseModelOutput(output) {
   try {
     // Try to find JSON in the output
     const jsonMatch = output.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.warn('[EthMem] No JSON found in model output');
-      return {};
+      console.warn('[EthMem] No JSON found in model output, will use pattern fallback');
+      return null; // Return null to trigger fallback, not empty object
     }
     
     const result = JSON.parse(jsonMatch[0]);
@@ -154,8 +182,48 @@ function parseModelOutput(output) {
     
   } catch (error) {
     console.error('[EthMem] Failed to parse model output:', error);
-    return {};
+    return null; // Return null to trigger fallback
   }
+}
+
+/**
+ * Extract memory from plain text model output
+ * When model returns description but not structured JSON
+ */
+function extractFromPlainText(originalText, modelDescription) {
+  console.log('[MemoryExtractor] Extracting from plain text model output');
+  console.log('[MemoryExtractor] Original text:', originalText);
+  console.log('[MemoryExtractor] Model description:', modelDescription);
+  
+  // Use pattern matching on original text to determine category and entity
+  const patternResult = patternBasedExtraction(originalText);
+  
+  console.log('[MemoryExtractor] Pattern result:', patternResult);
+  
+  if (patternResult && Object.keys(patternResult).length > 0) {
+    // Found a pattern match, use its category and entity but add model description
+    const memory = {
+      category: patternResult.category,
+      entity: patternResult.entity,
+      description: modelDescription, // Use the model's natural language description
+      confidence: 0.90 // Higher confidence since model validated it
+    };
+    console.log('[MemoryExtractor] Created memory from pattern + model:', memory);
+    return memory;
+  }
+  
+  // If no pattern matched, create a general memory with model's description
+  // Try to extract a key entity from the original text
+  const words = originalText.toLowerCase().split(/\s+/);
+  const stopWords = ['i', 'me', 'my', 'am', 'is', 'are', 'the', 'a', 'an', 'and', 'or', 'but'];
+  const entity = words.find(w => w.length > 2 && !stopWords.includes(w)) || words[0];
+  
+  return {
+    category: 'preference', // Generic category
+    entity: entity,
+    description: modelDescription,
+    confidence: 0.85
+  };
 }
 
 /**

@@ -2,7 +2,12 @@
 console.log('[EthMem] Background script loaded');
 
 // Import memory extraction and storage modules
-importScripts('../lib/memoryExtractor.js', '../lib/memoryStorage.js');
+importScripts(
+  '../lib/config.js',
+  '../lib/cloudService.js',
+  '../lib/memoryExtractor.js', 
+  '../lib/memoryStorage.js'
+);
 
 // Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
@@ -50,6 +55,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   if (message.type === 'RUN_MODEL_INFERENCE') {
     handleModelInference(message.payload, sendResponse);
+    return true;
+  }
+  
+  if (message.type === 'GET_RANKED_MEMORIES') {
+    handleGetRankedMemories(message.userMessage, message.maxMemories || 5, sendResponse);
     return true;
   }
 });
@@ -147,6 +157,55 @@ async function handleGetStats(sendResponse) {
     console.error('[EthMem] Error in handleGetStats:', error);
     sendResponse({
       success: false,
+      error: error.message
+    });
+  }
+}
+
+/**
+ * Handle ranked memories request
+ */
+async function handleGetRankedMemories(userMessage, maxMemories, sendResponse) {
+  try {
+    // Get all memories first
+    const memories = await getAllMemories();
+    
+    if (!memories || memories.length === 0) {
+      sendResponse({
+        success: true,
+        memories: []
+      });
+      return;
+    }
+
+    console.log(`[EthMem] Ranking ${memories.length} memories for: "${userMessage}"`);
+
+    // Try cloud AI ranking
+    if (typeof rankMemoriesWithAI !== 'undefined') {
+      const rankedMemories = await rankMemoriesWithAI(userMessage, memories, maxMemories);
+      
+      sendResponse({
+        success: true,
+        memories: rankedMemories
+      });
+      return;
+    }
+
+    // Fallback: return most recent
+    const recentMemories = memories
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, maxMemories);
+
+    sendResponse({
+      success: true,
+      memories: recentMemories
+    });
+
+  } catch (error) {
+    console.error('[EthMem] Error in handleGetRankedMemories:', error);
+    sendResponse({
+      success: false,
+      memories: [],
       error: error.message
     });
   }

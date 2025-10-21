@@ -662,9 +662,38 @@
       }
     }
 
-    // Handle memory request from smart injector (page script)
+    // Handle ranked memory request from smart injector (page script)
+    if (event.data?.type === 'GET_RANKED_MEMORIES' && event.data?.source === 'ethmem-page-script') {
+      console.log('[EthMem] Smart injector requesting ranked memories');
+      try {
+        const response = await chrome.runtime.sendMessage({ 
+          type: 'GET_RANKED_MEMORIES',
+          userMessage: event.data.userMessage,
+          maxMemories: event.data.maxMemories || 5
+        });
+        
+        // Send ranked memories back to page script
+        window.postMessage({
+          messageId: event.data.messageId,
+          memories: response?.memories || [],
+          source: 'ethmem-content-script'
+        }, '*');
+        
+        console.log(`[EthMem] Sent ${response?.memories?.length || 0} ranked memories to smart injector`);
+      } catch (error) {
+        console.error('[EthMem] Failed to fetch ranked memories:', error);
+        window.postMessage({
+          messageId: event.data.messageId,
+          memories: [],
+          error: error.message,
+          source: 'ethmem-content-script'
+        }, '*');
+      }
+    }
+
+    // Handle memory request from smart injector (page script) - fallback
     if (event.data?.type === 'GET_ALL_MEMORIES' && event.data?.source === 'ethmem-page-script') {
-      console.log('[EthMem] Smart injector requesting memories');
+      console.log('[EthMem] Smart injector requesting all memories');
       try {
         const response = await chrome.runtime.sendMessage({ type: 'GET_ALL_MEMORIES' });
         

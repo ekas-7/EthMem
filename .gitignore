@@ -1,2 +1,12 @@
 !README.md
 *.md
+
+# Environment variables
+.env
+extension/.env
+extension/src/lib/.env
+
+# API Keys and secrets
+**/config.local.js
+**/.env.local
+config.js
