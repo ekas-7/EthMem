@@ -110,6 +110,7 @@ async function checkModelStatus() {
  * This is a simple rule-based system until the model is fully integrated
  */
 function patternBasedExtraction(prompt) {
+  console.log('[EthMem] Running pattern-based extraction');
   // Extract the text from prompt
   const textMatch = prompt.match(/Text: "(.+?)"/);
   if (!textMatch) return {};

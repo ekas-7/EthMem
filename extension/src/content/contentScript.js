@@ -44,10 +44,132 @@
     }
   }
 
+  // Inject smart memory injection system
+  function injectSmartInjector() {
+    try {
+      // Inject memoryRanker first (dependency)
+      const rankerScript = document.createElement('script');
+      rankerScript.src = chrome.runtime.getURL('src/lib/memoryRanker.js');
+      rankerScript.onload = function() {
+        console.log('[EthMem] memoryRanker.js loaded');
+        this.remove();
+        
+        // Then inject smartInjector
+        const injectorScript = document.createElement('script');
+        injectorScript.src = chrome.runtime.getURL('src/page/smartInjector.js');
+        injectorScript.onload = function() {
+          console.log('[EthMem] smartInjector.js loaded - Smart injection active! 🧠');
+          this.remove();
+        };
+        (document.head || document.documentElement).appendChild(injectorScript);
+      };
+      (document.head || document.documentElement).appendChild(rankerScript);
+    } catch (e) {
+      console.error('[EthMem] failed to inject smart injector:', e);
+    }
+  }
+
   // Inject memory viewer UI script
   function injectMemoryViewer() {
     // Note: We don't inject this as a script anymore - it will be inline in content script
     console.log('[EthMem] Memory viewer functions ready (inline)');
+  }
+
+  // Show badge when memories are injected
+  function showInjectionBadge(memories) {
+    // Remove existing badge if any
+    const existing = document.getElementById('ethmem-injection-badge');
+    if (existing) existing.remove();
+
+    const badge = document.createElement('div');
+    badge.id = 'ethmem-injection-badge';
+    badge.style.cssText = `
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background: linear-gradient(135deg, #38e078, #2ec566);
+      color: #111714;
+      padding: 12px 18px;
+      border-radius: 24px;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      z-index: 9999;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(56, 224, 120, 0.4);
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    `;
+    badge.innerHTML = `
+      <span style="font-size: 18px;">🧠</span>
+      <span>${memories.length} memories active</span>
+      <span style="font-size: 12px; opacity: 0.8; margin-left: 4px;">✨</span>
+    `;
+
+    badge.onmouseenter = () => {
+      badge.style.transform = 'scale(1.05)';
+      badge.style.boxShadow = '0 6px 20px rgba(56, 224, 120, 0.5)';
+    };
+    
+    badge.onmouseleave = () => {
+      badge.style.transform = 'scale(1)';
+      badge.style.boxShadow = '0 4px 16px rgba(56, 224, 120, 0.4)';
+    };
+
+    badge.onclick = () => {
+      // Show tooltip with injected memories
+      const tooltip = document.createElement('div');
+      tooltip.style.cssText = `
+        position: fixed;
+        bottom: 150px;
+        right: 20px;
+        background: #0f2419;
+        border: 1px solid #29382f;
+        border-radius: 12px;
+        padding: 16px;
+        max-width: 300px;
+        z-index: 10000;
+        color: #e8e8e8;
+        font-size: 13px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      `;
+      
+      let content = '<div style="font-weight: 600; margin-bottom: 10px; color: #38e078;">Injected Memories:</div>';
+      memories.forEach(m => {
+        content += `<div style="margin: 6px 0; padding: 6px; background: rgba(56, 224, 120, 0.1); border-radius: 6px;">
+          <span style="color: #38e078; font-size: 11px; text-transform: uppercase;">${m.category}</span><br>
+          <span style="color: #e8e8e8;">${m.entity}</span>
+        </div>`;
+      });
+      content += '<div style="margin-top: 12px; font-size: 11px; opacity: 0.6; text-align: center;">ChatGPT knows this context</div>';
+      
+      tooltip.innerHTML = content;
+      document.body.appendChild(tooltip);
+
+      // Remove tooltip on click outside
+      const removeTooltip = (e) => {
+        if (!tooltip.contains(e.target) && e.target !== badge) {
+          tooltip.remove();
+          document.removeEventListener('click', removeTooltip);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', removeTooltip), 100);
+    };
+
+    document.body.appendChild(badge);
+
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+      if (badge.parentNode) {
+        badge.style.opacity = '0.6';
+        badge.style.transform = 'scale(0.9)';
+      }
+    }, 10000);
+
+    console.log('[EthMem] Injection badge displayed');
   }
 
   // Memory viewer functions (inline in content script for chrome.runtime access)
@@ -494,7 +616,7 @@
   }
 
   // Listen for messages from pageScript (via window.postMessage)
-  window.addEventListener('message', (event) => {
+  window.addEventListener('message', async (event) => {
     // Only accept messages from same origin
     if (event.source !== window) return;
     
@@ -538,6 +660,37 @@
           console.error('[EthMem] Error extracting memory:', error);
         });
       }
+    }
+
+    // Handle memory request from smart injector (page script)
+    if (event.data?.type === 'GET_ALL_MEMORIES' && event.data?.source === 'ethmem-page-script') {
+      console.log('[EthMem] Smart injector requesting memories');
+      try {
+        const response = await chrome.runtime.sendMessage({ type: 'GET_ALL_MEMORIES' });
+        
+        // Send memories back to page script
+        window.postMessage({
+          messageId: event.data.messageId,
+          memories: response?.memories || [],
+          source: 'ethmem-content-script'
+        }, '*');
+        
+        console.log(`[EthMem] Sent ${response?.memories?.length || 0} memories to smart injector`);
+      } catch (error) {
+        console.error('[EthMem] Failed to fetch memories for smart injector:', error);
+        window.postMessage({
+          messageId: event.data.messageId,
+          memories: [],
+          error: error.message,
+          source: 'ethmem-content-script'
+        }, '*');
+      }
+    }
+
+    // Handle injection notification (show badge)
+    if (event.data?.type === 'MEMORIES_INJECTED' && event.data?.source === 'ethmem-page-script') {
+      console.log('[EthMem] Memories injected:', event.data.memories);
+      showInjectionBadge(event.data.memories);
     }
 
     if (event.data && event.data.type === 'EXT_LOGO_CLICK') {
@@ -923,6 +1076,7 @@
   injectPageScript();
   injectEthAdapter();
   injectMemoryViewer();
+  injectSmartInjector(); // Smart memory injection with Laflan
 
   // Auto-inject header button with retry logic (Claude and Gemini only, NOT ChatGPT)
   let retryCount = 0;

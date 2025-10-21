@@ -107,7 +107,19 @@ const MODELS = [
     description: 'Efficient text-to-text model optimized for fact extraction and summarization. Runs smoothly with WebGPU acceleration.',
     size: '~783MB',
     requiredMemory: '2GB',
-    supportsWebGPU: true
+    supportsWebGPU: true,
+    recommended: true
+  },
+  {
+    id: 'gemma-3-1b',
+    name: 'Gemma 3 1B Instruct',
+    fullName: 'onnx-community/gemma-3-1b-it-ONNX',
+    task: 'text-generation',
+    description: 'Google\'s Gemma 3 1B instruction-tuned model in ONNX format. Excellent for structured extraction and reasoning tasks.',
+    size: '~1.2GB',
+    requiredMemory: '3GB',
+    supportsWebGPU: true,
+    recommended: false
   }
   // Add more models here in the future
 ];
@@ -294,13 +306,25 @@ function getActionButtons(model, state) {
       `;
     
     case 'downloaded':
+      const isActive = activeModel === model.id;
       return `
-        <button class="btn btn-primary" data-action="load" data-model="${model.id}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
-          Load Model
-        </button>
+        ${!isActive ? `
+          <button class="btn btn-primary" data-action="set-active" data-model="${model.id}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+            Set as Active
+          </button>
+        ` : `
+          <button class="btn btn-primary" disabled style="opacity: 1; background: #1f3d2e; color: #38e078;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+            ✓ Active Model
+          </button>
+        `}
         <button class="btn btn-danger" data-action="delete" data-model="${model.id}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -310,6 +334,7 @@ function getActionButtons(model, state) {
       `;
     
     case 'loaded':
+      const isActiveLoaded = activeModel === model.id;
       return `
         <button class="btn btn-secondary" data-action="unload" data-model="${model.id}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -317,9 +342,15 @@ function getActionButtons(model, state) {
           </svg>
           Unload Model
         </button>
-        <button class="btn btn-danger" data-action="delete" data-model="${model.id}">
-          Delete
-        </button>
+        ${!isActiveLoaded ? `
+          <button class="btn btn-primary" data-action="set-active" data-model="${model.id}">
+            Set as Active
+          </button>
+        ` : `
+          <button class="btn btn-primary" disabled style="opacity: 1; background: #1f3d2e; color: #38e078;">
+            ✓ Active
+          </button>
+        `}
       `;
     
     case 'error':
@@ -366,6 +397,9 @@ function attachEventListeners(card, model, state) {
           break;
         case 'unload':
           await unloadModel(modelId);
+          break;
+        case 'set-active':
+          await setActiveModel(modelId);
           break;
         case 'delete':
           await deleteModel(modelId);
@@ -562,6 +596,29 @@ async function clearError(modelId) {
   modelStates[modelId].status = 'not-downloaded';
   modelStates[modelId].error = null;
   await saveModelStates();
+  renderModels();
+}
+
+/**
+ * Set active model (for inference)
+ */
+async function setActiveModel(modelId) {
+  console.log(`Setting active model: ${modelId}`);
+  
+  const previousActive = activeModel;
+  
+  // Update active model
+  activeModel = modelId;
+  await saveModelStates();
+  
+  // Notify background script that active model changed
+  chrome.runtime.sendMessage({
+    type: 'ACTIVE_MODEL_CHANGED',
+    modelId: modelId,
+    previousModel: previousActive
+  });
+  
+  console.log(`Active model set to: ${modelId}`);
   renderModels();
 }
 
