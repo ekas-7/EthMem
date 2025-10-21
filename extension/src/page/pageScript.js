@@ -25,8 +25,68 @@
           parsedBody = null;
         }
       }
+      
       // Heuristic: For chat messages, ChatGPT sends to endpoints containing "/backend-api/conversation" or "/api/conversation"
       const isChatEndpoint = /conversation|chat|responses/i.test(url);
+      
+      // Check if we have pending memory injection for chat endpoints
+      if (isChatEndpoint && window.__ETHMEM_INJECTION__ && parsedBody) {
+        const injection = window.__ETHMEM_INJECTION__;
+        const age = Date.now() - injection.timestamp;
+        
+        // Only inject if less than 3 seconds old (fresh)
+        if (age < 3000) {
+          console.log('[EthMem PageScript] 🧠 Injecting memories into API request...');
+          console.log('[EthMem PageScript] Original message:', injection.originalMessage.substring(0, 50));
+          
+          let injected = false;
+          
+          // Modify the message content to include context
+          if (Array.isArray(parsedBody.messages)) {
+            const last = parsedBody.messages[parsedBody.messages.length - 1];
+            if (last && last.content) {
+              // Append context to the actual message
+              if (Array.isArray(last.content.parts)) {
+                // Find and modify the matching part
+                for (let i = 0; i < last.content.parts.length; i++) {
+                  if (last.content.parts[i] && last.content.parts[i].trim() === injection.originalMessage.trim()) {
+                    last.content.parts[i] = last.content.parts[i] + injection.injectionText;
+                    injected = true;
+                    console.log('[EthMem PageScript] ✅ Injected into parts[' + i + ']');
+                    break;
+                  }
+                }
+              } else if (typeof last.content === 'string') {
+                if (last.content.trim() === injection.originalMessage.trim()) {
+                  last.content = last.content + injection.injectionText;
+                  injected = true;
+                  console.log('[EthMem PageScript] ✅ Injected into content string');
+                }
+              }
+            }
+          } else if (parsedBody.prompt && parsedBody.prompt.trim() === injection.originalMessage.trim()) {
+            parsedBody.prompt = parsedBody.prompt + injection.injectionText;
+            injected = true;
+            console.log('[EthMem PageScript] ✅ Injected into prompt');
+          }
+          
+          if (injected) {
+            // Re-stringify the body
+            body = JSON.stringify(parsedBody);
+            init.body = body;
+            
+            console.log('[EthMem PageScript] 🎉 Memory context injected invisibly!');
+          } else {
+            console.warn('[EthMem PageScript] ⚠️  Could not find matching message to inject');
+            console.log('[EthMem PageScript] Payload structure:', Object.keys(parsedBody));
+          }
+        } else {
+          console.log('[EthMem PageScript] Injection expired (age:', age, 'ms)');
+        }
+        
+        // Clear the injection after use (or expiry)
+        delete window.__ETHMEM_INJECTION__;
+      }
       if (isChatEndpoint) {
         // Attempt to extract user message text from parsedBody
         let userMessage = null;

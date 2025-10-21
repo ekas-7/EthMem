@@ -60,20 +60,32 @@ async function process(el, msg, send) {
     const res = await ask(msg);
     
     if (res.success && res.injectionText) {
-      console.log('[SmartInjector] Inject', res.relevant.length);
-      const txt = msg + res.injectionText;
+      console.log('[SmartInjector] Preparing invisible injection for', res.relevant.length, 'memories');
       
-      if (el.tagName === 'TEXTAREA') {
-        el.value = txt;
-      } else {
-        el.innerText = txt;
-      }
-      el.dispatchEvent(new Event('input', {bubbles: true}));
+      // Store injection context globally so pageScript can access it
+      window.__ETHMEM_INJECTION__ = {
+        originalMessage: msg,
+        injectionText: res.injectionText,
+        timestamp: Date.now()
+      };
       
+      console.log('[SmartInjector] Injection stored, original message preserved');
       notify(res.relevant.length);
-      await sleep(100);
+    } else {
+      console.log('[SmartInjector] No memories to inject');
     }
     
+    // IMPORTANT: Make sure the text field has ONLY the original message
+    if (el.tagName === 'TEXTAREA') {
+      el.value = msg;
+    } else {
+      el.innerText = msg;
+    }
+    
+    // Wait a tiny bit to ensure UI is updated
+    await sleep(50);
+    
+    // Now send - the original message will be visible but API will get context
     send();
   } catch (err) {
     console.error('[SmartInjector] Error:', err);
