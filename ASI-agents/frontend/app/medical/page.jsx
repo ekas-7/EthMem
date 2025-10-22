@@ -84,7 +84,7 @@ export default function MedicalPage() {
                 value={patientId}
                 onChange={(e) => setPatientId(e.target.value)}
                 onBlur={() => patientId && loadMemories(patientId)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder-gray-500 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder-gray-500 transition-all"
                 placeholder="Enter patient ID (e.g., PAT001)"
                 required
               />
@@ -97,7 +97,7 @@ export default function MedicalPage() {
               <textarea
                 value={symptoms}
                 onChange={(e) => setSymptoms(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder-gray-500 h-32 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder-gray-500 h-32 transition-all"
                 placeholder="Describe your symptoms in detail..."
                 required
               />
@@ -110,7 +110,7 @@ export default function MedicalPage() {
               <textarea
                 value={medicalHistory}
                 onChange={(e) => setMedicalHistory(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder-gray-500 h-24 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder-gray-500 h-24 transition-all"
                 placeholder="Any relevant medical history..."
               />
             </div>
@@ -122,12 +122,12 @@ export default function MedicalPage() {
               <select
                 value={urgencyLevel}
                 onChange={(e) => setUrgencyLevel(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
               >
-                <option value="low" className="bg-gray-900">Low</option>
-                <option value="normal" className="bg-gray-900">Normal</option>
-                <option value="high" className="bg-gray-900">High</option>
-                <option value="emergency" className="bg-gray-900">Emergency</option>
+                <option value="low" className="bg-[#0A1F1C]">Low</option>
+                <option value="normal" className="bg-[#0A1F1C]">Normal</option>
+                <option value="high" className="bg-[#0A1F1C]">High</option>
+                <option value="emergency" className="bg-[#0A1F1C]">Emergency</option>
               </select>
             </div>
 

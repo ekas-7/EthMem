@@ -58,8 +58,8 @@ export default function HomePage() {
       <div className="text-center mb-16 relative">
         <div className="inline-block mb-6">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 blur-2xl opacity-30 animate-pulse"></div>
-            <h1 className="relative text-6xl md:text-7xl font-black mb-6 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-green-500 blur-2xl opacity-30 animate-pulse"></div>
+            <h1 className="relative text-6xl md:text-7xl font-black mb-6 bg-gradient-to-r from-emerald-400 via-teal-400 to-green-400 bg-clip-text text-transparent">
               ASI-Agents
             </h1>
           </div>
@@ -68,23 +68,23 @@ export default function HomePage() {
         <p className="text-2xl text-gray-300 mb-3 font-light">
           Multi-Domain AI Agent Ecosystems
         </p>
-        <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-          Five Complete Agent Systems Powered by <span className="text-cyan-400 font-semibold">ASI</span> and{' '}
-          <span className="text-purple-400 font-semibold">ETHMem</span> Integration
+        <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+          Five Complete Agent Systems Powered by <span className="text-emerald-400 font-semibold">ASI</span> and{' '}
+          <span className="text-teal-400 font-semibold">ETHMem</span> Integration
         </p>
 
         {/* Stats Bar */}
         <div className="flex justify-center gap-8 mt-8 flex-wrap">
           <div className="flex items-center gap-2 glass px-4 py-2 rounded-full">
-            <Sparkles className="text-cyan-400" size={20} />
+            <Sparkles className="text-emerald-400" size={20} />
             <span className="text-white font-semibold">5 Ecosystems</span>
           </div>
           <div className="flex items-center gap-2 glass px-4 py-2 rounded-full">
-            <Brain className="text-purple-400" size={20} />
+            <Brain className="text-teal-400" size={20} />
             <span className="text-white font-semibold">AI-Powered</span>
           </div>
           <div className="flex items-center gap-2 glass px-4 py-2 rounded-full">
-            <Zap className="text-pink-400" size={20} />
+            <Zap className="text-green-400" size={20} />
             <span className="text-white font-semibold">Memory Integration</span>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function HomePage() {
                 </span>
               </div>
               
-              <h2 className="text-2xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-cyan-400 group-hover:to-purple-400 transition-all duration-300">
+              <h2 className="text-2xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-emerald-400 group-hover:to-teal-400 transition-all duration-300">
                 {agent.name}
               </h2>
               
@@ -138,11 +138,11 @@ export default function HomePage() {
       </div>
 
       {/* About Section */}
-      <div className="glass-strong rounded-2xl p-8 border border-white/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 blur-3xl"></div>
+      <div className="glass-strong rounded-2xl p-8 border border-emerald-500/10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 blur-3xl"></div>
         
         <div className="relative z-10">
-          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
             About ASI-Agents
           </h2>
           <p className="text-gray-300 leading-relaxed mb-6 text-lg">
@@ -150,20 +150,20 @@ export default function HomePage() {
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="text-center p-6 glass rounded-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-colors">
-              <div className="text-5xl font-black bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent mb-2">
+            <div className="text-center p-6 glass rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 transition-colors">
+              <div className="text-5xl font-black bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent mb-2">
                 5
               </div>
               <div className="text-sm text-gray-400 uppercase tracking-wider">Agent Ecosystems</div>
             </div>
-            <div className="text-center p-6 glass rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-colors">
-              <div className="text-5xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+            <div className="text-center p-6 glass rounded-xl border border-teal-500/20 hover:border-teal-500/40 transition-colors">
+              <div className="text-5xl font-black bg-gradient-to-r from-teal-400 to-green-400 bg-clip-text text-transparent mb-2">
                 15+
               </div>
               <div className="text-sm text-gray-400 uppercase tracking-wider">Specialized Agents</div>
             </div>
-            <div className="text-center p-6 glass rounded-xl border border-pink-500/20 hover:border-pink-500/40 transition-colors">
-              <div className="text-5xl font-black bg-gradient-to-r from-pink-400 to-orange-400 bg-clip-text text-transparent mb-2">
+            <div className="text-center p-6 glass rounded-xl border border-green-500/20 hover:border-green-500/40 transition-colors">
+              <div className="text-5xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-2">
                 ∞
               </div>
               <div className="text-sm text-gray-400 uppercase tracking-wider">Possibilities</div>

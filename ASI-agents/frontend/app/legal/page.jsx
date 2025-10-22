@@ -85,7 +85,7 @@ export default function LegalPage() {
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
                 onBlur={() => clientId && loadMemories(clientId)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-all"
                 placeholder="Enter client ID (e.g., CLI001)"
                 required
               />
@@ -98,7 +98,7 @@ export default function LegalPage() {
               <textarea
                 value={caseDescription}
                 onChange={(e) => setCaseDescription(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 h-32 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 h-32 transition-all"
                 placeholder="Describe your legal case in detail..."
                 required
               />
@@ -111,7 +111,7 @@ export default function LegalPage() {
               <textarea
                 value={legalHistory}
                 onChange={(e) => setLegalHistory(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 h-24 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 h-24 transition-all"
                 placeholder="Any relevant legal history..."
               />
             </div>
@@ -124,7 +124,7 @@ export default function LegalPage() {
                 <select
                   value={caseType}
                   onChange={(e) => setCaseType(e.target.value)}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
+                  className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
                 >
                   <option value="general" className="bg-gray-900">General</option>
                   <option value="civil" className="bg-gray-900">Civil</option>
@@ -142,7 +142,7 @@ export default function LegalPage() {
                 <select
                   value={urgencyLevel}
                   onChange={(e) => setUrgencyLevel(e.target.value)}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
+                  className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
                 >
                   <option value="low" className="bg-gray-900">Low</option>
                   <option value="normal" className="bg-gray-900">Normal</option>

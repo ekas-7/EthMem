@@ -90,7 +90,7 @@ export default function FinancialPage() {
                 value={investorId}
                 onChange={(e) => setInvestorId(e.target.value)}
                 onBlur={() => investorId && loadMemories(investorId)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 placeholder="Enter investor ID (e.g., INV001)"
                 required
               />
@@ -103,7 +103,7 @@ export default function FinancialPage() {
               <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-32"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-32"
                 placeholder="What would you like to know about your investments?"
                 required
               />
@@ -116,7 +116,7 @@ export default function FinancialPage() {
               <textarea
                 value={portfolio}
                 onChange={(e) => setPortfolio(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-24 font-mono text-sm"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-24 font-mono text-sm"
                 placeholder='Enter as JSON: {"stocks": 50000, "bonds": 30000, "crypto": 10000} or describe your portfolio'
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -131,7 +131,7 @@ export default function FinancialPage() {
               <textarea
                 value={investmentHistory}
                 onChange={(e) => setInvestmentHistory(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-20"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-20"
                 placeholder="Previous investments, returns, or financial goals..."
               />
             </div>
@@ -143,7 +143,7 @@ export default function FinancialPage() {
               <select
                 value={riskTolerance}
                 onChange={(e) => setRiskTolerance(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               >
                 <option value="conservative">Conservative (Low Risk)</option>
                 <option value="moderate">Moderate (Medium Risk)</option>

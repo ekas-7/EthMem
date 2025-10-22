@@ -85,7 +85,7 @@ export default function SupportPage() {
                 value={customerId}
                 onChange={(e) => setCustomerId(e.target.value)}
                 onBlur={() => customerId && loadMemories(customerId)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-500 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-500 transition-all"
                 placeholder="Enter customer ID (e.g., CUST001)"
                 required
               />
@@ -98,7 +98,7 @@ export default function SupportPage() {
               <textarea
                 value={issueDescription}
                 onChange={(e) => setIssueDescription(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-500 h-32 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-500 h-32 transition-all"
                 placeholder="Describe your issue in detail..."
                 required
               />
@@ -111,7 +111,7 @@ export default function SupportPage() {
               <textarea
                 value={ticketHistory}
                 onChange={(e) => setTicketHistory(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-500 h-24 transition-all"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-500 h-24 transition-all"
                 placeholder="Previous tickets or relevant information..."
               />
             </div>
@@ -124,7 +124,7 @@ export default function SupportPage() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white"
+                  className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white"
                 >
                   <option value="general" className="bg-gray-900">General</option>
                   <option value="technical" className="bg-gray-900">Technical</option>
@@ -141,7 +141,7 @@ export default function SupportPage() {
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white"
+                  className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white"
                 >
                   <option value="low" className="bg-gray-900">Low</option>
                   <option value="normal" className="bg-gray-900">Normal</option>

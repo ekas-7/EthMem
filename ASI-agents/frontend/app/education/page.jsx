@@ -80,7 +80,7 @@ export default function EducationPage() {
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
                 onBlur={() => studentId && loadMemories(studentId)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Enter student ID (e.g., STU001)"
                 required
               />
@@ -93,7 +93,7 @@ export default function EducationPage() {
               <textarea
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent h-32"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent h-32"
                 placeholder="What would you like to learn today?"
                 required
               />
@@ -107,7 +107,7 @@ export default function EducationPage() {
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="mathematics">Mathematics</option>
                   <option value="science">Science</option>
@@ -127,7 +127,7 @@ export default function EducationPage() {
                 <select
                   value={learningLevel}
                   onChange={(e) => setLearningLevel(e.target.value)}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>
@@ -143,7 +143,7 @@ export default function EducationPage() {
               <textarea
                 value={learningHistory}
                 onChange={(e) => setLearningHistory(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent h-20"
+                className="w-full px-4 py-2 bg-[#0F2D27]/50 border border-emerald-500/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent h-20"
                 placeholder="Any relevant background or what you've learned so far..."
               />
             </div>
