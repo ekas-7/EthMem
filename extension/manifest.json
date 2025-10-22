@@ -12,7 +12,10 @@
     "http://localhost/*",
     "https://localhost/*",
     "http://127.0.0.1/*",
-    "https://127.0.0.1/*"
+    "https://127.0.0.1/*",
+    "https://ethmem.vercel.app/*",
+    "https://zkmem.com/*",
+    "https://*.vercel.app/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
@@ -36,7 +39,10 @@
         "http://localhost/*",
         "https://localhost/*",
         "http://127.0.0.1/*",
-        "https://127.0.0.1/*"
+        "https://127.0.0.1/*",
+        "https://ethmem.vercel.app/*",
+        "https://zkmem.com/*",
+        "https://*.vercel.app/*"
       ],
       "js": ["src/content/frontendBridge.js"],
       "run_at": "document_end"
