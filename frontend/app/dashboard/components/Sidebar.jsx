@@ -122,8 +122,8 @@ export default function Sidebar() {
     <>
       {/* Logo */}
       <div className="flex items-center space-x-2 mb-8">
-        <div className="w-8 h-8 bg-emerald-400 rounded-lg flex items-center justify-center">
-          <span className="text-black font-bold text-lg">E</span>
+        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-400/30">
+          <span className="text-black font-bold text-xl">E</span>
         </div>
         <span className="text-2xl font-bold text-emerald-300">EthMem</span>
       </div>
@@ -138,10 +138,10 @@ export default function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                 active
-                  ? 'bg-emerald-700/20 text-emerald-300 border-r-2 border-emerald-400'
-                  : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-emerald-700/30 text-emerald-300 shadow-lg shadow-emerald-700/20 border-l-4 border-emerald-400'
+                  : 'text-sidebar-text hover:bg-white/5 hover:text-emerald-300 border-l-4 border-transparent'
               }`}
               onClick={() => setIsMobileOpen(false)}
             >
@@ -153,7 +153,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom Section */}
-      <div className="mt-auto space-y-4">
+      <div className="mt-auto space-y-4 border-t border-white/5 pt-4">
         {/* Connection Status */}
         <div className="space-y-2">
           {connectError && (
@@ -165,10 +165,10 @@ export default function Sidebar() {
           <button
             onClick={handleConnect}
             disabled={isConnecting}
-            className={`w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+            className={`w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 shadow-lg ${
               isConnected
-                ? 'bg-emerald-400 text-black hover:bg-emerald-500'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-gradient-to-r from-emerald-400 to-emerald-500 text-black hover:from-emerald-500 hover:to-emerald-600 shadow-emerald-400/30'
+                : 'bg-card-darker text-sidebar-text hover:bg-card-dark border border-white/10'
             } ${isConnecting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Wallet className="w-4 h-4" />
@@ -178,12 +178,13 @@ export default function Sidebar() {
           </button>
           
           {isConnected && (
-            <div className="text-xs text-gray-400 text-center space-y-1">
+            <div className="text-xs text-sidebar-muted text-center space-y-2 bg-card-darker rounded-lg p-3 border border-white/5">
               <div className="flex items-center justify-center space-x-1">
-                <span>{formattedAddress}</span>
+                <Database className="w-3 h-3" />
+                <span className="text-sidebar-text font-medium">{formattedAddress}</span>
                 <button
                   onClick={handleCopyAddress}
-                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                  className="text-sidebar-muted hover:text-emerald-400 transition-colors"
                   title="Copy address"
                 >
                   {copied ? (
@@ -193,13 +194,13 @@ export default function Sidebar() {
                   )}
                 </button>
               </div>
-              <div>{balance}</div>
-              <div className={`px-2 py-1 rounded text-xs ${
+              <div className="text-emerald-400 font-medium">{balance}</div>
+              <div className={`px-2 py-1 rounded text-xs font-semibold ${
                 isSepolia 
                   ? 'bg-green-900/30 text-green-400' 
                   : 'bg-red-900/30 text-red-400'
               }`}>
-                {isSepolia ? 'Sepolia' : `Chain ${chainId}`}
+                {isSepolia ? '✓ Sepolia' : `Chain ${chainId}`}
               </div>
             </div>
           )}
@@ -209,7 +210,7 @@ export default function Sidebar() {
         <div className="space-y-2">
           <Link
             href="/support"
-            className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+            className="flex items-center space-x-3 px-4 py-2.5 text-sm text-sidebar-muted hover:text-emerald-300 hover:bg-white/5 rounded-lg transition-all duration-200"
           >
             <HelpCircle className="w-4 h-4" />
             <span>Support</span>
@@ -217,7 +218,7 @@ export default function Sidebar() {
           
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors w-full text-left"
+            className="flex items-center space-x-3 px-4 py-2.5 text-sm text-sidebar-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 w-full text-left"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -246,12 +247,12 @@ export default function Sidebar() {
       )}
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-72 bg-gray-900 min-h-screen p-6 flex-col border-r border-gray-800">
+      <aside className="hidden md:flex w-64 bg-sidebar-dark min-h-screen p-6 flex-col fixed left-0 top-0 bottom-0 shadow-xl">
         <SidebarContent />
       </aside>
 
       {/* Mobile Sidebar */}
-      <aside className={`md:hidden fixed left-0 top-0 w-72 bg-gray-900 min-h-screen p-6 flex flex-col z-40 transform transition-transform ${
+      <aside className={`md:hidden fixed left-0 top-0 w-64 bg-sidebar-dark min-h-screen p-6 flex flex-col z-40 transform transition-transform shadow-2xl ${
         isMobileOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <SidebarContent />

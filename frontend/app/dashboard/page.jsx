@@ -14,15 +14,15 @@ export const metadata = {
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-background-dark text-white flex relative">
       <Sidebar />
 
-      <div className="flex-1 md:ml-0 p-6 lg:p-10">
+      <div className="flex-1 md:ml-64 p-4 md:p-6 lg:p-10">
         <DashboardHeader />
         
         <SepoliaStatus />
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard title="Data Usage" value="12.5 GB" delta="+2.1% last 30d" />
             <StatCard title="Linked Applications" value="8" delta="2 new this month" />
@@ -30,28 +30,28 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="bg-gray-800 rounded-xl p-4">
+            <div className="bg-card-dark rounded-xl p-5 shadow-lg border border-white/5">
               <UsagePie />
             </div>
-            <div className="bg-gray-800 rounded-xl p-4">
+            <div className="bg-card-dark rounded-xl p-5 shadow-lg border border-white/5">
               <ConnectedLLMs />
             </div>
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-gray-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Memory Growth</h3>
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-card-dark rounded-xl p-6 shadow-lg border border-white/5">
+            <h3 className="text-lg font-semibold mb-6 text-dark-primary">Memory Growth</h3>
             <MemoryGrowthChart />
           </div>
 
-          <div className="bg-gray-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+          <div className="bg-card-dark rounded-xl p-6 shadow-lg border border-white/5">
+            <h3 className="text-lg font-semibold mb-6 text-dark-primary">Recent Activity</h3>
             <RecentActivity />
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <ExtensionDataViewer />
         </div>
       </div>
