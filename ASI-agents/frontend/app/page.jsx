@@ -70,7 +70,7 @@ export default function HomePage() {
         </p>
         <p className="text-lg text-gray-500 max-w-2xl mx-auto">
           Five Complete Agent Systems Powered by <span className="text-cyan-400 font-semibold">ASI</span> and{' '}
-          <span className="text-purple-400 font-semibold">zkMem</span> Integration
+          <span className="text-purple-400 font-semibold">ETHMem</span> Integration
         </p>
 
         {/* Stats Bar */}

@@ -34,7 +34,7 @@ Claim your decentralized memory and never lose context again.
 This repository contains four major components that work together to create the EthMem ecosystem:
 
 ```
-zKMem/
+ETHMem/
 ├── frontend/              # 🎨 Next.js web application
 ├── extension/             # 🔌 Browser extension for ChatGPT/Claude/Gemini
 ├── smart-contract/        # 📜 Ethereum smart contracts for memory storage
@@ -461,8 +461,8 @@ python medical_system.py
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/ekas-7/zKMem.git
-cd zKMem
+git clone https://github.com/ekas-7/ETHMem.git
+cd ETHMem
 ```
 
 ### 2. Set Up Smart Contracts
@@ -576,7 +576,7 @@ This project is licensed under the MIT License.
 
 For questions, issues, or contributions, please open an issue on GitHub.
 
-**Repository**: [github.com/ekas-7/zKMem](https://github.com/ekas-7/zKMem)
+**Repository**: [github.com/ekas-7/ETHMem](https://github.com/ekas-7/ETHMem)
 
 ---
 

@@ -56,7 +56,7 @@ class AppointmentConfirmation(Model):
 # Using Agentverse mailbox - no local port/endpoint needed
 doctor_agent = Agent(
     name="doctor_agent",
-    seed="doctor_agent_seed_phrase_zkMem_2024",
+    seed="doctor_agent_seed_phrase_ETHMem_2024",
     mailbox="eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3NjM3MDg1OTUsImlhdCI6MTc2MTExNjU5NSwiaXNzIjoiZmV0Y2guYWkiLCJqdGkiOiJjODZiYWRmYTY3OGZiYzVlMWM1YzdiNTciLCJzY29wZSI6ImF2Iiwic3ViIjoiMDdiNzQ2Y2NlYjQzOTNiNDgzZjNiZjVjZjJkNmRkNjYwMGU5ODUyZjNjM2FkMDNiIn0.QJNlslN5SQ2LPr-_oWoEXH2k3jwQZLgV22neCxBkrIUzolG7RG-Y8QPhfEyLa7uF7fqtV3KDJgbuhcIfDdCLRkkAjkukHek41du5iM0WM3gtXJZbv_x2KProX3EcZXt-a1BQ35LciFUf4U7IS-OGawOo3VI87SMAM_OExA4DcSFTqiBg3ECPAkmFz9HdzdBEQUCrKkLfj68LpKJAGi2aPYRwCjFTJUuuv9m9x6HWILn7FPlCKLa3pA1C5qbairCJr9LuA1jkIKPx3N4FcsYYWVe_x48J_tS-UCZ9GEmRc88JoUowLreZTMOhAJR8_3o_LBCvrZ0vPTJDJjcGlRfOcw"  # Agentverse mailbox API key
 )
 
@@ -300,10 +300,10 @@ def assess_urgency(symptoms: str, declared_urgency: str) -> str:
 def log_interaction(ctx: Context, query: MedicalQuery, advice: MedicalAdvice):
     """
     Log medical interaction for record keeping
-    In production, this would store to blockchain via zkMem smart contracts
+    In production, this would store to blockchain via ETHMem smart contracts
     """
     ctx.logger.info(f"Logging interaction for patient: {query.patient_id}")
-    # Here you would integrate with the zkMem smart contract to store
+    # Here you would integrate with the ETHMem smart contract to store
     # encrypted medical records on the blockchain
     ctx.storage.set(
         f"consultation_{query.patient_id}_{ctx.timestamp}",

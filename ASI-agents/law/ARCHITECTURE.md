@@ -38,7 +38,7 @@ The **Legal Consultation System** is a multi-agent ecosystem that provides AI-po
 │                                       │ - Preferences │     │   │
 │                                       └───────────────┘     │   │
 │                                                             │   │
-│  Browser Extension (zkMem) ────────────────────────────────┘   │
+│  Browser Extension (ETHMem) ────────────────────────────────┘   │
 │  Exports legal case data to JSON                               │
 │                                                                  │
 │  All agents coordinated by Fetch.ai Bureau                     │
@@ -258,17 +258,17 @@ LAW_PORT=9000
 ```python
 # Lawyer Agent
 name="lawyer_agent"
-seed="lawyer_agent_seed_phrase_zkMem_2024"
+seed="lawyer_agent_seed_phrase_ETHMem_2024"
 mailbox="[Agentverse JWT Token]"
 
 # Client Agent  
 name="client_agent"
-seed="client_agent_seed_phrase_zkMem_2024"
+seed="client_agent_seed_phrase_ETHMem_2024"
 mailbox="[Agentverse JWT Token]"
 
 # Case Memory Agent
 name="case_memory_agent"
-seed="case_memory_agent_seed_zkMem_2024"
+seed="case_memory_agent_seed_ETHMem_2024"
 mailbox="[Agentverse JWT Token]"
 ```
 
@@ -309,7 +309,7 @@ python law_system.py
 3. **Blockchain Integration**
    - Immutable case records
    - Smart contract legal agreements
-   - zkMem full integration
+   - ETHMem full integration
 
 4. **Advanced Features**
    - Multi-jurisdiction support
@@ -330,4 +330,4 @@ python law_system.py
 
 **Version**: 1.0.0  
 **Last Updated**: October 2025  
-**Maintainer**: zkMem Team
+**Maintainer**: ETHMem Team

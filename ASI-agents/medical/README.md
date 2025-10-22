@@ -15,7 +15,7 @@ A multi-agent healthcare platform that combines **AI-powered medical consultatio
 - 📬 **Protocol-Based Communication**: Type-safe agent-to-agent messaging with Fetch.ai protocols
 - 📅 **Appointment Scheduling**: Automated appointment booking and confirmation
 - ⚡ **Urgency Assessment**: Automatic triage based on symptoms
-- 💾 **Blockchain Integration**: Ready for zkMem on-chain memory storage
+- 💾 **Blockchain Integration**: Ready for ETHMem on-chain memory storage
 - 🔒 **Privacy-First**: Local storage with optional blockchain sync
 
 ### Agent System
@@ -44,8 +44,8 @@ A multi-agent healthcare platform that combines **AI-powered medical consultatio
 
 ```bash
 # Clone the repository
-git clone https://github.com/ekas-7/zKMem.git
-cd zKMem/ASI-agents
+git clone https://github.com/ekas-7/ETHMem.git
+cd ETHMem/ASI-agents
 
 # Create virtual environment
 python3 -m venv venv
@@ -98,7 +98,7 @@ The system uses a **multi-agent architecture** with protocol-based communication
                        ▼
             ┌──────────────────┐
             │   Blockchain     │
-            │  (Future: zkMem) │
+            │  (Future: ETHMem) │
             └──────────────────┘
 ```
 
@@ -172,8 +172,8 @@ The system uses a **multi-agent architecture** with protocol-based communication
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/ekas-7/zKMem.git
-cd zKMem/ASI-agents
+git clone https://github.com/ekas-7/ETHMem.git
+cd ETHMem/ASI-agents
 ```
 
 ### Step 2: Create Virtual Environment
@@ -205,7 +205,7 @@ ASI_ONE_API_KEY=sk_your_asi_api_key_here
 
 # Agent Configuration
 AGENT_NAME=doctor_agent
-AGENT_SEED=doctor_agent_seed_phrase_zkMem_2024
+AGENT_SEED=doctor_agent_seed_phrase_ETHMem_2024
 ```
 
 ---
@@ -570,8 +570,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
 
 ```bash
 # Fork and clone
-git clone https://github.com/YOUR_USERNAME/zKMem.git
-cd zKMem/ASI-agents
+git clone https://github.com/YOUR_USERNAME/ETHMem.git
+cd ETHMem/ASI-agents
 
 # Create feature branch
 git checkout -b feature/your-feature
@@ -640,17 +640,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Fetch.ai** - uAgents framework and Agentverse platform
 - **ASI.ai** - ASI API for intelligent medical analysis
-- **zkMem Team** - Decentralized memory storage vision
+- **ETHMem Team** - Decentralized memory storage vision
 - **Contributors** - Everyone who helped build this!
 
 ---
 
 ## 📞 Support
 
-- 📧 Email: support@zkmem.dev
-- 💬 Discord: [Join our community](https://discord.gg/zkmem)
-- 🐛 Issues: [GitHub Issues](https://github.com/ekas-7/zKMem/issues)
-- 📚 Docs: [Full Documentation](https://docs.zkmem.dev)
+- 📧 Email: support@ETHMem.dev
+- 💬 Discord: [Join our community](https://discord.gg/ETHMem)
+- 🐛 Issues: [GitHub Issues](https://github.com/ekas-7/ETHMem/issues)
+- 📚 Docs: [Full Documentation](https://docs.ETHMem.dev)
 
 ---
 
@@ -670,7 +670,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### v2.0 (Future)
 - [ ] Specialist agents (cardiology, dermatology, etc.)
-- [ ] zkMem blockchain integration
+- [ ] ETHMem blockchain integration
 - [ ] Mobile app
 - [ ] Voice interface
 - [ ] EHR integration
@@ -768,11 +768,11 @@ appointment = AppointmentRequest(
 await ctx.send("doctor_agent_address", appointment)
 ```
 
-## Integration with zkMem
+## Integration with ETHMem
 
-The agent is designed to integrate with the zkMem ecosystem:
+The agent is designed to integrate with the ETHMem ecosystem:
 
-1. **Memory Storage**: Consultation logs can be stored in the zkMem smart contract
+1. **Memory Storage**: Consultation logs can be stored in the ETHMem smart contract
 2. **Identity Verification**: Patient IDs can be linked to Ethereum addresses
 3. **Privacy**: Medical data can be encrypted before blockchain storage
 4. **Portability**: Medical history can follow patients across different healthcare providers
@@ -788,7 +788,7 @@ def log_interaction(ctx: Context, query: MedicalQuery, advice: MedicalAdvice):
         "advice": advice.dict()
     })
     
-    # Store to zkMem blockchain via smart contract
+    # Store to ETHMem blockchain via smart contract
     await store_to_blockchain(
         patient_address=query.patient_id,
         encrypted_memory=encrypted_data,
@@ -807,7 +807,7 @@ Patient Agent → (MedicalQuery) → Doctor Agent
                                        ↓
 Doctor Agent → (MedicalAdvice) → Patient Agent
                                        ↓
-                              Log to zkMem Blockchain
+                              Log to ETHMem Blockchain
 ```
 
 ## Security Considerations
@@ -845,7 +845,7 @@ python test_doctor_agent.py
 
 ## License
 
-Part of the zkMem project - see main repository for license details.
+Part of the ETHMem project - see main repository for license details.
 
 ## Contributing
 

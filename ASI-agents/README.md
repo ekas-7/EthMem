@@ -190,8 +190,8 @@ All five ecosystems follow the **same proven architecture**:
 
 ```bash
 # Clone the repository
-git clone https://github.com/ekas-7/zKMem.git
-cd zKMem/ASI-agents
+git clone https://github.com/ekas-7/ETHMem.git
+cd ETHMem/ASI-agents
 
 # Run setup script (creates .env, installs dependencies)
 chmod +x setup.sh
@@ -528,7 +528,7 @@ cosmpy                   # Cosmos blockchain integration
 
 ### Planned 🔮
 - [ ] Web dashboard for all ecosystems
-- [ ] Real-time blockchain memory sync (zkMem integration)
+- [ ] Real-time blockchain memory sync (ETHMem integration)
 - [ ] Multi-language support
 - [ ] Voice interface for all agents
 - [ ] Mobile app integration
@@ -560,7 +560,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Fetch.ai** - For the uAgents framework and Agentverse platform
 - **ASI** - For the powerful ASI API
-- **zkMem** - For blockchain-based memory storage integration
+- **ETHMem** - For blockchain-based memory storage integration
 
 ---
 
@@ -568,7 +568,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions, issues, or feature requests:
 
-- Open an issue on [GitHub](https://github.com/ekas-7/zKMem/issues)
+- Open an issue on [GitHub](https://github.com/ekas-7/ETHMem/issues)
 - Check individual system README files for specific documentation
 - Review ARCHITECTURE.md files for technical details
 

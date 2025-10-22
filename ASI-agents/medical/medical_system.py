@@ -70,19 +70,19 @@ class MemoryResponse(Model):
 # ============ INITIALIZE AGENTS ============
 doctor_agent = Agent(
     name="doctor_agent",
-    seed="doctor_agent_seed_phrase_zkMem_2024",
+    seed="doctor_agent_seed_phrase_ETHMem_2024",
     port=8000,
 )
 
 patient_agent = Agent(
     name="patient_agent",
-    seed="patient_agent_seed_phrase_zkMem_2024",
+    seed="patient_agent_seed_phrase_ETHMem_2024",
     port=8001,
 )
 
 memory_agent = Agent(
     name="memory_agent",
-    seed="memory_agent_seed_phrase_zkMem_2024",
+    seed="memory_agent_seed_phrase_ETHMem_2024",
     port=8002,
 )
 

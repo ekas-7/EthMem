@@ -13,13 +13,13 @@ services:
     environment:
       - AGENT_NAME=medical_system
       - AGENT_PORT=8000
-      - AGENT_SEED=${MEDICAL_AGENT_SEED:-medical_agent_seed_zkMem_2024}
+      - AGENT_SEED=${MEDICAL_AGENT_SEED:-medical_agent_seed_ETHMem_2024}
       - MAILBOX_ENABLED=${MAILBOX_ENABLED:-false}
       - AGENT_MAILBOX_KEY=${MEDICAL_MAILBOX_KEY:-}
       - ASI_ONE_API_KEY=${ASI_ONE_API_KEY}
       - NETWORK=${NETWORK:-testnet}
       - ENDPOINT=http://0.0.0.0:8000/submit
-      - ZKMEM_CONTRACT_ADDRESS=${ZKMEM_CONTRACT_ADDRESS:-}
+      - ETHMem_CONTRACT_ADDRESS=${ETHMem_CONTRACT_ADDRESS:-}
       - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
       - PRIVATE_KEY=${PRIVATE_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -48,13 +48,13 @@ services:
     environment:
       - AGENT_NAME=law_system
       - AGENT_PORT=9000
-      - AGENT_SEED=${LAW_AGENT_SEED:-law_agent_seed_zkMem_2024}
+      - AGENT_SEED=${LAW_AGENT_SEED:-law_agent_seed_ETHMem_2024}
       - MAILBOX_ENABLED=${MAILBOX_ENABLED:-false}
       - AGENT_MAILBOX_KEY=${LAW_MAILBOX_KEY:-}
       - ASI_ONE_API_KEY=${ASI_ONE_API_KEY}
       - NETWORK=${NETWORK:-testnet}
       - ENDPOINT=http://0.0.0.0:9000/submit
-      - ZKMEM_CONTRACT_ADDRESS=${ZKMEM_CONTRACT_ADDRESS:-}
+      - ETHMem_CONTRACT_ADDRESS=${ETHMem_CONTRACT_ADDRESS:-}
       - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
       - PRIVATE_KEY=${PRIVATE_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -82,13 +82,13 @@ services:
     environment:
       - AGENT_NAME=support_system
       - AGENT_PORT=10000
-      - AGENT_SEED=${SUPPORT_AGENT_SEED:-support_agent_seed_zkMem_2024}
+      - AGENT_SEED=${SUPPORT_AGENT_SEED:-support_agent_seed_ETHMem_2024}
       - MAILBOX_ENABLED=${MAILBOX_ENABLED:-false}
       - AGENT_MAILBOX_KEY=${SUPPORT_MAILBOX_KEY:-}
       - ASI_ONE_API_KEY=${ASI_ONE_API_KEY}
       - NETWORK=${NETWORK:-testnet}
       - ENDPOINT=http://0.0.0.0:10000/submit
-      - ZKMEM_CONTRACT_ADDRESS=${ZKMEM_CONTRACT_ADDRESS:-}
+      - ETHMem_CONTRACT_ADDRESS=${ETHMem_CONTRACT_ADDRESS:-}
       - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
       - PRIVATE_KEY=${PRIVATE_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -116,13 +116,13 @@ services:
     environment:
       - AGENT_NAME=education_system
       - AGENT_PORT=11000
-      - AGENT_SEED=${EDUCATION_AGENT_SEED:-education_agent_seed_zkMem_2024}
+      - AGENT_SEED=${EDUCATION_AGENT_SEED:-education_agent_seed_ETHMem_2024}
       - MAILBOX_ENABLED=${MAILBOX_ENABLED:-false}
       - AGENT_MAILBOX_KEY=${EDUCATION_MAILBOX_KEY:-}
       - ASI_ONE_API_KEY=${ASI_ONE_API_KEY}
       - NETWORK=${NETWORK:-testnet}
       - ENDPOINT=http://0.0.0.0:11000/submit
-      - ZKMEM_CONTRACT_ADDRESS=${ZKMEM_CONTRACT_ADDRESS:-}
+      - ETHMem_CONTRACT_ADDRESS=${ETHMem_CONTRACT_ADDRESS:-}
       - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
       - PRIVATE_KEY=${PRIVATE_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -150,13 +150,13 @@ services:
     environment:
       - AGENT_NAME=financial_system
       - AGENT_PORT=12000
-      - AGENT_SEED=${FINANCIAL_AGENT_SEED:-financial_agent_seed_zkMem_2024}
+      - AGENT_SEED=${FINANCIAL_AGENT_SEED:-financial_agent_seed_ETHMem_2024}
       - MAILBOX_ENABLED=${MAILBOX_ENABLED:-false}
       - AGENT_MAILBOX_KEY=${FINANCIAL_MAILBOX_KEY:-}
       - ASI_ONE_API_KEY=${ASI_ONE_API_KEY}
       - NETWORK=${NETWORK:-testnet}
       - ENDPOINT=http://0.0.0.0:12000/submit
-      - ZKMEM_CONTRACT_ADDRESS=${ZKMEM_CONTRACT_ADDRESS:-}
+      - ETHMem_CONTRACT_ADDRESS=${ETHMem_CONTRACT_ADDRESS:-}
       - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
       - PRIVATE_KEY=${PRIVATE_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}

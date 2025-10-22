@@ -31,7 +31,7 @@ export default function Navigation() {
               <span className="font-bold text-xl bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 ASI-Agents
               </span>
-              <span className="text-xs text-gray-400">Powered by zkMem</span>
+              <span className="text-xs text-gray-400">Powered by ETHMem</span>
             </div>
           </Link>
 

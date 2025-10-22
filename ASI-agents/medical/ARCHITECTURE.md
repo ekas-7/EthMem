@@ -21,7 +21,7 @@ The ASI-Agents system is a **multi-agent healthcare platform** that combines AI-
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      zKMem Ecosystem                                │
+│                      ETHMem Ecosystem                                │
 │                                                                     │
 │  ┌──────────────────┐                    ┌──────────────────┐     │
 │  │  Browser         │                    │  Ethereum        │     │

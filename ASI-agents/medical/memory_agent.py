@@ -171,7 +171,7 @@ class MemoryStorageInterface:
 # ============ INITIALIZE MEMORY AGENT ============
 memory_agent = Agent(
     name="memory_agent",
-    seed="memory_agent_seed_phrase_zkMem_2024",
+    seed="memory_agent_seed_phrase_ETHMem_2024",
     port=8002,
 )
 

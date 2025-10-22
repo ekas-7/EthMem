@@ -14,7 +14,7 @@ if (projectId === 'YOUR_PROJECT_ID') {
 
 // Create wagmi config
 const metadata = {
-  name: 'zKMem',
+  name: 'ETHMem',
   description: 'Unified LLM Memory with Blockchain Identity',
   url: 'https://ethmem.vercel.app/', // origin must match your domain & subdomain
   icons: ['https://avatars.githubusercontent.com/u/179229932']

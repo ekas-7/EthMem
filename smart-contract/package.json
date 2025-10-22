@@ -1,5 +1,5 @@
 {
-  "name": "zkmem-smart-contract",
+  "name": "ETHMem-smart-contract",
   "version": "1.0.0",
   "description": "Smart contract for IPFS-based memory storage with one-to-many address mapping",
   "main": "index.js",
@@ -15,7 +15,7 @@
     "node": "hardhat node",
     "run": "hardhat run"
   },
-  "author": "zKMem Team",
+  "author": "ETHMem Team",
   "license": "MIT",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",

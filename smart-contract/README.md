@@ -1,4 +1,4 @@
-# zKMem Smart Contract
+# ETHMem Smart Contract
 
 A Hardhat 3-based smart contract project for storing memory data on IPFS with one-to-many address mapping. Each Ethereum address can store multiple memory entries, where each entry contains an IPFS hash pointing to the actual data.
 
