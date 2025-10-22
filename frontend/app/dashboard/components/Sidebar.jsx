@@ -11,7 +11,6 @@ import {
   Settings, 
   Puzzle, 
   HelpCircle, 
-  LogOut,
   Menu,
   X,
   Wallet,
@@ -91,13 +90,7 @@ export default function Sidebar() {
     }
   }
 
-  const handleLogout = () => {
-    if (isConnected) {
-      disconnectWallet()
-    }
-    // Add additional logout logic here (clear local storage, etc.)
-    console.log('Logging out...')
-  }
+
 
   const handleCopyAddress = async () => {
     if (!address) return
@@ -206,24 +199,8 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Support & Logout */}
-        <div className="space-y-2">
-          <Link
-            href="/support"
-            className="flex items-center space-x-3 px-4 py-2.5 text-sm text-sidebar-muted hover:text-emerald-300 hover:bg-white/5 rounded-lg transition-all duration-200"
-          >
-            <HelpCircle className="w-4 h-4" />
-            <span>Support</span>
-          </Link>
-          
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 px-4 py-2.5 text-sm text-sidebar-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 w-full text-left"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
-        </div>
+       
+
       </div>
     </>
   )
