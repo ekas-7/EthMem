@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Clock, User } from 'lucide-react'
+import { Clock, User, Brain } from 'lucide-react'
 
 export default function MemoryViewer({ memories, userId, agentType }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   if (!memories || memories.length === 0) {
     return (
-      <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500">
+      <div className="glass rounded-lg p-4 text-center text-gray-400 border border-white/10">
         No previous history found for this user
       </div>
     )
@@ -18,18 +18,19 @@ export default function MemoryViewer({ memories, userId, agentType }) {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-        <span className="mr-2">🧠</span> Memory History
+      <h3 className="font-semibold text-lg text-white flex items-center">
+        <Brain className="mr-2 text-purple-400" size={20} />
+        Memory History
       </h3>
       
       <div className="space-y-3">
         {displayMemories.map((memory, index) => (
           <div
             key={index}
-            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            className="glass border border-white/10 rounded-lg p-4 hover:border-white/20 transition-all hover:bg-white/10"
           >
             <div className="flex items-start justify-between mb-2">
-              <span className="text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+              <span className="text-xs font-semibold px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-400 rounded-full border border-cyan-500/20">
                 {memory.category || 'General'}
               </span>
               {memory.timestamp && (
@@ -40,7 +41,7 @@ export default function MemoryViewer({ memories, userId, agentType }) {
               )}
             </div>
             
-            <p className="text-gray-700 text-sm leading-relaxed">
+            <p className="text-gray-300 text-sm leading-relaxed">
               {memory.context || memory.description || memory.content}
             </p>
             
@@ -49,7 +50,7 @@ export default function MemoryViewer({ memories, userId, agentType }) {
                 {memory.tags.map((tag, i) => (
                   <span
                     key={i}
-                    className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+                    className="text-xs px-2 py-0.5 bg-white/5 text-gray-400 rounded border border-white/10"
                   >
                     {tag}
                   </span>
@@ -63,7 +64,7 @@ export default function MemoryViewer({ memories, userId, agentType }) {
       {memories.length > 3 && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full py-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+          className="w-full py-2 text-cyan-400 hover:text-cyan-300 font-medium text-sm transition-colors"
         >
           {isExpanded ? 'Show Less' : `Show ${memories.length - 3} More`}
         </button>
