@@ -2,24 +2,38 @@
 console.log('[EthMem] Background script loaded');
 
 // Import memory extraction and storage modules
-importScripts(
-  '../lib/config.js',
-  '../lib/cloudService.js',
-  '../lib/memoryExtractor.js', 
-  '../lib/memoryStorage.js'
-);
+// Note: importScripts paths are relative to extension root
+try {
+  self.importScripts(
+    '/src/lib/memoryStorage.js',
+    '/src/lib/memoryExtractor.js', 
+    '/src/lib/cloudService.js'
+  );
+  console.log('[EthMem] Scripts imported successfully');
+} catch (error) {
+  console.error('[EthMem] Failed to import scripts:', error);
+  console.error('[EthMem] Error details:', error.message, error.name);
+}
 
 // Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
   console.log('[EthMem] Extension installed');
   
   // Initialize IndexedDB
-  initDB().catch(err => {
-    console.error('[EthMem] Failed to initialize DB:', err);
-  });
+  if (typeof initDB !== 'undefined') {
+    initDB().catch(err => {
+      console.error('[EthMem] Failed to initialize DB:', err);
+    });
+  } else {
+    console.error('[EthMem] initDB is not defined - scripts may not have loaded');
+  }
   
   // Initialize cloud service
-  initCloudService();
+  if (typeof initCloudService !== 'undefined') {
+    initCloudService();
+  } else {
+    console.error('[EthMem] initCloudService is not defined - scripts may not have loaded');
+  }
 });
 
 // Handle messages from content scripts

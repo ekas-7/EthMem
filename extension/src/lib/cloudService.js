@@ -23,7 +23,7 @@ function initCloudService() {
  * @returns {Promise<Object>} - Extracted memory
  */
 async function extractMemoryWithAI(text) {
-  if (!self.CONFIG || !self.self.CONFIG.USE_CLOUD_EXTRACTION) {
+  if (!self.CONFIG || !self.CONFIG.USE_CLOUD_EXTRACTION) {
     console.log('[CloudAI] Cloud extraction disabled');
     return null;
   }
