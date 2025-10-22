@@ -1,487 +1,972 @@
-# ASI-Agents: Memory-Enhanced Medical Consultation System
+# ASI-Agents: Multi-Domain AI Agent Ecosystems# ASI-Agents: Memory-Enhanced Medical Consultation System
 
-A multi-agent healthcare platform that combines **AI-powered medical consultation** with **decentralized memory management** using Fetch.ai's uAgents framework and ASI (Artificial Superintelligence) API.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)A multi-agent healthcare platform that combines **AI-powered medical consultation** with **decentralized memory management** using Fetch.ai's uAgents framework and ASI (Artificial Superintelligence) API.
+
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
+
+[![Fetch.ai uAgents](https://img.shields.io/badge/Fetch.ai-uAgents-00D4FF)](https://fetch.ai)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[![ASI API](https://img.shields.io/badge/ASI-API-purple)](https://asi1.ai)[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+
 [![uAgents](https://img.shields.io/badge/uAgents-0.12.0+-green.svg)](https://fetch.ai/)
+
+> **Three Complete Agent Ecosystems** - Medical, Legal & Customer Support - All Powered by ASI and Memory Integration
 
 ## 🌟 Features
 
-### Core Capabilities
+<p align="center">
 
-- 🏥 **AI-Powered Medical Consultation**: Uses ASI API (`asi1-mini`) for intelligent symptom analysis
-- 🧠 **Memory-Enhanced Healthcare**: Integrates user memories (allergies, conditions, medications) for personalized care
+  <img src="https://img.shields.io/badge/Medical-🏥-green" alt="Medical"/>### Core Capabilities
+
+  <img src="https://img.shields.io/badge/Legal-⚖️-blue" alt="Legal"/>
+
+  <img src="https://img.shields.io/badge/Support-🎧-orange" alt="Support"/>- 🏥 **AI-Powered Medical Consultation**: Uses ASI API (`asi1-mini`) for intelligent symptom analysis
+
+</p>- 🧠 **Memory-Enhanced Healthcare**: Integrates user memories (allergies, conditions, medications) for personalized care
+
 - 📬 **Protocol-Based Communication**: Type-safe agent-to-agent messaging with Fetch.ai protocols
-- 📅 **Appointment Scheduling**: Automated appointment booking and confirmation
+
+---- 📅 **Appointment Scheduling**: Automated appointment booking and confirmation
+
 - ⚡ **Urgency Assessment**: Automatic triage based on symptoms
-- 💾 **Blockchain Integration**: Ready for zkMem on-chain memory storage
+
+## 🌟 Overview- 💾 **Blockchain Integration**: Ready for zkMem on-chain memory storage
+
 - 🔒 **Privacy-First**: Local storage with optional blockchain sync
+
+Welcome to **ASI-Agents** - a comprehensive collection of three independent multi-agent systems, each designed for a specific domain but sharing the same powerful architecture:
 
 ### Agent System
 
-1. **Doctor Agent** - Provides medical consultations with memory-aware diagnosis
-2. **Patient Agent** - Simulates patient interactions and appointment requests
+- **🏥 Medical Consultation System** - AI-powered healthcare consultations with personalized medical memory
+
+- **⚖️ Legal Consultation System** - Intelligent legal advice with case history integration1. **Doctor Agent** - Provides medical consultations with memory-aware diagnosis
+
+- **🎧 Customer Support System** - Smart customer service with support ticket memory2. **Patient Agent** - Simulates patient interactions and appointment requests
+
 3. **Memory Agent** - Manages user memories from browser extension storage
+
+Each ecosystem is **completely independent** yet follows the **same architecture pattern**, making it easy to understand, extend, and deploy any or all of them.
+
+---
 
 ---
 
 ## 📋 Table of Contents
 
+## 📁 Project Structure
+
 - [Quick Start](#-quick-start)
-- [Architecture](#-architecture)
-- [Agents Overview](#-agents-overview)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Configuration](#%EF%B8%8F-configuration)
-- [API Reference](#-api-reference)
-- [Examples](#-examples)
-- [Contributing](#-contributing)
+
+```- [Architecture](#-architecture)
+
+ASI-agents/- [Agents Overview](#-agents-overview)
+
+├── README.md                    # This file - Main overview- [Installation](#-installation)
+
+├── requirements.txt             # Shared Python dependencies- [Usage](#-usage)
+
+├── setup.sh                     # Setup script for all ecosystems- [Configuration](#%EF%B8%8F-configuration)
+
+│- [API Reference](#-api-reference)
+
+├── medical/                     # 🏥 Medical Consultation Ecosystem- [Examples](#-examples)
+
+│   ├── doctor_agent.py          # AI doctor agent- [Contributing](#-contributing)
+
+│   ├── patient_agent.py         # Patient simulation agent
+
+│   ├── memory_agent.py          # Medical memory management---
+
+│   ├── medical_system.py        # Bureau-managed system
+
+│   ├── user_memories.json       # Medical memory storage## 🚀 Quick Start
+
+│   ├── ARCHITECTURE.md          # Medical system architecture
+
+│   └── README.md                # Medical system documentation```bash
+
+│# Clone the repository
+
+├── law/                         # ⚖️ Legal Consultation Ecosystemgit clone https://github.com/ekas-7/zKMem.git
+
+│   ├── lawyer_agent.py          # AI lawyer agentcd zKMem/ASI-agents
+
+│   ├── client_agent.py          # Client simulation agent
+
+│   ├── case_memory_agent.py     # Legal memory management# Create virtual environment
+
+│   ├── law_system.py            # Bureau-managed systempython3 -m venv venv
+
+│   ├── case_memories.json       # Legal case memory storagesource venv/bin/activate  # On Windows: venv\Scripts\activate
+
+│   ├── ARCHITECTURE.md          # Legal system architecture
+
+│   └── README.md                # Legal system documentation# Install dependencies
+
+│pip install -r requirements.txt
+
+└── customer-support/            # 🎧 Customer Support Ecosystem
+
+    ├── support_agent.py         # AI support agent# Configure environment
+
+    ├── customer_agent.py        # Customer simulation agentcp .env.example .env
+
+    ├── ticket_memory_agent.py   # Support memory management# Edit .env and add your ASI_ONE_API_KEY
+
+    ├── support_system.py        # Bureau-managed system
+
+    ├── customer_memories.json   # Customer memory storage# Run the complete system
+
+    ├── ARCHITECTURE.md          # Support system architecturepython medical_system.py
+
+    └── README.md                # Support system documentation```
+
+```
 
 ---
-
-## 🚀 Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/ekas-7/zKMem.git
-cd zKMem/ASI-agents
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env and add your ASI_ONE_API_KEY
-
-# Run the complete system
-python medical_system.py
-```
 
 ---
 
 ## 🏗️ Architecture
 
+## 🏗️ Shared Architecture
+
 The system uses a **multi-agent architecture** with protocol-based communication:
 
-```
-┌──────────────────┐      MemoryRequest      ┌──────────────────┐
-│  Memory Agent    │◄─────────────────────────│  Doctor Agent    │
-│  Port: 8002      │                          │  Port: 8000      │
-│                  │      MemoryResponse      │                  │
-│  - User memories │──────────────────────────►│  - ASI-powered   │
-│  - Categories    │                          │  - Memory-aware  │
-│  - Storage mgmt  │                          │  - Personalized  │
-└──────────────────┘                          └─────────┬────────┘
-         ▲                                              │
-         │                                              │
-         │                                              ▼
-         │                                    ┌──────────────────┐
-         │                                    │  Patient Agent   │
-         │                                    │  Port: 8001      │
-         │                                    │                  │
-         └────────────────────────────────────│  - Send queries  │
-                                              │  - Get advice    │
-                                              │  - Appointments  │
-                                              └──────────────────┘
-                       │
-                       ▼
-            ┌──────────────────┐
-            │ Browser Extension│
-            │   (IndexedDB)    │
-            └──────────────────┘
-                       │
-                       ▼
-            ┌──────────────────┐
-            │   Blockchain     │
-            │  (Future: zkMem) │
-            └──────────────────┘
+All three ecosystems follow the **same proven architecture**:
+
 ```
 
-👉 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
+```┌──────────────────┐      MemoryRequest      ┌──────────────────┐
 
----
+┌─────────────────────────────────────────────────────────────┐│  Memory Agent    │◄─────────────────────────│  Doctor Agent    │
+
+│                     ECOSYSTEM ARCHITECTURE                   ││  Port: 8002      │                          │  Port: 8000      │
+
+├─────────────────────────────────────────────────────────────┤│                  │      MemoryResponse      │                  │
+
+│                                                               ││  - User memories │──────────────────────────►│  - ASI-powered   │
+
+│  ┌──────────────┐        ┌──────────────┐                   ││  - Categories    │                          │  - Memory-aware  │
+
+│  │   Expert     │◄──────►│   Client     │                   ││  - Storage mgmt  │                          │  - Personalized  │
+
+│  │   Agent      │        │   Agent      │                   │└──────────────────┘                          └─────────┬────────┘
+
+│  │  (Doctor/    │        │  (Patient/   │                   │         ▲                                              │
+
+│  │   Lawyer/    │        │   Client/    │                   │         │                                              │
+
+│  │   Support)   │        │   Customer)  │                   │         │                                              ▼
+
+│  └──────┬───────┘        └──────────────┘                   │         │                                    ┌──────────────────┐
+
+│         │                                                     │         │                                    │  Patient Agent   │
+
+│         │ Request                                            │         │                                    │  Port: 8001      │
+
+│         │ Memories                                           │         │                                    │                  │
+
+│         ▼                                                     │         └────────────────────────────────────│  - Send queries  │
+
+│  ┌──────────────┐                                            │                                              │  - Get advice    │
+
+│  │   Memory     │                                            │                                              │  - Appointments  │
+
+│  │   Agent      │◄──── Browser Extension                    │                                              └──────────────────┘
+
+│  │  (Medical/   │      (JSON Export)                        │                       │
+
+│  │   Legal/     │                                            │                       ▼
+
+│  │   Support)   │                                            │            ┌──────────────────┐
+
+│  └──────────────┘                                            │            │ Browser Extension│
+
+│         │                                                     │            │   (IndexedDB)    │
+
+│         │ Enhanced                                           │            └──────────────────┘
+
+│         │ Context                                            │                       │
+
+│         ▼                                                     │                       ▼
+
+│  ┌──────────────┐                                            │            ┌──────────────────┐
+
+│  │   ASI API    │                                            │            │   Blockchain     │
+
+│  │   (asi1.ai)  │                                            │            │  (Future: zkMem) │
+
+│  │  AI Analysis │                                            │            └──────────────────┘
+
+│  └──────────────┘                                            │```
+
+│                                                               │
+
+│  All agents managed by Fetch.ai Bureau                       │👉 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
+
+│  Protocol-based communication via Agentverse                 │
+
+└─────────────────────────────────────────────────────────────┘---
+
+```
 
 ## 🤖 Agents Overview
 
+### Key Components (Same for All)
+
 ### 1. Doctor Agent (`doctor_agent.py`)
 
-**Provides AI-powered medical consultations**
+1. **Expert Agent** - Provides specialized advice (Medical/Legal/Support)
 
-**Features:**
-- Analyzes symptoms using ASI API
-- Requests user memories for context
+2. **Client Agent** - Simulates user interactions**Provides AI-powered medical consultations**
+
+3. **Memory Agent** - Manages personalized user/case/customer history
+
+4. **Bureau System** - Coordinates all agents in the ecosystem**Features:**
+
+5. **ASI API Integration** - Powers intelligent analysis and responses- Analyzes symptoms using ASI API
+
+6. **Protocol Communication** - Structured agent-to-agent messaging- Requests user memories for context
+
 - Generates personalized recommendations
-- Handles appointment scheduling
+
+---- Handles appointment scheduling
+
 - Emergency detection and triage
+
+## 🚀 Quick Start
 
 **Protocol:** `MedicalConsultationProtocol v1.0.0`
 
+### Prerequisites
+
 **Message Handlers:**
-```python
-@doctor_protocol.on_message(model=MedicalQuery, replies=MedicalAdvice)
-@doctor_protocol.on_message(model=AppointmentRequest, replies=AppointmentConfirmation)
+
+- Python 3.13+```python
+
+- ASI API key from [asi1.ai](https://asi1.ai)@doctor_protocol.on_message(model=MedicalQuery, replies=MedicalAdvice)
+
+- Internet connection for agent communication@doctor_protocol.on_message(model=AppointmentRequest, replies=AppointmentConfirmation)
+
 ```
+
+### Installation
 
 ### 2. Patient Agent (`patient_agent.py`)
 
-**Simulates patient interactions**
+```bash
 
-**Features:**
+# Clone the repository**Simulates patient interactions**
+
+git clone https://github.com/ekas-7/zKMem.git
+
+cd zKMem/ASI-agents**Features:**
+
 - Sends medical queries
-- Receives AI-powered advice
-- Requests appointments
-- Handles confirmations
 
-**Protocol:** `PatientConsultationProtocol v1.0.0`
+# Run setup script (creates .env, installs dependencies)- Receives AI-powered advice
+
+chmod +x setup.sh- Requests appointments
+
+./setup.sh- Handles confirmations
+
+
+
+# Or install manually**Protocol:** `PatientConsultationProtocol v1.0.0`
+
+pip install -r requirements.txt
 
 ### 3. Memory Agent (`memory_agent.py`)
 
-**Manages user memories from browser extension**
+# Configure your ASI API key
+
+echo "ASI_ONE_API_KEY=your_asi_api_key_here" > .env**Manages user memories from browser extension**
+
+```
 
 **Features:**
-- Reads from IndexedDB/JSON storage
+
+### Run Any Ecosystem- Reads from IndexedDB/JSON storage
+
 - Categorizes memories (medical, personal, preferences)
-- Serves memories to other agents via protocols
+
+Each ecosystem can run **completely independently**:- Serves memories to other agents via protocols
+
 - Supports filtering by category
 
-**Protocol:** `MemoryManagementProtocol v1.0.0`
+```bash
 
-**Memory Categories:**
+# 🏥 Medical System**Protocol:** `MemoryManagementProtocol v1.0.0`
+
+cd medical
+
+python medical_system.py**Memory Categories:**
+
 - Medical: `allergy`, `medication`, `condition`
-- Personal: `name`, `age`, `location`, `occupation`
-- Preferences: `food`, `hobby`, `music`, `movie`
-- Social: `family`, `friend`, `colleague`
+
+# ⚖️ Legal System- Personal: `name`, `age`, `location`, `occupation`
+
+cd law- Preferences: `food`, `hobby`, `music`, `movie`
+
+python law_system.py- Social: `family`, `friend`, `colleague`
+
 - Skills: `skill`, `language`, `education`
 
----
+# 🎧 Customer Support System
 
-## 📦 Installation
+cd customer-support---
 
-### Prerequisites
+python support_system.py
 
-- Python 3.13 or higher
+```## 📦 Installation
+
+
+
+---### Prerequisites
+
+
+
+## 🏥 Medical Consultation System- Python 3.13 or higher
+
 - pip package manager
-- ASI API key ([Get one here](https://asi1.ai))
+
+**Purpose**: AI-powered medical consultations with personalized health memory integration.- ASI API key ([Get one here](https://asi1.ai))
+
 - (Optional) Fetch.ai Agentverse account for mailbox
 
-### Step 1: Clone Repository
+### Features
 
-```bash
-git clone https://github.com/ekas-7/zKMem.git
-cd zKMem/ASI-agents
+- 🩺 Symptom analysis and preliminary diagnosis### Step 1: Clone Repository
+
+- 💊 Personalized recommendations based on medical history
+
+- 🧬 Allergy and condition awareness```bash
+
+- ⚠️ Urgency assessment and triagegit clone https://github.com/ekas-7/zKMem.git
+
+- 📋 Medical memory integration from browser extensioncd zKMem/ASI-agents
+
 ```
 
-### Step 2: Create Virtual Environment
+### Example Use Case
 
-```bash
-python3 -m venv venv
-source venv/bin/activate  # Linux/Mac
-# OR
-venv\Scripts\activate     # Windows
+```python### Step 2: Create Virtual Environment
+
+# Patient reports symptoms
+
+query = MedicalQuery(```bash
+
+    patient_id="PAT-001",python3 -m venv venv
+
+    symptoms="fever and cough for 3 days",source venv/bin/activate  # Linux/Mac
+
+    urgency_level="normal"# OR
+
+)venv\Scripts\activate     # Windows
+
 ```
 
-### Step 3: Install Dependencies
+# Doctor agent:
 
-```bash
-pip install -r requirements.txt
-```
+# 1. Requests medical memories (allergies, conditions)### Step 3: Install Dependencies
 
-### Step 4: Configure Environment
+# 2. Enhances medical history
 
-```bash
+# 3. Uses ASI API for intelligent diagnosis```bash
+
+# 4. Returns personalized medical advicepip install -r requirements.txt
+
+``````
+
+
+
+**[Full Documentation →](medical/README.md)**### Step 4: Configure Environment
+
+
+
+---```bash
+
 cp .env.example .env
-```
 
-Edit `.env` and add your credentials:
+## ⚖️ Legal Consultation System```
 
-```env
-# ASI API Configuration
-ASI_ONE_API_KEY=sk_your_asi_api_key_here
 
-# Agent Configuration
-AGENT_NAME=doctor_agent
+
+**Purpose**: Intelligent legal consultations with case history and jurisdiction awareness.Edit `.env` and add your credentials:
+
+
+
+### Features```env
+
+- 📜 Legal case analysis and preliminary assessment# ASI API Configuration
+
+- ⚖️ Jurisdiction-specific guidanceASI_ONE_API_KEY=sk_your_asi_api_key_here
+
+- 📚 Case history integration
+
+- 🔍 Legal issue identification# Agent Configuration
+
+- 📝 Next steps and recommendationsAGENT_NAME=doctor_agent
+
 AGENT_SEED=doctor_agent_seed_phrase_zkMem_2024
-```
 
----
+### Example Use Case```
 
-## 💻 Usage
+```python
 
-### Run Complete System (Recommended)
+# Client seeks legal advice---
 
-Run all agents in a single Bureau-managed process:
+query = LegalQuery(
 
-```bash
-python medical_system.py
-```
+    client_id="CLI-001",## 💻 Usage
 
-**Output:**
-```
+    case_description="Employment termination without cause",
+
+    case_type="civil",### Run Complete System (Recommended)
+
+    urgency_level="normal"
+
+)Run all agents in a single Bureau-managed process:
+
+
+
+# Lawyer agent:```bash
+
+# 1. Requests case memories (history, jurisdiction)python medical_system.py
+
+# 2. Analyzes legal issues```
+
+# 3. Uses ASI API for legal analysis
+
+# 4. Provides actionable legal recommendations**Output:**
+
+``````
+
 ======================================================================
-🏥 MEDICAL CONSULTATION SYSTEM WITH MEMORY INTEGRATION
+
+**[Full Documentation →](law/README.md)**🏥 MEDICAL CONSULTATION SYSTEM WITH MEMORY INTEGRATION
+
 ======================================================================
-👨‍⚕️ Doctor Agent:  agent1qvrt...
+
+---👨‍⚕️ Doctor Agent:  agent1qvrt...
+
 👤 Patient Agent: agent1qt8p...
-🧠 Memory Agent:  agent1qvk8...
+
+## 🎧 Customer Support System🧠 Memory Agent:  agent1qvk8...
+
 ======================================================================
-💾 Loaded 3 user memories:
+
+**Purpose**: AI-powered customer support with ticket history and preference awareness.💾 Loaded 3 user memories:
+
    - [name] User's name is John Doe
-   - [allergy] User is allergic to peanuts
-   - [condition] User has type 2 diabetes
-======================================================================
 
-INFO: [bureau]: Starting server on http://0.0.0.0:8000
-INFO: [patient_agent]: 📤 Sending medical consultation request...
+### Features   - [allergy] User is allergic to peanuts
+
+- 🎫 Intelligent ticket routing and analysis   - [condition] User has type 2 diabetes
+
+- 👤 Customer history integration======================================================================
+
+- 💡 Solution suggestions based on past issues
+
+- ⏱️ Resolution time estimationINFO: [bureau]: Starting server on http://0.0.0.0:8000
+
+- 📊 Priority assessmentINFO: [patient_agent]: 📤 Sending medical consultation request...
+
 INFO: [doctor_agent]: 📨 Received medical query
-INFO: [doctor_agent]: 🧠 Requesting user memories...
-INFO: [doctor_agent]: 💾 Found 2 medical memories
-INFO: [patient_agent]: 📋 MEDICAL ADVICE RECEIVED
-INFO: [patient_agent]: 🔍 Diagnosis: ...given your type 2 diabetes and peanut allergy...
-```
 
-### Run Individual Agents
+### Example Use CaseINFO: [doctor_agent]: 🧠 Requesting user memories...
 
-```bash
+```pythonINFO: [doctor_agent]: 💾 Found 2 medical memories
+
+# Customer submits support ticketINFO: [patient_agent]: 📋 MEDICAL ADVICE RECEIVED
+
+ticket = SupportTicket(INFO: [patient_agent]: 🔍 Diagnosis: ...given your type 2 diabetes and peanut allergy...
+
+    customer_id="CUST-001",```
+
+    issue_description="Can't log into account",
+
+    category="technical",### Run Individual Agents
+
+    priority="normal"
+
+)```bash
+
 # Terminal 1: Doctor Agent
-python doctor_agent.py
 
-# Terminal 2: Patient Agent  
-python patient_agent.py
+# Support agent:python doctor_agent.py
 
-# Terminal 3: Memory Agent
+# 1. Requests customer memories (history, preferences)
+
+# 2. Analyzes ticket with context# Terminal 2: Patient Agent  
+
+# 3. Uses ASI API for solution generationpython patient_agent.py
+
+# 4. Provides personalized support response
+
+```# Terminal 3: Memory Agent
+
 python memory_agent.py
-```
 
-### Run Setup Script
+**[Full Documentation →](customer-support/README.md)**```
 
-```bash
+
+
+---### Run Setup Script
+
+
+
+## 🔑 Key Technologies```bash
+
 chmod +x setup.sh
-./setup.sh
-```
 
----
+### Core Framework./setup.sh
 
-## ⚙️ Configuration
+- **Fetch.ai uAgents** (>=0.12.0) - Agent framework and protocol communication```
 
-### Environment Variables
+- **Python 3.13** - Primary programming language
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `ASI_ONE_API_KEY` | ASI API key for AI inference | Yes | - |
-| `AGENT_NAME` | Agent identifier | No | `doctor_agent` |
+- **Agentverse Mailbox** - Cloud-based agent messaging (no local ports needed!)---
+
+
+
+### AI & APIs## ⚙️ Configuration
+
+- **ASI API** (asi1.ai) - Artificial Superintelligence for intelligent analysis
+
+- **asi1-mini model** - Fast, accurate responses for all domains### Environment Variables
+
+
+
+### Data & Storage| Variable | Description | Required | Default |
+
+- **JSON-based Memory** - Local-first storage with optional sync|----------|-------------|----------|---------|
+
+- **Browser Extension** - Memory extraction from user interactions| `ASI_ONE_API_KEY` | ASI API key for AI inference | Yes | - |
+
+- **Pydantic Models** - Type-safe message passing| `AGENT_NAME` | Agent identifier | No | `doctor_agent` |
+
 | `AGENT_SEED` | Unique seed phrase for agent identity | No | Auto-generated |
-| `AGENT_MAILBOX_KEY` | Agentverse mailbox JWT token | No | - |
+
+---| `AGENT_MAILBOX_KEY` | Agentverse mailbox JWT token | No | - |
+
 | `NETWORK` | Network type (`testnet` or `mainnet`) | No | `testnet` |
+
+## 🎯 Common Features Across All Ecosystems
 
 ### Agent Ports
 
-| Agent | Port | Endpoint |
-|-------|------|----------|
-| Doctor Agent | 8000 | `http://0.0.0.0:8000` |
-| Patient Agent | 8001 | `http://0.0.0.0:8001` |
-| Memory Agent | 8002 | `http://0.0.0.0:8002` |
+| Feature | Medical | Legal | Support |
 
-### Memory Storage
+|---------|---------|-------|---------|| Agent | Port | Endpoint |
 
-User memories are stored in `user_memories.json`:
+| **AI-Powered Analysis** | ✅ Diagnosis | ✅ Legal Analysis | ✅ Solution Generation ||-------|------|----------|
 
-```json
+| **Memory Integration** | ✅ Medical History | ✅ Case History | ✅ Ticket History || Doctor Agent | 8000 | `http://0.0.0.0:8000` |
+
+| **Personalization** | ✅ Allergies, Conditions | ✅ Jurisdiction, Preferences | ✅ Purchase History, Preferences || Patient Agent | 8001 | `http://0.0.0.0:8001` |
+
+| **Urgency Assessment** | ✅ Triage Levels | ✅ Case Priority | ✅ Ticket Priority || Memory Agent | 8002 | `http://0.0.0.0:8002` |
+
+| **Recommendations** | ✅ Medical Advice | ✅ Legal Steps | ✅ Support Suggestions |
+
+| **Protocol Communication** | ✅ uAgents | ✅ uAgents | ✅ uAgents |### Memory Storage
+
+| **ASI API Integration** | ✅ | ✅ | ✅ |
+
+| **Bureau Management** | ✅ | ✅ | ✅ |User memories are stored in `user_memories.json`:
+
+
+
+---```json
+
 {
-  "memories": [
+
+## 🛠️ Development  "memories": [
+
     {
-      "id": "mem_001",
+
+### Adding a New Ecosystem      "id": "mem_001",
+
       "entity": "peanuts",
-      "category": "allergy",
+
+Want to create a **Financial Advisor**, **Educational Tutor**, or **Real Estate** ecosystem? Follow this pattern:      "category": "allergy",
+
       "context": "User is allergic to peanuts",
-      "timestamp": 1729598600000,
-      "status": "local",
-      "metadata": {
-        "source": "chat",
-        "confidence": 0.98
-      }
-    }
-  ]
+
+1. **Create folder**: `ASI-agents/your-domain/`      "timestamp": 1729598600000,
+
+2. **Create three agents**:      "status": "local",
+
+   - Expert agent (advisor/tutor/agent)      "metadata": {
+
+   - Client agent (user simulation)        "source": "chat",
+
+   - Memory agent (domain-specific memory)        "confidence": 0.98
+
+3. **Create system file**: Bureau-managed coordinator      }
+
+4. **Copy architecture**: Use medical/legal/support as template    }
+
+5. **Adapt domain logic**: Change prompts, categories, and models  ]
+
 }
-```
 
----
+### Running Tests```
+
+
+
+```bash---
+
+# Test individual ecosystem
+
+cd medical && python medical_system.py## 📚 API Reference
+
+cd law && python law_system.py
+
+cd customer-support && python support_system.py### Message Models
 
 ## 📚 API Reference
 
-### Message Models
-## 📚 API Reference
+# Each should show:
 
-### Message Models
+# - Agent addresses### Message Models
 
-#### MedicalQuery
-```python
-{
+# - Memory loading
+
+# - Protocol registration#### MedicalQuery
+
+# - Periodic interactions```python
+
+```{
+
     "patient_id": str,
-    "symptoms": str,
+
+---    "symptoms": str,
+
     "medical_history": str,  # Optional, auto-enhanced with memories
-    "urgency_level": "low" | "normal" | "high" | "emergency"
-}
-```
 
-#### MedicalAdvice
-```python
-{
+## 📊 Performance & Scalability    "urgency_level": "low" | "normal" | "high" | "emergency"
+
+}
+
+- **Response Time**: ~2-5 seconds (ASI API latency)```
+
+- **Memory Capacity**: Unlimited (JSON-based storage)
+
+- **Concurrent Agents**: Limited by Bureau (recommended: 3-10 per Bureau)#### MedicalAdvice
+
+- **Throughput**: ~10-20 requests/minute per ecosystem```python
+
+- **Scalability**: Horizontal (multiple Bureau instances){
+
     "patient_id": str,
-    "diagnosis": str,           # AI-generated diagnosis
+
+---    "diagnosis": str,           # AI-generated diagnosis
+
     "recommendations": List[str], # Personalized recommendations
-    "follow_up_required": bool,
+
+## 🔒 Security & Privacy    "follow_up_required": bool,
+
     "urgency_assessment": str
-}
-```
 
-#### AppointmentRequest
-```python
+### Data Protection}
+
+- **Local-First**: Memories stored locally before optional sync```
+
+- **Encryption Ready**: Structure supports encrypted storage
+
+- **User Control**: Users own and control their data#### AppointmentRequest
+
+- **No PHI/PII Storage**: Current version uses sample data only```python
+
 {
-    "patient_id": str,
+
+### Important Disclaimers    "patient_id": str,
+
     "preferred_date": str,
-    "reason": str
-}
+
+**Medical System**:    "reason": str
+
+⚠️ Provides **preliminary, educational information only**. NOT a substitute for professional medical advice.}
+
 ```
 
-#### AppointmentConfirmation
+**Legal System**:
+
+⚠️ Provides **general legal information only**. NOT a substitute for qualified legal counsel.#### AppointmentConfirmation
+
 ```python
-{
-    "patient_id": str,
+
+**Support System**:{
+
+⚠️ Provides **automated support**. Complex issues may require human escalation.    "patient_id": str,
+
     "appointment_id": str,      # Auto-generated ID
-    "scheduled_date": str,
+
+---    "scheduled_date": str,
+
     "status": "confirmed" | "pending" | "cancelled"
-}
+
+## 📝 Configuration}
+
 ```
+
+### Environment Variables (.env)
 
 #### MemoryRequest
-```python
-{
-    "user_id": str,
+
+```bash```python
+
+# Required for all ecosystems{
+
+ASI_ONE_API_KEY=your_asi_api_key_here    "user_id": str,
+
     "category": Optional[str],  # Filter: allergy, condition, medication, etc.
-    "limit": Optional[int]       # Max results, default: 10
-}
-```
 
-#### MemoryResponse
+# Optional: Custom ports (defaults shown)    "limit": Optional[int]       # Max results, default: 10
+
+MEDICAL_PORT=8000}
+
+LAW_PORT=9000```
+
+SUPPORT_PORT=10000
+
+```#### MemoryResponse
+
 ```python
-{
+
+### Memory Files{
+
     "user_id": str,
-    "memories": List[Dict],     # Array of UserMemory objects
-    "count": int
-}
-```
 
----
+Each ecosystem has its own memory file:    "memories": List[Dict],     # Array of UserMemory objects
 
-## 📖 Examples
+- **Medical**: `user_memories.json` (allergies, conditions, medications)    "count": int
 
-### Example 1: Medical Consultation with Allergies
+- **Legal**: `case_memories.json` (cases, jurisdiction, preferences)}
 
-**Input (Patient):**
+- **Support**: `customer_memories.json` (purchases, issues, preferences)```
+
+
+
+Files are auto-created with sample data on first run.---
+
+
+
+---## 📖 Examples
+
+
+
+## 🤝 Contributing### Example 1: Medical Consultation with Allergies
+
+
+
+We welcome contributions! Here's how:**Input (Patient):**
+
 ```python
-query = MedicalQuery(
-    patient_id="PAT-001",
-    symptoms="fever and cough for 3 days, feeling very tired",
-    medical_history="",
-    urgency_level="normal"
-)
-```
 
-**Memory Agent provides:**
-```json
-{
-  "memories": [
-    {"category": "allergy", "entity": "peanuts"},
-    {"category": "condition", "entity": "type 2 diabetes"}
-  ]
+1. **Fork the repository**query = MedicalQuery(
+
+2. **Create a feature branch**    patient_id="PAT-001",
+
+   ```bash    symptoms="fever and cough for 3 days, feeling very tired",
+
+   git checkout -b feature/amazing-feature    medical_history="",
+
+   ```    urgency_level="normal"
+
+3. **Make your changes**)
+
+   - Follow existing code patterns```
+
+   - Add tests if applicable
+
+   - Update documentation**Memory Agent provides:**
+
+4. **Commit and push**```json
+
+   ```bash{
+
+   git commit -m "Add: amazing feature"  "memories": [
+
+   git push origin feature/amazing-feature    {"category": "allergy", "entity": "peanuts"},
+
+   ```    {"category": "condition", "entity": "type 2 diabetes"}
+
+5. **Open a Pull Request**  ]
+
 }
-```
 
-**Output (Doctor):**
-```python
-advice = MedicalAdvice(
-    patient_id="PAT-001",
-    diagnosis="Based on your symptoms—fever, cough, and fatigue—especially given your type 2 diabetes and peanut allergy, consult a healthcare provider promptly...",
+### Contribution Ideas```
+
+- 🆕 New domain ecosystems (Education, Finance, Real Estate)
+
+- 🧪 Unit tests and integration tests**Output (Doctor):**
+
+- 📚 Enhanced documentation and tutorials```python
+
+- 🎨 UI/Frontend for agent interactionadvice = MedicalAdvice(
+
+- 🔧 Performance optimizations    patient_id="PAT-001",
+
+- 🌐 Multi-language support    diagnosis="Based on your symptoms—fever, cough, and fatigue—especially given your type 2 diabetes and peanut allergy, consult a healthcare provider promptly...",
+
     recommendations=[
-        "Monitor blood glucose levels closely",
+
+---        "Monitor blood glucose levels closely",
+
         "Avoid peanuts and known allergens",
-        "Stay hydrated with sugar-free fluids",
+
+## 📚 Documentation        "Stay hydrated with sugar-free fluids",
+
         "Contact provider if symptoms worsen"
-    ],
-    follow_up_required=False,
-    urgency_assessment="normal"
-)
+
+- **[Medical System Architecture](medical/ARCHITECTURE.md)** - Detailed medical agent design    ],
+
+- **[Legal System Architecture](law/ARCHITECTURE.md)** - Legal consultation architecture    follow_up_required=False,
+
+- **[Support System Architecture](customer-support/ARCHITECTURE.md)** - Customer support design    urgency_assessment="normal"
+
+- **[Fetch.ai uAgents Docs](https://docs.fetch.ai/uAgents)** - Official uAgents documentation)
+
+- **[ASI API Docs](https://asi1.ai/docs)** - ASI API reference```
+
+
+
+---### Example 2: Emergency Detection
+
+
+
+## 🗺️ Roadmap**Input:**
+
+```python
+
+### Phase 1 (Current) ✅query = MedicalQuery(
+
+- Three complete ecosystems (Medical, Legal, Support)    patient_id="PAT-002",
+
+- ASI API integration    symptoms="severe chest pain and difficulty breathing",
+
+- Memory management    urgency_level="normal"  # User may not recognize urgency
+
+- Protocol-based communication)
+
 ```
 
-### Example 2: Emergency Detection
+### Phase 2 (Q1 2025)
 
-**Input:**
-```python
-query = MedicalQuery(
-    patient_id="PAT-002",
-    symptoms="severe chest pain and difficulty breathing",
-    urgency_level="normal"  # User may not recognize urgency
-)
-```
+- Frontend dashboards for each ecosystem**Output:**
 
-**Output:**
-```python
-advice = MedicalAdvice(
-    patient_id="PAT-002",
+- Real-time agent monitoring```python
+
+- Enhanced memory sync with blockchainadvice = MedicalAdvice(
+
+- Multi-user support    patient_id="PAT-002",
+
     diagnosis="URGENT: Possible cardiac issue requiring immediate attention",
-    recommendations=[
-        "CALL EMERGENCY SERVICES IMMEDIATELY",
-        "Do not drive yourself",
-        "Avoid physical exertion",
-        "Seek emergency medical care"
+
+### Phase 3 (Q2 2025)    recommendations=[
+
+- New ecosystems (Financial, Educational, Real Estate)        "CALL EMERGENCY SERVICES IMMEDIATELY",
+
+- Voice interface integration        "Do not drive yourself",
+
+- Mobile apps        "Avoid physical exertion",
+
+- Enterprise deployment tools        "Seek emergency medical care"
+
     ],
-    follow_up_required=True,
-    urgency_assessment="emergency"  # Auto-upgraded
-)
-```
+
+### Phase 4 (Future)    follow_up_required=True,
+
+- zkMem blockchain full integration    urgency_assessment="emergency"  # Auto-upgraded
+
+- Decentralized agent marketplace)
+
+- Cross-ecosystem agent collaboration```
+
+- Advanced analytics and reporting
 
 ### Example 3: Memory Query
 
-```python
-# Request all medical memories
-request = MemoryRequest(
-    user_id="user_001",
-    category="allergy",
-    limit=5
-)
-
-# Response
-response = MemoryResponse(
-    user_id="user_001",
-    memories=[
-        {
-            "id": "mem_003",
-            "entity": "peanuts",
-            "category": "allergy",
-            "context": "User is allergic to peanuts",
-            "timestamp": 1729598600000,
-            "status": "local",
-            "metadata": {"source": "chat", "confidence": 0.98}
-        }
-    ],
-    count=1
-)
-```
-
 ---
 
-## 🧪 Testing
+```python
 
-### Run Tests
+## 📞 Support & Community# Request all medical memories
 
-```bash
+request = MemoryRequest(
+
+- 📧 **Email**: support@zkmem.dev    user_id="user_001",
+
+- 💬 **Discord**: [Join our community](https://discord.gg/zkmem)    category="allergy",
+
+- 🐛 **Issues**: [GitHub Issues](https://github.com/ekas-7/zKMem/issues)    limit=5
+
+- 📖 **Docs**: [Full Documentation](https://docs.zkmem.dev))
+
+- 🐦 **Twitter**: [@zkMem](https://twitter.com/zkmem)
+
+# Response
+
+---response = MemoryResponse(
+
+    user_id="user_001",
+
+## 📄 License    memories=[
+
+        {
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.            "id": "mem_003",
+
+            "entity": "peanuts",
+
+---            "category": "allergy",
+
+            "context": "User is allergic to peanuts",
+
+## 🙏 Acknowledgments            "timestamp": 1729598600000,
+
+            "status": "local",
+
+- **Fetch.ai** - uAgents framework and Agentverse platform            "metadata": {"source": "chat", "confidence": 0.98}
+
+- **ASI.ai** - Artificial Superintelligence API        }
+
+- **zkMem Team** - Decentralized memory vision and browser extension    ],
+
+- **Contributors** - Everyone who has helped build and improve this project!    count=1
+
+)
+
+---```
+
+
+
+## 🌟 Star the Project!---
+
+
+
+If you find this project useful, please consider giving it a ⭐ on GitHub!## 🧪 Testing
+
+
+
+---### Run Tests
+
+
+
+**Built with ❤️ using Fetch.ai uAgents and ASI API**```bash
+
 # Run all tests
-pytest
+
+*Empowering intelligent agent ecosystems across Medical, Legal, and Customer Support domains*pytest
+
+
 
 # Run specific test file
 pytest tests/test_doctor_agent.py
