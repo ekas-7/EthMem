@@ -1,11 +1,42 @@
 'use client'
 
 import Sidebar from "../components/Sidebar";
-import { BarChart3, TrendingUp, Activity, Clock, Database, Zap, PieChart, Users } from 'lucide-react';
+import { BarChart3, TrendingUp, Activity, Clock, Database, Zap, PieChart, Users, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+
+const connectedApps = [
+  { 
+    name: 'ChatGPT', 
+    interactions: 4250, 
+    icon: '/chatgpt2.png',
+    url: 'https://chatgpt.com'
+  },
+  { 
+    name: 'Claude', 
+    interactions: 3180, 
+    icon: '/claude.jpeg',
+    url: 'https://claude.ai'
+  },
+  { 
+    name: 'Gemini', 
+    interactions: 2890, 
+    icon: '/gemini.png',
+    url: 'https://gemini.google.com'
+  },
+  { 
+    name: 'LLaMA', 
+    interactions: 2001, 
+    icon: '/llama.png',
+    url: 'https://llama.meta.com'
+  },
+];
 
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('30d');
+
+  const handleVisitApp = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="min-h-screen bg-background-dark text-white flex relative">
@@ -123,7 +154,7 @@ export default function AnalyticsPage() {
                 { label: 'ChatGPT', value: 4250, color: 'bg-emerald-400', percent: 85 },
                 { label: 'Claude', value: 3180, color: 'bg-blue-400', percent: 65 },
                 { label: 'Gemini', value: 2890, color: 'bg-purple-400', percent: 58 },
-                { label: 'Local LLMs', value: 2001, color: 'bg-pink-400', percent: 42 },
+                { label: 'LLaMA', value: 2001, color: 'bg-pink-400', percent: 42 },
               ].map((item, i) => (
                 <div key={i} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
@@ -206,22 +237,26 @@ export default function AnalyticsPage() {
               Top Connected Apps
             </h3>
             <div className="space-y-3">
-              {[
-                { name: 'ChatGPT', interactions: 4250, icon: '🤖' },
-                { name: 'Claude', interactions: 3180, icon: '🧠' },
-                { name: 'Gemini', interactions: 2890, icon: '💎' },
-                { name: 'Local LLMs', interactions: 2001, icon: '💻' },
-              ].map((app, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-card-darker rounded-lg border border-white/5 hover:border-emerald-400/20 transition-all group">
+              {connectedApps.map((app, i) => (
+                <div 
+                  key={i} 
+                  className="flex items-center justify-between p-3 bg-card-darker rounded-lg border border-white/5 hover:border-emerald-400/20 transition-all group cursor-pointer"
+                  onClick={() => handleVisitApp(app.url)}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-900/30 rounded-lg flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-                      {app.icon}
+                    <div className="w-10 h-10  rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden">
+                      <img 
+                        src={app.icon} 
+                        alt={app.name}
+                        className="w-full h-full object-cover rounded"
+                      />
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-sidebar-text">{app.name}</div>
                       <div className="text-xs text-muted">{app.interactions.toLocaleString()} interactions</div>
                     </div>
                   </div>
+                  <ExternalLink className="w-4 h-4 text-muted group-hover:text-emerald-400 transition-colors" />
                 </div>
               ))}
             </div>
