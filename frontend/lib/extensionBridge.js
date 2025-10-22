@@ -27,24 +27,31 @@ class ExtensionBridge {
         return false
       }
 
-      // First check if extension is available via window message
-      const extensionAvailable = await this.checkExtensionViaMessage()
-      if (extensionAvailable) {
-        this.isExtensionAvailable = true
-        this.retryCount = 0
-        this.lastError = null
-        return true
+      // Try multiple times with increasing delays
+      const maxAttempts = 3
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        console.log(`[ExtensionBridge] Checking extension availability (attempt ${attempt}/${maxAttempts})`)
+        
+        // Only use window message method for webpages
+        // Webpages cannot use chrome.runtime.sendMessage directly
+        const extensionAvailable = await this.checkExtensionViaMessage()
+        if (extensionAvailable) {
+          console.log('[ExtensionBridge] Extension available')
+          this.isExtensionAvailable = true
+          this.retryCount = 0
+          this.lastError = null
+          return true
+        }
+
+        // Wait before next attempt (except on last attempt)
+        if (attempt < maxAttempts) {
+          const delay = attempt * 1000 // 1s, 2s delays
+          console.log(`[ExtensionBridge] Extension not found, retrying in ${delay}ms...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+        }
       }
 
-      // Fallback to chrome.runtime method
-      if (window.chrome?.runtime) {
-        const response = await this.sendMessage({ type: 'GET_MEMORY_STATS' })
-        this.isExtensionAvailable = true
-        this.retryCount = 0
-        this.lastError = null
-        return true
-      }
-
+      console.log('[ExtensionBridge] Extension not available after all attempts')
       this.isExtensionAvailable = false
       return false
     } catch (error) {
@@ -62,13 +69,27 @@ class ExtensionBridge {
     return new Promise((resolve) => {
       const timeout = setTimeout(() => {
         resolve(false)
-      }, 1000) // 1 second timeout
+      }, 3000) // Increased to 3 second timeout
 
+      const requestId = Date.now()
+      
       const handleMessage = (event) => {
+        // Check for extension ready message
         if (event.data?.type === 'ETHMEM_EXTENSION_READY') {
           clearTimeout(timeout)
           window.removeEventListener('message', handleMessage)
           resolve(true)
+          return
+        }
+        
+        // Check for response to our GET_STATS request
+        if (event.data?.type === 'ETHMEM_RESPONSE' && 
+            event.data?.requestId === requestId &&
+            event.data?.action === 'GET_STATS') {
+          clearTimeout(timeout)
+          window.removeEventListener('message', handleMessage)
+          resolve(true)
+          return
         }
       }
 
@@ -78,7 +99,7 @@ class ExtensionBridge {
       window.postMessage({
         type: 'ETHMEM_REQUEST',
         action: 'GET_STATS',
-        requestId: Date.now()
+        requestId: requestId
       }, window.location.origin)
     })
   }
@@ -87,29 +108,59 @@ class ExtensionBridge {
    * Send message to extension with retry logic
    */
   async sendMessage(message) {
-    return new Promise((resolve, reject) => {
-      if (!window.chrome?.runtime) {
-        reject(new Error('Chrome runtime not available'))
-        return
-      }
+    // Always use window message method for webpages
+    // Webpages cannot use chrome.runtime.sendMessage directly
+    try {
+      return await this.sendMessageViaWindow(message)
+    } catch (error) {
+      console.warn('[ExtensionBridge] Window message failed:', error.message)
+      throw error
+    }
+  }
 
-      chrome.runtime.sendMessage(message, (response) => {
-        if (chrome.runtime.lastError) {
-          const error = chrome.runtime.lastError
+  /**
+   * Send message via window postMessage
+   */
+  async sendMessageViaWindow(message) {
+    return new Promise((resolve, reject) => {
+      const requestId = Date.now()
+      const timeout = setTimeout(() => {
+        reject(new Error('Extension communication timeout'))
+      }, 5000) // 5 second timeout
+
+      const handleMessage = (event) => {
+        if (event.data?.type === 'ETHMEM_RESPONSE' && event.data.requestId === requestId) {
+          clearTimeout(timeout)
+          window.removeEventListener('message', handleMessage)
           
-          // Check if it's a context invalidated error
-          if (error.message.includes('Extension context invalidated') || 
-              error.message.includes('Receiving end does not exist')) {
-            console.warn('[ExtensionBridge] Extension context invalidated, marking as unavailable')
+        if (event.data.data?.success) {
+          resolve(event.data.data)
+        } else {
+          const error = new Error(event.data.data?.error || 'Unknown error')
+          // Mark context as invalidated if the error indicates it
+          if (event.data.data?.contextInvalidated) {
             this.isExtensionAvailable = false
             this.lastError = error
           }
-          
-          reject(new Error(error.message))
-        } else {
-          resolve(response)
+          reject(error)
         }
-      })
+        }
+      }
+
+      window.addEventListener('message', handleMessage)
+      
+      // Map message types to actions
+      let action = 'GET_STATS'
+      if (message.type === 'GET_MEMORIES') action = 'GET_MEMORIES'
+      else if (message.type === 'DELETE_MEMORY') action = 'DELETE_MEMORY'
+      else if (message.type === 'CLEAR_ALL_MEMORIES') action = 'CLEAR_ALL_MEMORIES'
+      
+      window.postMessage({
+        type: 'ETHMEM_REQUEST',
+        action: action,
+        requestId: requestId,
+        memoryId: message.payload?.id
+      }, window.location.origin)
     })
   }
 
@@ -132,7 +183,8 @@ class ExtensionBridge {
         
         // If it's a context invalidated error, don't retry immediately
         if (error.message.includes('Extension context invalidated') || 
-            error.message.includes('Receiving end does not exist')) {
+            error.message.includes('Receiving end does not exist') ||
+            error.message.includes('Extension communication timeout')) {
           this.isExtensionAvailable = false
           throw error
         }
