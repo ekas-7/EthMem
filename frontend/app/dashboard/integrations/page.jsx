@@ -8,18 +8,20 @@ const integrations = [
   {
     name: "ChatGPT",
     description: "AI-powered conversational assistant",
-    status: "connected",
-    icon: "/chatgpt.png",
-    lastSync: "2 minutes ago",
-    interactions: "4.2k"
+    status: "available",
+    icon: "/chatgpt2.png",
+    lastSync: null,
+    interactions: "0",
+    url: "https://chatgpt.com"
   },
   {
     name: "Claude AI",
     description: "Advanced AI assistant by Anthropic",
-    status: "connected",
+    status: "available",
     icon: "/claude.jpeg",
-    lastSync: "5 minutes ago",
-    interactions: "3.1k"
+    lastSync: null,
+    interactions: "0",
+    url: "https://claude.ai"
   },
   {
     name: "Gemini",
@@ -27,7 +29,8 @@ const integrations = [
     status: "available",
     icon: "/gemini.png",
     lastSync: null,
-    interactions: "0"
+    interactions: "0",
+    url: "https://gemini.google.com"
   },
   {
     name: "LLaMA",
@@ -35,7 +38,17 @@ const integrations = [
     status: "available",
     icon: "/llama.png",
     lastSync: null,
-    interactions: "0"
+    interactions: "0",
+    url: "https://llama.meta.com"
+  },
+  {
+    name: "ASI",
+    description: "Artificial Superintelligence Network",
+    status: "available",
+    icon: "/asi.png",
+    lastSync: null,
+    interactions: "0",
+    url: "https://fetch.ai"
   }
 ];
 
@@ -43,42 +56,42 @@ const availableIntegrations = [
   {
     name: "Notion",
     description: "Connect your Notion workspace for seamless memory storage",
-    icon: "📝",
+    icon: "https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg",
     category: "Productivity",
     popular: true
   },
   {
     name: "Google Drive",
     description: "Backup memories to your Google Drive",
-    icon: "📁",
+    icon: "https://cdn.worldvectorlogo.com/logos/google-drive-2020.svg",
     category: "Storage",
     popular: false
   },
   {
     name: "Slack",
     description: "Enhanced team communication with memory context",
-    icon: "💬",
+    icon: "https://cdn.worldvectorlogo.com/logos/slack-new-logo.svg",
     category: "Communication",
     popular: true
   },
   {
     name: "Discord",
     description: "AI memory integration for Discord servers",
-    icon: "🎮",
+    icon: "https://cdn.worldvectorlogo.com/logos/discord-6.svg",
     category: "Communication",
     popular: false
   },
   {
     name: "Obsidian",
     description: "Sync your knowledge base with AI memory",
-    icon: "🧠",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/1/10/2023_Obsidian_logo.svg",
     category: "Productivity",
     popular: false
   },
   {
     name: "Zapier",
     description: "Automate workflows with memory data",
-    icon: "⚡",
+    icon: "https://cdn.worldvectorlogo.com/logos/zapier.svg",
     category: "Automation",
     popular: true
   }
@@ -90,6 +103,10 @@ export default function IntegrationsPage() {
   const filteredIntegrations = filter === 'all' 
     ? availableIntegrations 
     : availableIntegrations.filter(i => i.category === filter);
+
+  const handleVisitWebsite = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="min-h-screen bg-background-dark text-white flex relative">
@@ -108,104 +125,18 @@ export default function IntegrationsPage() {
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card-dark rounded-xl p-5 shadow-lg border border-white/5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted">Connected Apps</div>
-                <div className="text-2xl font-bold text-white mt-1">8</div>
-              </div>
-              <div className="p-3 bg-emerald-900/30 rounded-lg">
-                <Check className="w-6 h-6 text-emerald-400" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-card-dark rounded-xl p-5 shadow-lg border border-white/5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted">Total Interactions</div>
-                <div className="text-2xl font-bold text-white mt-1">7.3k</div>
-              </div>
-              <div className="p-3 bg-blue-900/30 rounded-lg">
-                <Zap className="w-6 h-6 text-blue-400" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-card-dark rounded-xl p-5 shadow-lg border border-white/5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted">Available</div>
-                <div className="text-2xl font-bold text-white mt-1">24+</div>
-              </div>
-              <div className="p-3 bg-purple-900/30 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-purple-400" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Connected Integrations */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-dark-primary mb-4">Connected LLMs</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {integrations.filter(i => i.status === 'connected').map((integration) => (
-              <div key={integration.name} className="bg-card-dark rounded-xl p-6 border border-emerald-500/20 shadow-lg hover:border-emerald-500/40 transition-all group">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-card-darker rounded-lg p-1 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <img 
-                        src={integration.icon} 
-                        alt={integration.name}
-                        className="w-full h-full rounded object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white">{integration.name}</h4>
-                      <p className="text-xs text-muted">{integration.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-1 px-2 py-1 bg-emerald-900/30 rounded-full">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-emerald-400 font-semibold">Active</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex items-center gap-4 text-sm">
-                    <div>
-                      <span className="text-muted">Last sync: </span>
-                      <span className="text-sidebar-text">{integration.lastSync}</span>
-                    </div>
-                    <div className="px-2 py-1 bg-card-darker rounded">
-                      <span className="text-muted">{integration.interactions} uses</span>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button className="p-2 text-muted hover:text-emerald-400 hover:bg-emerald-900/20 rounded-lg transition-all">
-                      <Settings className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-muted hover:text-blue-400 hover:bg-blue-900/20 rounded-lg transition-all">
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-muted hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-all">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Available Integrations */}
+        {/* Available LLMs */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-dark-primary">Available LLMs</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {integrations.filter(i => i.status === 'available').map((integration) => (
-              <div key={integration.name} className="bg-card-dark rounded-xl p-6 border border-white/5 shadow-lg hover:border-emerald-400/20 transition-all group">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {integrations.map((integration) => (
+              <div 
+                key={integration.name} 
+                className="bg-card-dark rounded-xl p-6 border border-white/5 shadow-lg hover:border-emerald-400/20 transition-all group cursor-pointer"
+                onClick={() => handleVisitWebsite(integration.url)}
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-card-darker rounded-lg p-1 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -220,19 +151,26 @@ export default function IntegrationsPage() {
                       <p className="text-xs text-muted">{integration.description}</p>
                     </div>
                   </div>
-                  <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg hover:shadow-emerald-500/30">
-                    Connect
-                  </button>
+                  <ExternalLink className="w-4 h-4 text-muted group-hover:text-emerald-400 transition-colors" />
                 </div>
+                <button 
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg hover:shadow-emerald-500/30"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleVisitWebsite(integration.url);
+                  }}
+                >
+                  Visit Website
+                </button>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Other Available Integrations */}
+        {/* Upcoming Integrations */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-dark-primary">Other Integrations</h3>
+            <h3 className="text-lg font-semibold text-dark-primary">Upcoming Integrations</h3>
             <div className="flex gap-2">
               {['all', 'Productivity', 'Storage', 'Communication', 'Automation'].map((cat) => (
                 <button
@@ -254,8 +192,12 @@ export default function IntegrationsPage() {
               <div key={integration.name} className="bg-card-dark rounded-xl p-6 border border-white/5 hover:border-gray-600 transition-all group shadow-lg">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-card-darker rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                      {integration.icon}
+                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
+                      <img 
+                        src={integration.icon} 
+                        alt={integration.name}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
