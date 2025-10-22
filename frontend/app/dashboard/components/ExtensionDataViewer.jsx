@@ -6,7 +6,7 @@ import extensionBridge from '../../../lib/extensionBridge'
 import { uploadMemoriesToContract, isConnectedToSepolia } from '../../../lib/contractService'
 import { useWallet } from '../../../hooks/useWallet'
 
-export default function ExtensionDataViewer() {
+export default function ExtensionDataViewer({ onMemoriesUpdate }) {
   const [memories, setMemories] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -62,6 +62,11 @@ export default function ExtensionDataViewer() {
         // Load memories from extension
         const extensionMemories = await extensionBridge.getMemories()
         setMemories(extensionMemories)
+        
+        // Notify parent component about the update
+        if (onMemoriesUpdate) {
+          onMemoriesUpdate()
+        }
       } else {
         // Check if it's a context invalidated error
         if (extensionBridge.isContextInvalidated()) {
@@ -145,6 +150,11 @@ export default function ExtensionDataViewer() {
       const success = await extensionBridge.deleteMemory(memoryId)
       if (success) {
         setMemories(memories.filter(m => m.id !== memoryId))
+        
+        // Notify parent component about the update
+        if (onMemoriesUpdate) {
+          onMemoriesUpdate()
+        }
       } else {
         setError('Failed to delete memory')
       }
@@ -226,6 +236,11 @@ export default function ExtensionDataViewer() {
           status: 'on-chain'
         }))
       )
+      
+      // Notify parent component about the update
+      if (onMemoriesUpdate) {
+        onMemoriesUpdate()
+      }
 
     } catch (err) {
       console.error('Upload failed:', err)

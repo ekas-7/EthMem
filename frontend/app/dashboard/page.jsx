@@ -24,6 +24,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboardData();
+    
+    // Set up interval to refresh data every 10 seconds
+    const interval = setInterval(() => {
+      loadDashboardData();
+    }, 10000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadDashboardData = async () => {
@@ -86,7 +93,7 @@ export default function DashboardPage() {
 
         {/* Extension Data Viewer - Memories at top */}
         <div className="mt-8">
-          <ExtensionDataViewer />
+          <ExtensionDataViewer onMemoriesUpdate={loadDashboardData} />
         </div>
 
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
