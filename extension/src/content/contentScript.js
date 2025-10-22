@@ -44,6 +44,22 @@
     }
   }
 
+  // Inject smartInjector.js for AI-powered memory injection
+  function injectSmartInjector() {
+    try {
+      const script = document.createElement('script');
+      script.src = chrome.runtime.getURL('src/page/smartInjector.js');
+      script.onload = function() {
+        console.log('[EthMem] smartInjector.js loaded successfully');
+        this.remove();
+      };
+      (document.head || document.documentElement).appendChild(script);
+      console.log('[EthMem] smartInjector.js injected into page context');
+    } catch (e) {
+      console.error('[EthMem] failed to inject smartInjector.js', e);
+    }
+  }
+
   // Inject memory viewer UI script
   function injectMemoryViewer() {
     // Note: We don't inject this as a script anymore - it will be inline in content script
@@ -498,6 +514,22 @@
     // Only accept messages from same origin
     if (event.source !== window) return;
     
+    // Handle smart injection requests
+    if (event.data && event.data.type === 'ETHMEM_SMART') {
+      console.log('[EthMem ContentScript] Smart injection request received');
+      
+      chrome.runtime.sendMessage({
+        type: 'PROCESS_MESSAGE_SMART',
+        payload: event.data.payload
+      }, (response) => {
+        window.postMessage({
+          type: 'ETHMEM_SMART_RES',
+          payload: response
+        }, '*');
+      });
+      return;
+    }
+    
     if (event.data && event.data.type === 'CHATGPT_LOG') {
       const payload = event.data.payload;
       
@@ -518,25 +550,16 @@
           entries.slice(-50).forEach(e => processedMessages.add(e));
         }
         
-        console.log('[EthMem] User message detected, sending for extraction:', payload.userMessage.substring(0, 100));
+        console.log('[EthMem] User message detected:', payload.userMessage.substring(0, 100));
         
-        // Send to background for memory extraction
-        chrome.runtime.sendMessage({
-          type: 'EXTRACT_MEMORY',
-          payload: {
-            text: payload.userMessage,
-            messageId: payload.timestamp.toString(),
-            platform: isChatGPT ? 'chatgpt' : isClaude ? 'claude' : 'gemini',
-            url: window.location.href,
-            timestamp: payload.timestamp
-          }
-        }).then(response => {
-          if (response && response.success) {
-            console.log('[EthMem] Memory extracted:', response.memory);
-          }
-        }).catch(error => {
-          console.error('[EthMem] Error extracting memory:', error);
-        });
+        // NOTE: Memory extraction is now handled by the smart injection system
+        // The smartInjector.js intercepts messages BEFORE sending and handles both:
+        // 1. Extracting new memories
+        // 2. Injecting relevant memories
+        // This avoids duplicate extraction and ensures seamless UX
+        
+        // Old automatic extraction disabled to prevent duplicates
+        // Memory extraction now happens in smartInjector when user sends message
       }
     }
 
@@ -922,6 +945,7 @@
   // Inject scripts
   injectPageScript();
   injectEthAdapter();
+  injectSmartInjector();
   injectMemoryViewer();
 
   // Auto-inject header button with retry logic (Claude and Gemini only, NOT ChatGPT)

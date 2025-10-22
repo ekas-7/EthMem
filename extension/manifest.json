@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ETHMem",
   "description": "Decentralized memory for ChatGPT, Claude, and Gemini - AI-powered memory extraction and on-chain storage.",
-  "version": "0.2.5",
+  "version": "0.2.92",
   "permissions": ["scripting", "activeTab", "storage"],
   "host_permissions": [
     "https://chat.openai.com/*",
@@ -34,6 +34,7 @@
         "assets/logo.png",
         "src/page/pageScript.js",
         "src/page/ethAdapter.js",
+        "src/page/smartInjector.js",
         "src/ui/memoryViewer.js",
         "src/ui/modelManagement.html",
         "src/ui/modelManagement.js",

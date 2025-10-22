@@ -5,6 +5,7 @@ console.log('[EthMem] Background script loaded');
 importScripts(
   '../lib/config.js',
   '../lib/cloudService.js',
+  '../lib/smartMemoryService.js',
   '../lib/memoryExtractor.js',
   '../lib/memoryStorage.js'
 );
@@ -61,6 +62,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   if (message.type === 'TEST_API_KEY') {
     handleTestApiKey(message.payload, sendResponse);
+    return true;
+  }
+  
+  // Smart memory processing
+  if (message.type === 'PROCESS_MESSAGE_SMART') {
+    handleProcessMessageSmart(message.payload, sendResponse);
     return true;
   }
 });
@@ -278,6 +285,97 @@ async function handleTestApiKey(payload, sendResponse) {
     sendResponse({
       success: false,
       error: error.message
+    });
+  }
+}
+
+/**
+ * Handle smart message processing (extract + rank in one call)
+ */
+async function handleProcessMessageSmart(payload, sendResponse) {
+  try {
+    const { userMessage } = payload;
+    
+    console.log('[EthMem] Smart processing message:', userMessage.substring(0, 50));
+    
+    // Get API config
+    const config = await loadConfig();
+    if (!config.apiKey) {
+      console.warn('[EthMem] No API key configured for smart processing');
+      sendResponse({
+        success: false,
+        error: 'No API key configured',
+        relevant: [],
+        newMemory: null
+      });
+      return;
+    }
+    
+    // Get all existing memories
+    const allMemories = await getAllMemories();
+    console.log('[EthMem] Processing with', allMemories.length, 'existing memories');
+    
+    // Process with GPT
+    const result = await processMessageSmart(
+      userMessage,
+      allMemories,
+      config.apiKey,
+      config.model
+    );
+    
+    // If there's a new memory, save it (after checking for duplicates)
+    if (result.newMemory) {
+      const memory = {
+        id: 'mem-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+        timestamp: Date.now(),
+        source: userMessage,
+        category: result.newMemory.category,
+        entity: result.newMemory.entity,
+        description: result.newMemory.description,
+        context: {
+          conversationId: 'chatgpt-' + Date.now(),
+          platform: 'chatgpt'
+        },
+        metadata: {
+          confidence: result.newMemory.confidence || 0.8,
+          modelUsed: config.model || 'gpt-3.5-turbo',
+          extractionVersion: '3.0-smart'
+        },
+        status: 'local'
+      };
+      
+      // Check for duplicates before saving
+      const duplicate = await isDuplicate(memory);
+      
+      if (duplicate) {
+        console.log('[EthMem] ⚠️  Duplicate memory detected, skipping save');
+      } else {
+        await saveMemory(memory);
+        console.log('[EthMem] ✅ New memory saved:', memory.description);
+      }
+    }
+    
+    // Format relevant memories for injection
+    const injectionText = formatMemoriesForInjection(result.relevant);
+    
+    console.log('[EthMem] Smart processing complete:');
+    console.log('[EthMem]   Relevant memories:', result.relevant.length);
+    console.log('[EthMem]   New memory:', result.newMemory ? 'Yes' : 'No');
+    
+    sendResponse({
+      success: true,
+      relevant: result.relevant,
+      injectionText: injectionText,
+      newMemory: result.newMemory
+    });
+    
+  } catch (error) {
+    console.error('[EthMem] Error in smart processing:', error);
+    sendResponse({
+      success: false,
+      error: error.message,
+      relevant: [],
+      newMemory: null
     });
   }
 }
