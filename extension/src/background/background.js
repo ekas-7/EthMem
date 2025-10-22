@@ -17,6 +17,9 @@ chrome.runtime.onInstalled.addListener(() => {
   initDB().catch(err => {
     console.error('[EthMem] Failed to initialize DB:', err);
   });
+  
+  // Initialize cloud service
+  initCloudService();
 });
 
 // Handle messages from content scripts
@@ -62,6 +65,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     handleGetRankedMemories(message.userMessage, message.maxMemories || 5, sendResponse);
     return true;
   }
+  
 });
 
 /**

@@ -4,16 +4,13 @@
  */
 
 // Import config (will be loaded via importScripts in background context)
-let CONFIG = null;
+// CONFIG is already available from config.js import
 
 /**
  * Initialize the service
  */
 function initCloudService() {
   try {
-    // Load config
-    importScripts('../lib/config.js');
-    CONFIG = self.CONFIG;
     console.log('[CloudAI] Service initialized');
   } catch (error) {
     console.error('[CloudAI] Failed to initialize:', error);
@@ -26,7 +23,7 @@ function initCloudService() {
  * @returns {Promise<Object>} - Extracted memory
  */
 async function extractMemoryWithAI(text) {
-  if (!CONFIG || !CONFIG.USE_CLOUD_EXTRACTION) {
+  if (!self.CONFIG || !self.self.CONFIG.USE_CLOUD_EXTRACTION) {
     console.log('[CloudAI] Cloud extraction disabled');
     return null;
   }
@@ -53,20 +50,20 @@ Rules:
 JSON:`;
 
   try {
-    const response = await fetch(CONFIG.API_ENDPOINT, {
+    const response = await fetch(self.CONFIG.API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CONFIG.API_KEY}`
+        'Authorization': `Bearer ${self.CONFIG.API_KEY}`
       },
       body: JSON.stringify({
-        model: CONFIG.MODEL,
+        model: self.CONFIG.MODEL,
         messages: [
           { role: 'system', content: 'You are a personal memory extraction assistant. Return only valid JSON.' },
           { role: 'user', content: prompt }
         ],
-        temperature: CONFIG.EXTRACTION_TEMPERATURE,
-        max_tokens: CONFIG.EXTRACTION_MAX_TOKENS
+        temperature: self.self.CONFIG.EXTRACTION_TEMPERATURE,
+        max_tokens: self.self.CONFIG.EXTRACTION_MAX_TOKENS
       })
     });
 
@@ -111,7 +108,7 @@ JSON:`;
  * @returns {Promise<Array>} - Top N relevant memories
  */
 async function rankMemoriesWithAI(userMessage, memories, topN = 5) {
-  if (!CONFIG || !CONFIG.USE_CLOUD_RANKING) {
+  if (!self.CONFIG || !self.self.CONFIG.USE_CLOUD_RANKING) {
     console.log('[CloudAI] Cloud ranking disabled');
     return memories.slice(0, topN);
   }
@@ -144,20 +141,20 @@ Example: [3, 7, 1, 5, 2]
 JSON array:`;
 
   try {
-    const response = await fetch(CONFIG.API_ENDPOINT, {
+    const response = await fetch(self.CONFIG.API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CONFIG.API_KEY}`
+        'Authorization': `Bearer ${self.CONFIG.API_KEY}`
       },
       body: JSON.stringify({
-        model: CONFIG.MODEL,
+        model: self.CONFIG.MODEL,
         messages: [
           { role: 'system', content: 'You are a memory relevance ranking system. Return only a JSON array of indices.' },
           { role: 'user', content: prompt }
         ],
-        temperature: CONFIG.RANKING_TEMPERATURE,
-        max_tokens: CONFIG.RANKING_MAX_TOKENS
+        temperature: self.CONFIG.RANKING_TEMPERATURE,
+        max_tokens: self.CONFIG.RANKING_MAX_TOKENS
       })
     });
 
@@ -194,7 +191,4 @@ JSON array:`;
   }
 }
 
-// Initialize on load
-if (typeof self !== 'undefined' && self.importScripts) {
-  initCloudService();
-}
+// Service will be initialized by background script

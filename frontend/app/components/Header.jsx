@@ -14,6 +14,10 @@ export default function Header() {
     router.push('/dashboard');
   };
 
+  const handleGoToStorage = () => {
+    router.push('/storage');
+  };
+
   return (
     <header className="bg-gradient-to-br from-[#0B2F1B] to-[#07120B] rounded-b-xl sm:rounded-b-2xl md:rounded-b-[3rem] p-4 sm:p-6 text-white relative overflow-hidden">
       {/* subtle grid overlay */}
@@ -35,12 +39,20 @@ export default function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
             {isConnected && (
-              <button 
-                onClick={handleGoToDashboard}
-                className="hover:text-white transition-colors"
-              >
-                Dashboard
-              </button>
+              <>
+                <button 
+                  onClick={handleGoToDashboard}
+                  className="hover:text-white transition-colors"
+                >
+                  Dashboard
+                </button>
+                <button 
+                  onClick={handleGoToStorage}
+                  className="hover:text-white transition-colors"
+                >
+                  Storage
+                </button>
+              </>
             )}
             <a className="hover:text-white transition-colors" href="#">Features</a>
             <a className="hover:text-white transition-colors" href="#">Resources</a>
@@ -68,15 +80,26 @@ export default function Header() {
           <div className="md:hidden bg-black/20 backdrop-blur-sm rounded-lg mx-2 sm:mx-6 mb-4 p-4">
             <div className="flex flex-col space-y-4 text-sm font-medium text-gray-300">
               {isConnected && (
-                <button 
-                  onClick={() => {
-                    handleGoToDashboard();
-                    setIsMenuOpen(false);
-                  }}
-                  className="hover:text-white transition-colors py-2 text-left"
-                >
-                  Dashboard
-                </button>
+                <>
+                  <button 
+                    onClick={() => {
+                      handleGoToDashboard();
+                      setIsMenuOpen(false);
+                    }}
+                    className="hover:text-white transition-colors py-2 text-left"
+                  >
+                    Dashboard
+                  </button>
+                  <button 
+                    onClick={() => {
+                      handleGoToStorage();
+                      setIsMenuOpen(false);
+                    }}
+                    className="hover:text-white transition-colors py-2 text-left"
+                  >
+                    Storage
+                  </button>
+                </>
               )}
               <a className="hover:text-white transition-colors py-2" href="#">Features</a>
               <a className="hover:text-white transition-colors py-2" href="#">Resources</a>

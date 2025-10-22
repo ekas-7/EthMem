@@ -13,18 +13,30 @@ export default function ConnectWallet({ className = '', variant = 'default' }) {
     formattedAddress, 
     balance, 
     connectWallet, 
+    connectMetaMask,
     disconnectWallet, 
-    connectors 
+    connectors,
+    connectError,
+    getMetaMaskConnector
   } = useWallet()
   
   const [showDropdown, setShowDropdown] = useState(false)
   const router = useRouter()
 
   const handleConnect = () => {
-    // Use the first available connector (usually MetaMask)
-    const connector = connectors[0]
-    if (connector) {
-      connectWallet(connector)
+    // Try to connect to MetaMask specifically
+    const metaMaskConnector = getMetaMaskConnector()
+    if (metaMaskConnector) {
+      console.log('Connecting to MetaMask...')
+      connectMetaMask()
+    } else {
+      console.log('MetaMask not found, using first available connector')
+      const connector = connectors[0]
+      if (connector) {
+        connectWallet(connector)
+      } else {
+        console.error('No wallet connectors available')
+      }
     }
   }
 
@@ -87,26 +99,34 @@ export default function ConnectWallet({ className = '', variant = 'default' }) {
   }
 
   return (
-    <button
-      onClick={handleConnect}
-      disabled={isConnecting}
-      className={`font-semibold py-2 px-4 rounded-full flex items-center gap-2 transition-colors ${
-        variant === 'primary' 
-          ? 'bg-emerald-400 hover:bg-emerald-500 text-black' 
-          : 'bg-emerald-400 hover:bg-emerald-500 text-black'
-      } ${isConnecting ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
-    >
-      {isConnecting ? (
-        <>
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-          <span>Connecting...</span>
-        </>
-      ) : (
-        <>
-          <User size={16} />
-          <span>Connect Wallet</span>
-        </>
+    <div className={className}>
+      {connectError && (
+        <div className="mb-2 p-2 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
+          <strong>Connection Error:</strong> {connectError.message}
+        </div>
       )}
-    </button>
+      
+      <button
+        onClick={handleConnect}
+        disabled={isConnecting}
+        className={`font-semibold py-2 px-4 rounded-full flex items-center gap-2 transition-colors ${
+          variant === 'primary' 
+            ? 'bg-emerald-400 hover:bg-emerald-500 text-black' 
+            : 'bg-emerald-400 hover:bg-emerald-500 text-black'
+        } ${isConnecting ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        {isConnecting ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
+            <span>Connecting...</span>
+          </>
+        ) : (
+          <>
+            <User size={16} />
+            <span>Connect Wallet</span>
+          </>
+        )}
+      </button>
+    </div>
   )
 }

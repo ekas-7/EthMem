@@ -13,9 +13,133 @@
   // Track processed messages to avoid duplicates
   const processedMessages = new Set();
 
+  // Global error handler for unhandled promise rejections
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason && event.reason.message && 
+        (event.reason.message.includes('Extension context invalidated') ||
+         event.reason.message.includes('Receiving end does not exist'))) {
+      console.warn('[EthMem] Caught unhandled extension context invalidation:', event.reason.message);
+      event.preventDefault(); // Prevent the error from being logged to console
+    }
+  });
+
+  // Helper function to safely check if extension runtime is available
+  function isExtensionRuntimeAvailable() {
+    try {
+      // Check if chrome object exists
+      if (typeof chrome === 'undefined' || !chrome) {
+        return false;
+      }
+      
+      // Check if runtime exists
+      if (!chrome.runtime) {
+        return false;
+      }
+      
+      // Try to access runtime.id to test if context is valid
+      if (chrome.runtime.id) {
+        return !!(chrome.runtime.sendMessage);
+      }
+      
+      return false;
+    } catch (error) {
+      console.warn('[EthMem] Extension runtime check failed:', error);
+      return false;
+    }
+  }
+
+  // Helper function to safely send messages to background script
+  function safeRuntimeSendMessage(message, callback) {
+    if (!isExtensionRuntimeAvailable()) {
+      console.warn('[EthMem] Extension runtime not available');
+      if (callback) {
+        callback(null, new Error('Extension context invalidated'));
+      }
+      return false;
+    }
+
+    try {
+      chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+          const error = new Error(chrome.runtime.lastError.message);
+          console.error('[EthMem] Runtime error:', chrome.runtime.lastError);
+          if (callback) callback(null, error);
+        } else {
+          if (callback) callback(response, null);
+        }
+      });
+      return true;
+    } catch (error) {
+      console.error('[EthMem] Error sending message:', error);
+      if (callback) callback(null, error);
+      return false;
+    }
+  }
+
+  // Helper function to safely access chrome.storage.local
+  function safeStorageGet(keys, callback) {
+    if (!chrome.storage || !chrome.storage.local) {
+      console.warn('[EthMem] Chrome storage not available');
+      if (callback) {
+        callback(null, new Error('Extension context invalidated'));
+      }
+      return false;
+    }
+
+    try {
+      chrome.storage.local.get(keys, (result) => {
+        if (chrome.runtime.lastError) {
+          const error = new Error(chrome.runtime.lastError.message);
+          console.error('[EthMem] Storage error:', chrome.runtime.lastError);
+          if (callback) callback(null, error);
+        } else {
+          if (callback) callback(result, null);
+        }
+      });
+      return true;
+    } catch (error) {
+      console.error('[EthMem] Error accessing storage:', error);
+      if (callback) callback(null, error);
+      return false;
+    }
+  }
+
+  // Helper function to safely set chrome.storage.local
+  function safeStorageSet(items, callback) {
+    if (!chrome.storage || !chrome.storage.local) {
+      console.warn('[EthMem] Chrome storage not available');
+      if (callback) {
+        callback(new Error('Extension context invalidated'));
+      }
+      return false;
+    }
+
+    try {
+      chrome.storage.local.set(items, () => {
+        if (chrome.runtime.lastError) {
+          const error = new Error(chrome.runtime.lastError.message);
+          console.error('[EthMem] Storage set error:', chrome.runtime.lastError);
+          if (callback) callback(error);
+        } else {
+          if (callback) callback(null);
+        }
+      });
+      return true;
+    } catch (error) {
+      console.error('[EthMem] Error setting storage:', error);
+      if (callback) callback(error);
+      return false;
+    }
+  }
+
   // Inject pageScript.js into the page context so it can intercept fetch calls
   function injectPageScript() {
     try {
+      if (!isExtensionRuntimeAvailable()) {
+        console.warn('[EthMem] Extension runtime not available, skipping pageScript injection');
+        return;
+      }
+      
       const script = document.createElement('script');
       script.src = chrome.runtime.getURL('src/page/pageScript.js');
       script.onload = function() {
@@ -31,6 +155,11 @@
   // Inject ethAdapter.js into the page context for wallet connection
   function injectEthAdapter() {
     try {
+      if (!isExtensionRuntimeAvailable()) {
+        console.warn('[EthMem] Extension runtime not available, skipping ethAdapter injection');
+        return;
+      }
+      
       const script = document.createElement('script');
       script.src = chrome.runtime.getURL('src/page/ethAdapter.js');
       script.onload = function() {
@@ -47,6 +176,11 @@
   // Inject smart memory injection system
   function injectSmartInjector() {
     try {
+      if (!isExtensionRuntimeAvailable()) {
+        console.warn('[EthMem] Extension runtime not available, skipping smart injector injection');
+        return;
+      }
+      
       // Inject modelInferenceService first (dependency)
       const serviceScript = document.createElement('script');
       serviceScript.src = chrome.runtime.getURL('src/lib/modelInferenceService.js');
@@ -182,19 +316,30 @@
       return;
     }
     
-    // Request memories from background script
-    chrome.runtime.sendMessage({ type: 'GET_MEMORIES' }).then(response => {
-      const memories = response.memories || [];
+  // Request memories from background script with safe error handling
+  safeRuntimeSendMessage({ type: 'GET_MEMORIES' }, (response, error) => {
+    if (error) {
+      console.error('[EthMem] Error fetching memories:', error);
+      
+      // Check if it's a context invalidated error
+      if (error.message.includes('Extension context invalidated') || 
+          error.message.includes('Receiving end does not exist')) {
+        console.warn('[EthMem] Extension context invalidated, showing reconnection message');
+        renderMemoryViewer([], true); // Show reconnection message
+      } else {
+        renderMemoryViewer([]);
+      }
+    } else {
+      const memories = response?.memories || [];
       console.log('[EthMem] Fetched memories:', memories.length);
       renderMemoryViewer(memories);
-    }).catch(error => {
-      console.error('[EthMem] Error fetching memories:', error);
-      renderMemoryViewer([]);
-    });
+    }
+  });
   }
 
-  function renderMemoryViewer(memories) {
-    const viewer = document.createElement('div');
+  function renderMemoryViewer(memories, showReconnectionMessage = false) {
+    try {
+      const viewer = document.createElement('div');
     viewer.id = 'ethmem-viewer';
     viewer.style.cssText = `
       position: fixed;
@@ -245,7 +390,12 @@
     
     // Add logo
     const logo = document.createElement('img');
-    logo.src = chrome.runtime.getURL('assets/logo.png');
+    if (isExtensionRuntimeAvailable()) {
+      logo.src = chrome.runtime.getURL('assets/logo.png');
+    } else {
+      // Fallback: use a data URL or skip logo
+      logo.style.display = 'none';
+    }
     logo.style.cssText = `
       width: 32px;
       height: 32px;
@@ -355,7 +505,32 @@
     `;
     document.head.appendChild(style);
     
-    if (memories.length === 0) {
+    if (showReconnectionMessage) {
+      const reconnectionMessage = document.createElement('div');
+      reconnectionMessage.style.cssText = `
+        text-align: center;
+        padding: 60px 20px;
+        color: #b8c5be;
+      `;
+      reconnectionMessage.innerHTML = `
+        <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;">⚠️</div>
+        <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #fff;">Extension Disconnected</div>
+        <div style="font-size: 14px; color: #b8c5be; max-width: 400px; margin: 0 auto; line-height: 1.5; margin-bottom: 20px;">
+          The EthMem extension context has been invalidated. Please refresh the page or restart the extension to reconnect.
+        </div>
+        <button onclick="location.reload()" style="
+          background: #38e078;
+          color: #111714;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 14px;
+        ">Refresh Page</button>
+      `;
+      content.appendChild(reconnectionMessage);
+    } else if (memories.length === 0) {
       const empty = document.createElement('div');
       empty.style.cssText = `
         text-align: center;
@@ -397,6 +572,68 @@
         setTimeout(() => viewer.remove(), 200);
       }
     };
+    } catch (error) {
+      console.error('[EthMem] Error in renderMemoryViewer:', error);
+      
+      // If it's an extension context error, show a simple error message
+      if (error.message && (error.message.includes('Extension context invalidated') ||
+                           error.message.includes('Receiving end does not exist'))) {
+        console.warn('[EthMem] Extension context invalidated in renderMemoryViewer');
+        
+        // Create a simple error viewer
+        const errorViewer = document.createElement('div');
+        errorViewer.id = 'ethmem-viewer';
+        errorViewer.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.85);
+          z-index: 10001;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        `;
+        
+        errorViewer.innerHTML = `
+          <div style="
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            max-width: 400px;
+          ">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+            <h2 style="margin: 0 0 16px 0; font-size: 18px;">Extension Disconnected</h2>
+            <p style="margin: 0 0 20px 0; color: #ccc; font-size: 14px;">
+              Please refresh the page to reconnect the EthMem extension.
+            </p>
+            <button onclick="location.reload()" style="
+              background: #38e078;
+              color: #111714;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 8px;
+              font-weight: 600;
+              cursor: pointer;
+              font-size: 14px;
+            ">Refresh Page</button>
+          </div>
+        `;
+        
+        errorViewer.onclick = (e) => {
+          if (e.target === errorViewer) {
+            errorViewer.remove();
+          }
+        };
+        
+        document.body.appendChild(errorViewer);
+      }
+    }
   }
 
   function escapeHtml(text) {
@@ -643,7 +880,7 @@
         console.log('[EthMem] User message detected, sending for extraction:', payload.userMessage.substring(0, 100));
         
         // Send to background for memory extraction
-        chrome.runtime.sendMessage({
+        safeRuntimeSendMessage({
           type: 'EXTRACT_MEMORY',
           payload: {
             text: payload.userMessage,
@@ -652,12 +889,19 @@
             url: window.location.href,
             timestamp: payload.timestamp
           }
-        }).then(response => {
-          if (response && response.success) {
+        }, (response, error) => {
+          if (error) {
+            console.error('[EthMem] Error extracting memory:', error);
+            
+            // Check if it's a context invalidated error
+            if (error.message.includes('Extension context invalidated') || 
+                error.message.includes('Receiving end does not exist')) {
+              console.warn('[EthMem] Extension context invalidated during memory extraction');
+              // Don't retry immediately for context invalidated errors
+            }
+          } else if (response && response.success) {
             console.log('[EthMem] Memory extracted:', response.memory);
           }
-        }).catch(error => {
-          console.error('[EthMem] Error extracting memory:', error);
         });
       }
     }
@@ -665,80 +909,87 @@
     // Handle ranked memory request from smart injector (page script)
     if (event.data?.type === 'GET_RANKED_MEMORIES' && event.data?.source === 'ethmem-page-script') {
       console.log('[EthMem] Smart injector requesting ranked memories');
-      try {
-        const response = await chrome.runtime.sendMessage({ 
-          type: 'GET_RANKED_MEMORIES',
-          userMessage: event.data.userMessage,
-          maxMemories: event.data.maxMemories || 5
-        });
-        
-        // Send ranked memories back to page script
-        window.postMessage({
-          messageId: event.data.messageId,
-          memories: response?.memories || [],
-          source: 'ethmem-content-script'
-        }, '*');
-        
-        console.log(`[EthMem] Sent ${response?.memories?.length || 0} ranked memories to smart injector`);
-      } catch (error) {
-        console.error('[EthMem] Failed to fetch ranked memories:', error);
-        window.postMessage({
-          messageId: event.data.messageId,
-          memories: [],
-          error: error.message,
-          source: 'ethmem-content-script'
-        }, '*');
-      }
+      safeRuntimeSendMessage({ 
+        type: 'GET_RANKED_MEMORIES',
+        userMessage: event.data.userMessage,
+        maxMemories: event.data.maxMemories || 5
+      }, (response, error) => {
+        if (error) {
+          console.error('[EthMem] Failed to fetch ranked memories:', error);
+          
+          // Check if it's a context invalidated error
+          if (error.message.includes('Extension context invalidated') || 
+              error.message.includes('Receiving end does not exist')) {
+            console.warn('[EthMem] Extension context invalidated during ranked memories fetch');
+          }
+          
+          window.postMessage({
+            messageId: event.data.messageId,
+            memories: [],
+            error: error.message,
+            source: 'ethmem-content-script'
+          }, '*');
+        } else {
+          // Send ranked memories back to page script
+          window.postMessage({
+            messageId: event.data.messageId,
+            memories: response?.memories || [],
+            source: 'ethmem-content-script'
+          }, '*');
+          
+          console.log(`[EthMem] Sent ${response?.memories?.length || 0} ranked memories to smart injector`);
+        }
+      });
     }
 
     // Handle memory request from smart injector (page script) - fallback
     if (event.data?.type === 'GET_ALL_MEMORIES' && event.data?.source === 'ethmem-page-script') {
       console.log('[EthMem] Smart injector requesting all memories');
-      try {
-        const response = await chrome.runtime.sendMessage({ type: 'GET_ALL_MEMORIES' });
-        
-        // Send memories back to page script
-        window.postMessage({
-          messageId: event.data.messageId,
-          memories: response?.memories || [],
-          source: 'ethmem-content-script'
-        }, '*');
-        
-        console.log(`[EthMem] Sent ${response?.memories?.length || 0} memories to smart injector`);
-      } catch (error) {
-        console.error('[EthMem] Failed to fetch memories for smart injector:', error);
-        window.postMessage({
-          messageId: event.data.messageId,
-          memories: [],
-          error: error.message,
-          source: 'ethmem-content-script'
-        }, '*');
-      }
+      safeRuntimeSendMessage({ type: 'GET_ALL_MEMORIES' }, (response, error) => {
+        if (error) {
+          console.error('[EthMem] Failed to fetch memories for smart injector:', error);
+          window.postMessage({
+            messageId: event.data.messageId,
+            memories: [],
+            error: error.message,
+            source: 'ethmem-content-script'
+          }, '*');
+        } else {
+          // Send memories back to page script
+          window.postMessage({
+            messageId: event.data.messageId,
+            memories: response?.memories || [],
+            source: 'ethmem-content-script'
+          }, '*');
+          
+          console.log(`[EthMem] Sent ${response?.memories?.length || 0} memories to smart injector`);
+        }
+      });
     }
 
     // Handle active model request from smart injector (page script)
     if (event.data?.type === 'GET_ACTIVE_MODEL' && event.data?.source === 'ethmem-page-script') {
       console.log('[EthMem] Smart injector requesting active model');
-      try {
-        const result = await chrome.storage.local.get(['activeModel']);
-        
-        // Send active model back to page script
-        window.postMessage({
-          messageId: event.data.messageId,
-          activeModel: result?.activeModel || null,
-          source: 'ethmem-content-script'
-        }, '*');
-        
-        console.log(`[EthMem] Sent active model: ${result?.activeModel || 'none'}`);
-      } catch (error) {
-        console.error('[EthMem] Failed to fetch active model:', error);
-        window.postMessage({
-          messageId: event.data.messageId,
-          activeModel: null,
-          error: error.message,
-          source: 'ethmem-content-script'
-        }, '*');
-      }
+      safeStorageGet(['activeModel'], (result, error) => {
+        if (error) {
+          console.error('[EthMem] Failed to fetch active model:', error);
+          window.postMessage({
+            messageId: event.data.messageId,
+            activeModel: null,
+            error: error.message,
+            source: 'ethmem-content-script'
+          }, '*');
+        } else {
+          // Send active model back to page script
+          window.postMessage({
+            messageId: event.data.messageId,
+            activeModel: result?.activeModel || null,
+            source: 'ethmem-content-script'
+          }, '*');
+          
+          console.log(`[EthMem] Sent active model: ${result?.activeModel || 'none'}`);
+        }
+      });
     }
 
     // Handle injection notification (show badge)
@@ -753,13 +1004,17 @@
       
       // Check if iframe already exists
       if (!document.getElementById('ethmem-transformers-iframe')) {
-        const iframe = document.createElement('iframe');
-        iframe.id = 'ethmem-transformers-iframe';
-        iframe.src = chrome.runtime.getURL('src/ui/transformersLoader.html');
-        iframe.style.display = 'none';
-        iframe.sandbox = 'allow-scripts allow-same-origin';
-        document.body.appendChild(iframe);
-        console.log('[EthMem] Transformers iframe created');
+        if (isExtensionRuntimeAvailable()) {
+          const iframe = document.createElement('iframe');
+          iframe.id = 'ethmem-transformers-iframe';
+          iframe.src = chrome.runtime.getURL('src/ui/transformersLoader.html');
+          iframe.style.display = 'none';
+          iframe.sandbox = 'allow-scripts allow-same-origin';
+          document.body.appendChild(iframe);
+          console.log('[EthMem] Transformers iframe created');
+        } else {
+          console.warn('[EthMem] Extension runtime not available, cannot create transformers iframe');
+        }
       } else {
         console.log('[EthMem] Transformers iframe already exists');
       }
@@ -852,7 +1107,12 @@
 
     // Create logo icon (SVG embedded or img)
     const img = document.createElement('img');
-    img.src = chrome.runtime.getURL('../../assets/logo.png');
+    if (isExtensionRuntimeAvailable()) {
+      img.src = chrome.runtime.getURL('../../assets/logo.png');
+    } else {
+      // Fallback: use a simple text or hide
+      img.style.display = 'none';
+    }
     img.alt = '';
     img.setAttribute('aria-hidden', 'true');
     img.style.objectFit = 'contain';
@@ -1114,8 +1374,9 @@
     }
   }
 
-  // Listen for messages from popup or background
-  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // Listen for messages from popup or background (with safe check)
+  if (isExtensionRuntimeAvailable()) {
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!msg || !msg.action && !msg.type) return;
     
     if (msg.action === 'connectWallet') {
@@ -1159,6 +1420,9 @@
     
     return true;
   });
+  } else {
+    console.warn('[EthMem] Extension runtime not available, skipping message listener setup');
+  }
 
   // Listen for wallet connection responses from page context
   window.addEventListener('message', (event) => {
@@ -1166,10 +1430,16 @@
     
     if (event.data && event.data.type === 'WALLET_CONNECTED') {
       console.log('[EthMem] wallet connected:', event.data.payload);
-      chrome.storage.local.set({
+      safeStorageSet({
         walletConnected: true,
         walletAddress: event.data.payload.address,
         chainId: event.data.payload.chainId
+      }, (error) => {
+        if (error) {
+          console.error('[EthMem] Error saving wallet connection:', error);
+        } else {
+          console.log('[EthMem] Wallet connection saved to storage');
+        }
       });
     }
     
