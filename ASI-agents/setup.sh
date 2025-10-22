@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Setup script for ASI-Agents Multi-Domain Ecosystems
-# This script sets up the environment for Medical, Legal, and Customer Support systems
+# This script sets up the environment for all 5 agent ecosystems
 
 echo "================================================================"
 echo "🚀 ASI-Agents Multi-Domain Setup"
@@ -9,6 +9,8 @@ echo "================================================================"
 echo "   🏥 Medical Consultation System"
 echo "   ⚖️  Legal Consultation System"
 echo "   🎧 Customer Support System"
+echo "   📚 Education System"
+echo "   💰 Financial Advisory System"
 echo "================================================================"
 echo ""
 
@@ -63,6 +65,8 @@ if [ ! -f ".env" ]; then
     echo "# MEDICAL_PORT=8000" >> .env
     echo "# LAW_PORT=9000" >> .env
     echo "# SUPPORT_PORT=10000" >> .env
+    echo "# EDUCATION_PORT=11000" >> .env
+    echo "# FINANCIAL_PORT=12000" >> .env
     echo "✓ .env file created"
     echo "⚠️  Please edit .env and add your ASI API key!"
 else
@@ -85,6 +89,14 @@ if [ ! -f "customer-support/customer_memories.json" ]; then
     echo "  Creating customer-support/customer_memories.json..."
 fi
 
+if [ ! -f "education/student_memories.json" ]; then
+    echo "  Creating education/student_memories.json..."
+fi
+
+if [ ! -f "financial/portfolio_memories.json" ]; then
+    echo "  Creating financial/portfolio_memories.json..."
+fi
+
 echo "✓ Memory files ready (auto-created on first run)"
 echo ""
 
@@ -102,11 +114,19 @@ echo ""
 echo "🎧 To run Customer Support System:"
 echo "   cd customer-support && python support_system.py"
 echo ""
+echo "📚 To run Education System:"
+echo "   cd education && python education_system.py"
+echo ""
+echo "💰 To run Financial Advisory System:"
+echo "   cd financial && python financial_system.py"
+echo ""
 echo "📚 Documentation:"
 echo "   - Main README: README.md"
-echo "   - Medical: medical/README.md"
-echo "   - Legal: law/README.md"
-echo "   - Support: customer-support/README.md"
+echo "   - Medical: medical/README.md & medical/ARCHITECTURE.md"
+echo "   - Legal: law/ARCHITECTURE.md"
+echo "   - Support: customer-support/ARCHITECTURE.md"
+echo "   - Education: education/ARCHITECTURE.md"
+echo "   - Financial: financial/ARCHITECTURE.md"
 echo ""
 echo "⚙️  Configuration:"
 echo "   - Edit .env with your ASI_ONE_API_KEY"
@@ -115,7 +135,7 @@ echo ""
 echo "================================================================"
 echo ""
 
-read -p "Which system would you like to run? (medical/law/support/none): " system_choice
+read -p "Which system would you like to run? (medical/law/support/education/financial/none): " system_choice
 echo ""
 
 case $system_choice in
@@ -131,11 +151,15 @@ case $system_choice in
         echo "🎧 Starting Customer Support System..."
         cd customer-support && python support_system.py
         ;;
+    education)
+        echo "📚 Starting Education System..."
+        cd education && python education_system.py
+        ;;
+    financial)
+        echo "💰 Starting Financial Advisory System..."
+        cd financial && python financial_system.py
+        ;;
     *)
         echo "✓ Setup complete! Run a system manually when ready."
         ;;
 esac
-
-    echo "Starting doctor agent..."
-    python doctor_agent.py
-fi
