@@ -385,6 +385,17 @@ async function handleProcessMessageSmart(payload, sendResponse) {
     const allMemories = await getAllMemories();
     console.log('[EthMem] Processing with', allMemories.length, 'existing memories');
     
+    if (allMemories.length === 0) {
+      console.warn('[EthMem] No memories stored yet!');
+      sendResponse({
+        success: true,
+        relevant: [],
+        injectionText: '',
+        newMemory: null
+      });
+      return;
+    }
+    
     // Process with GPT
     const result = await processMessageSmart(
       userMessage,
@@ -392,6 +403,11 @@ async function handleProcessMessageSmart(payload, sendResponse) {
       config.apiKey,
       config.model
     );
+    
+    console.log('[EthMem] Smart processing result:', {
+      relevantCount: result.relevant?.length || 0,
+      hasNewMemory: !!result.newMemory
+    });
     
     // If there's a new memory, save it (after checking for duplicates)
     if (result.newMemory) {

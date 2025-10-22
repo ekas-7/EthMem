@@ -1019,36 +1019,68 @@
     btn.setAttribute('aria-label', 'EthMem Memories');
     btn.title = 'EthMem - View Your Memories';
 
-    if (isTextbar && isChatGPT) {
-      // ChatGPT textbar button styling (matches Attach, Search, Study buttons)
-      btn.style.cssText = `
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        height: 36px;
-        min-width: 32px;
-        padding: 8px;
-        border-radius: 18px;
-        border: 1px solid rgb(86, 88, 105);
-        background: transparent;
-        color: rgb(172, 172, 190);
-        font-size: 13px;
-        font-weight: 600;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        cursor: pointer;
-        transition: background 0.2s ease, opacity 0.2s ease;
-        white-space: nowrap;
-        gap: 6px;
-      `;
-      
-      btn.addEventListener('mouseenter', () => {
-        btn.style.background = 'rgb(52, 53, 65)';
-        btn.style.opacity = '0.8';
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.background = 'transparent';
-        btn.style.opacity = '1';
-      });
+    if (isTextbar && (isChatGPT || isClaude)) {
+      // ChatGPT & Claude textbar button styling (matches platform buttons)
+      if (isChatGPT) {
+        btn.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 36px;
+          min-width: 32px;
+          padding: 8px;
+          border-radius: 18px;
+          border: 1px solid rgb(86, 88, 105);
+          background: transparent;
+          color: rgb(172, 172, 190);
+          font-size: 13px;
+          font-weight: 600;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          cursor: pointer;
+          transition: background 0.2s ease, opacity 0.2s ease;
+          white-space: nowrap;
+          gap: 6px;
+        `;
+        
+        btn.addEventListener('mouseenter', () => {
+          btn.style.background = 'rgb(52, 53, 65)';
+          btn.style.opacity = '0.8';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.background = 'transparent';
+          btn.style.opacity = '1';
+        });
+      } else if (isClaude) {
+        // Claude textbar button styling (minimal, matches Claude's design)
+        btn.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 32px;
+          min-width: 32px;
+          padding: 6px;
+          border-radius: 6px;
+          border: none;
+          background: transparent;
+          color: rgb(156, 163, 175);
+          font-size: 13px;
+          font-weight: 500;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          cursor: pointer;
+          transition: background 0.15s ease, opacity 0.15s ease;
+          white-space: nowrap;
+          gap: 4px;
+        `;
+        
+        btn.addEventListener('mouseenter', () => {
+          btn.style.background = 'rgba(0, 0, 0, 0.05)';
+          btn.style.opacity = '0.9';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.background = 'transparent';
+          btn.style.opacity = '1';
+        });
+      }
     } else {
       // Header button styling
       btn.style.display = 'inline-flex';
@@ -1104,9 +1136,12 @@
     img.style.objectFit = 'contain';
     img.style.flexShrink = '0';
     
-    if (isTextbar && isChatGPT) {
+    if (isTextbar && (isChatGPT || isClaude)) {
       img.style.width = '20px';
       img.style.height = '20px';
+      if (isClaude) {
+        img.style.borderRadius = '4px'; // Slightly rounded for Claude
+      }
     } else if (isGemini) {
       img.style.width = '20px';
       img.style.height = '20px';
@@ -1120,7 +1155,7 @@
     btn.appendChild(img);
 
     // Add label for textbar buttons or non-textbar
-    if (!isTextbar || !isChatGPT) {
+    if (!isTextbar || (!isChatGPT && !isClaude)) {
       const label = document.createElement('span');
       label.className = 'ext-logo-label';
       label.textContent = 'ethmem';
@@ -1163,61 +1198,145 @@
 
   // Function to inject button into ChatGPT composer textbar
   function insertLogoInTextbar() {
-    if (!isChatGPT) return false; // Only for ChatGPT
+    if (!isChatGPT && !isClaude) return false; // Only for ChatGPT and Claude
     
     try {
-      // Find the composer footer actions container
-      const composerFooter = document.querySelector('[data-testid="composer-footer-actions"]');
-      if (!composerFooter) {
-        console.log('[EthMem] composer footer not found, retrying...');
-        return false;
-      }
+      // ChatGPT: Find the composer footer actions container
+      if (isChatGPT) {
+        const composerFooter = document.querySelector('[data-testid="composer-footer-actions"]');
+        if (!composerFooter) {
+          console.log('[EthMem] composer footer not found, retrying...');
+          return false;
+        }
 
-      // Find the buttons container (has Attach, Search, Study buttons)
-      const buttonsContainer = composerFooter.querySelector('.flex.min-w-fit.items-center');
-      if (!buttonsContainer) {
-        console.log('[EthMem] buttons container not found, trying alternative selector...');
-        
-        // Try alternative: find any flex container with buttons
-        const allFlexContainers = composerFooter.querySelectorAll('.flex');
-        console.log('[EthMem] Found flex containers:', allFlexContainers.length);
-        
-        // Look for container with Attach/Search buttons
-        for (let container of allFlexContainers) {
-          if (container.querySelector('[data-testid*="attach"], [data-testid*="search"], [aria-label*="Attach"], [aria-label*="Search"]')) {
-            console.log('[EthMem] Found buttons container via alternative method');
-            
-            // Check if already injected
-            if (container.querySelector('.ext-logo-button-textbar')) {
-              console.log('[EthMem] textbar button already present');
+        // Find the buttons container (has Attach, Search, Study buttons)
+        const buttonsContainer = composerFooter.querySelector('.flex.min-w-fit.items-center');
+        if (!buttonsContainer) {
+          console.log('[EthMem] buttons container not found, trying alternative selector...');
+          
+          // Try alternative: find any flex container with buttons
+          const allFlexContainers = composerFooter.querySelectorAll('.flex');
+          console.log('[EthMem] Found flex containers:', allFlexContainers.length);
+          
+          // Look for container with Attach/Search buttons
+          for (let container of allFlexContainers) {
+            if (container.querySelector('[data-testid*="attach"], [data-testid*="search"], [aria-label*="Attach"], [aria-label*="Search"]')) {
+              console.log('[EthMem] Found buttons container via alternative method');
+              
+              // Check if already injected
+              if (container.querySelector('.ext-logo-button-textbar')) {
+                console.log('[EthMem] textbar button already present');
+                return true;
+              }
+              
+              const ethmemButton = createLogoButton(true);
+              container.appendChild(ethmemButton);
+              console.log('[EthMem] textbar button injected successfully (alternative method)');
               return true;
             }
+          }
+          
+          console.log('[EthMem] Could not find buttons container');
+          return false;
+        }
+
+        // Check if already injected
+        if (buttonsContainer.querySelector('.ext-logo-button-textbar')) {
+          console.log('[EthMem] textbar button already present');
+          return true;
+        }
+
+        // Create and insert the button
+        const ethmemButton = createLogoButton(true);
+        
+        // Insert after the last button (Study button)
+        buttonsContainer.appendChild(ethmemButton);
+        
+        console.log('[EthMem] textbar button injected successfully');
+        return true;
+      }
+      
+      // Claude: Find the composer buttons container
+      if (isClaude) {
+        // Claude's DOM structure changes, so we need flexible selectors
+        // Look for the main composer/input container first
+        
+        // Method 1: Find via form or input wrapper
+        let buttonsContainer = null;
+        
+        // Try to find the form element that contains the input
+        const form = document.querySelector('form');
+        if (form) {
+          // Look for buttons container within the form - it's usually a flex container with items-center
+          const candidates = form.querySelectorAll('.flex.items-center');
+          
+          for (let candidate of candidates) {
+            // Check if this container has buttons or interactive elements
+            const hasButtons = candidate.querySelector('button');
+            const hasSvg = candidate.querySelector('svg');
+            const isNotInModal = !candidate.closest('[role="dialog"]'); // Avoid modal buttons
             
-            const ethmemButton = createLogoButton(true);
-            container.appendChild(ethmemButton);
-            console.log('[EthMem] textbar button injected successfully (alternative method)');
-            return true;
+            // Also check if it's near the input area (within same parent structure)
+            const hasContentEditable = candidate.closest('div')?.querySelector('[contenteditable="true"]');
+            
+            if ((hasButtons || hasSvg) && isNotInModal && hasContentEditable) {
+              buttonsContainer = candidate;
+              console.log('[EthMem] Claude: Found buttons container via form method');
+              break;
+            }
           }
         }
         
-        console.log('[EthMem] Could not find buttons container');
-        return false;
-      }
-
-      // Check if already injected
-      if (buttonsContainer.querySelector('.ext-logo-button-textbar')) {
-        console.log('[EthMem] textbar button already present');
+        // Method 2: Find any flex container with gap-2 that has buttons
+        if (!buttonsContainer) {
+          const gapContainers = document.querySelectorAll('.flex.items-center.gap-2');
+          for (let container of gapContainers) {
+            if (container.querySelector('button') && !container.closest('[role="dialog"]')) {
+              buttonsContainer = container;
+              console.log('[EthMem] Claude: Found buttons container via gap-2 method');
+              break;
+            }
+          }
+        }
+        
+        // Method 3: Look for any flex container near send button
+        if (!buttonsContainer) {
+          const sendButton = document.querySelector('button[aria-label*="Send"], button[type="submit"]');
+          if (sendButton) {
+            const parent = sendButton.closest('.flex.items-center');
+            if (parent) {
+              buttonsContainer = parent;
+              console.log('[EthMem] Claude: Found buttons container via send button method');
+            }
+          }
+        }
+        
+        if (!buttonsContainer) {
+          console.log('[EthMem] Claude: buttons container not found');
+          return false;
+        }
+        
+        // Check if already injected
+        if (buttonsContainer.querySelector('.ext-logo-button-textbar')) {
+          console.log('[EthMem] Claude: textbar button already present');
+          return true;
+        }
+        
+        // Create and insert the button
+        const ethmemButton = createLogoButton(true);
+        
+        // Insert at the beginning or end depending on layout
+        if (buttonsContainer.firstChild) {
+          buttonsContainer.insertBefore(ethmemButton, buttonsContainer.firstChild);
+        } else {
+          buttonsContainer.appendChild(ethmemButton);
+        }
+        
+        console.log('[EthMem] Claude: textbar button injected successfully');
         return true;
       }
-
-      // Create and insert the button
-      const ethmemButton = createLogoButton(true);
       
-      // Insert after the last button (Study button)
-      buttonsContainer.appendChild(ethmemButton);
-      
-      console.log('[EthMem] textbar button injected successfully');
-      return true;
+      return false;
     } catch (e) {
       console.warn('[EthMem] insertLogoInTextbar error', e);
       return false;
@@ -1440,14 +1559,14 @@
   injectSmartInjector();
   injectMemoryViewer();
 
-  // Auto-inject header button with retry logic (Claude and Gemini only, NOT ChatGPT)
+  // Auto-inject header button with retry logic (Gemini only, NOT ChatGPT or Claude)
   let retryCount = 0;
   const maxRetries = 20;
   
   function tryInjectHeader() {
-    // Skip header button for ChatGPT (we use textbar button instead)
-    if (isChatGPT) {
-      console.log('[EthMem] Skipping header button for ChatGPT (using textbar button)');
+    // Skip header button for ChatGPT and Claude (we use textbar button instead)
+    if (isChatGPT || isClaude) {
+      console.log(`[EthMem] Skipping header button for ${isChatGPT ? 'ChatGPT' : 'Claude'} (using textbar button)`);
       setupObserver();
       return;
     }
@@ -1462,41 +1581,76 @@
     }
   }
 
-  // Auto-inject textbar button with retry logic (ChatGPT only)
+  // Auto-inject textbar button with retry logic (ChatGPT and Claude)
   let textbarRetryCount = 0;
   const textbarMaxRetries = 30; // Increased retries for slower loading
   
   function tryInjectTextbar() {
-    if (!isChatGPT) return;
+    if (!isChatGPT && !isClaude) return;
     
     const success = insertLogoInTextbar();
     if (!success && textbarRetryCount < textbarMaxRetries) {
       textbarRetryCount++;
-      console.log(`[EthMem] Textbar injection attempt ${textbarRetryCount}/${textbarMaxRetries}`);
+      const platform = isChatGPT ? 'ChatGPT' : 'Claude';
+      console.log(`[EthMem] ${platform} textbar injection attempt ${textbarRetryCount}/${textbarMaxRetries}`);
       setTimeout(tryInjectTextbar, 500); // Longer delay
     } else if (success) {
-      console.log('[EthMem] textbar button successfully injected');
+      const platform = isChatGPT ? 'ChatGPT' : 'Claude';
+      console.log(`[EthMem] ${platform} textbar button successfully injected`);
     } else {
-      console.warn('[EthMem] Failed to inject textbar button after', textbarMaxRetries, 'attempts');
+      const platform = isChatGPT ? 'ChatGPT' : 'Claude';
+      console.warn(`[EthMem] Failed to inject ${platform} textbar button after`, textbarMaxRetries, 'attempts');
     }
   }
 
   // Set up MutationObserver to re-inject if buttons are removed/changed
   function setupObserver() {
+    let reinjectionTimeout = null;
+    let isReinjecting = false;
+    
     const observer = new MutationObserver((mutations) => {
-      // For ChatGPT: only watch textbar button
-      if (isChatGPT) {
-        if (!document.querySelector('.ext-logo-button-textbar')) {
-          console.log('[EthMem] textbar button removed, re-injecting...');
-          insertLogoInTextbar();
-        }
-      } else {
-        // For Claude/Gemini: watch header button
-        if (!document.querySelector('.ext-logo-button')) {
-          console.log('[EthMem] header button removed, re-injecting...');
-          insertLogoInHeader();
-        }
+      // Debounce re-injection to prevent infinite loops
+      if (isReinjecting) return;
+      
+      // Clear any pending reinjection
+      if (reinjectionTimeout) {
+        clearTimeout(reinjectionTimeout);
       }
+      
+      reinjectionTimeout = setTimeout(() => {
+        // For ChatGPT and Claude: watch textbar button
+        if (isChatGPT || isClaude) {
+          if (!document.querySelector('.ext-logo-button-textbar')) {
+            const platform = isChatGPT ? 'ChatGPT' : 'Claude';
+            console.log(`[EthMem] ${platform} textbar button removed, re-injecting...`);
+            
+            isReinjecting = true;
+            const success = insertLogoInTextbar();
+            
+            // Reset flag after a delay
+            setTimeout(() => {
+              isReinjecting = false;
+            }, 1000);
+            
+            if (!success) {
+              console.log(`[EthMem] ${platform} textbar re-injection failed, will retry on next mutation`);
+            }
+          }
+        } else {
+          // For Gemini: watch header button
+          if (!document.querySelector('.ext-logo-button')) {
+            console.log('[EthMem] Gemini header button removed, re-injecting...');
+            
+            isReinjecting = true;
+            const success = insertLogoInHeader();
+            
+            // Reset flag after a delay
+            setTimeout(() => {
+              isReinjecting = false;
+            }, 1000);
+          }
+        }
+      }, 250); // Debounce delay
     });
 
     observer.observe(document.body, {
@@ -1510,6 +1664,9 @@
 
   // Start auto-injection
   setTimeout(tryInjectHeader, 300);
-  setTimeout(tryInjectTextbar, 500); // Slight delay for textbar
+  
+  // Claude needs more time for DOM to load
+  const textbarDelay = isClaude ? 1000 : 500;
+  setTimeout(tryInjectTextbar, textbarDelay);
 
 })();
