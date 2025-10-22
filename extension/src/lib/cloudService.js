@@ -1,194 +1,126 @@
-/**
- * Cloud AI Service
- * Handles extraction and ranking using cloud-based AI
- */
-
-// Import config (will be loaded via importScripts in background context)
-// CONFIG is already available from config.js import
+// cloudService.js - OpenAI API integration for memory extraction
+// Uses GPT-3.5-turbo to extract structured memory data from conversations
 
 /**
- * Initialize the service
+ * Extract memory from text using OpenAI GPT-3.5
+ * @param {string} text - The conversation text to analyze
+ * @param {string} apiKey - OpenAI API key
+ * @param {string} model - Model to use (default: gpt-3.5-turbo)
+ * @returns {Promise<Object|null>} Extracted memory or null if failed
  */
-function initCloudService() {
-  try {
-    console.log('[CloudAI] Service initialized');
-  } catch (error) {
-    console.error('[CloudAI] Failed to initialize:', error);
-  }
-}
-
-/**
- * Extract memory from text using cloud AI
- * @param {string} text - User's message
- * @returns {Promise<Object>} - Extracted memory
- */
-async function extractMemoryWithAI(text) {
-  if (!self.CONFIG || !self.CONFIG.USE_CLOUD_EXTRACTION) {
-    console.log('[CloudAI] Cloud extraction disabled');
+async function extractMemoryWithAI(text, apiKey, model = 'gpt-3.5-turbo') {
+  if (!apiKey) {
+    console.warn('[CloudAI] No API key provided');
     return null;
   }
 
-  console.log('[CloudAI] Extracting memory from:', text);
+  const prompt = `You are a memory extraction system. Analyze the following text and extract ONE specific, concrete piece of information about the user (preferences, facts, personal details, etc.).
 
-  const prompt = `You are a memory extraction system. Extract ONE important personal fact from this message.
+Text: "${text}"
 
-Message: "${text}"
-
-Extract a personal fact and return ONLY valid JSON in this exact format:
+Extract the MOST IMPORTANT user-specific information and respond with a JSON object:
 {
-  "category": "food|location|name|age|occupation|hobby|skill|language|preference",
-  "entity": "the main subject",
-  "description": "natural language description (e.g., User loves bananas, User lives in Delhi)",
-  "confidence": 0.85
+  "category": "food|location|name|age|occupation|skill|hobby|music|movie|family|friend|relationship|preference|goal|interest|language|education|allergy|visited|fact",
+  "entity": "the specific thing (e.g., 'pizza', 'New York', 'coding', 'girlfriend')",
+  "description": "clear description (e.g., 'User loves pizza', 'User lives in New York', 'User has a girlfriend')",
+  "confidence": 0.0-1.0
 }
 
-Rules:
-- Only extract clear personal facts
-- confidence must be between 0.7 and 1.0
-- If no clear fact exists, return: {"category": null, "entity": null, "confidence": 0}
+IMPORTANT: Keep descriptions neutral and factual. Avoid storing overly personal or sensitive details verbatim.
 
-JSON:`;
+If no meaningful user information is found, respond with:
+{"category": "none", "entity": "", "description": "", "confidence": 0}
+
+Respond ONLY with valid JSON, no other text.`;
 
   try {
-    const response = await fetch(self.CONFIG.API_ENDPOINT, {
+    console.log('[CloudAI] Sending extraction request to OpenAI...');
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${self.CONFIG.API_KEY}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: self.CONFIG.MODEL,
+        model: model,
         messages: [
-          { role: 'system', content: 'You are a personal memory extraction assistant. Return only valid JSON.' },
-          { role: 'user', content: prompt }
+          {
+            role: 'system',
+            content: 'You are a precise memory extraction system. Extract ONE key fact about the user and respond only with valid JSON.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
         ],
-        temperature: self.self.CONFIG.EXTRACTION_TEMPERATURE,
-        max_tokens: self.self.CONFIG.EXTRACTION_MAX_TOKENS
+        temperature: 0.3,
+        max_tokens: 150
       })
     });
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[CloudAI] API error:', response.status, errorData);
+      return null;
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content.trim();
+    const content = data.choices[0]?.message?.content?.trim();
     
-    console.log('[CloudAI] Extraction response:', content);
-
-    // Parse JSON from response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.warn('[CloudAI] No JSON in response');
+    if (!content) {
+      console.warn('[CloudAI] Empty response from API');
       return null;
     }
 
-    const result = JSON.parse(jsonMatch[0]);
+    console.log('[CloudAI] Raw response:', content);
+
+    // Parse JSON response
+    const extracted = JSON.parse(content);
     
-    // Check if extraction was successful
-    if (!result.category || !result.entity || result.confidence < 0.7) {
-      console.log('[CloudAI] No valid memory extracted');
+    // Validate response
+    if (extracted.category === 'none' || !extracted.entity || !extracted.description) {
+      console.log('[CloudAI] No meaningful memory found');
       return null;
     }
 
-    console.log('[CloudAI] Memory extracted:', result);
-    return result;
+    console.log('[CloudAI] Successfully extracted memory:', extracted);
+    return {
+      category: extracted.category,
+      entity: extracted.entity,
+      description: extracted.description,
+      confidence: extracted.confidence || 0.8,
+      source: 'cloud-ai',
+      model: model
+    };
 
   } catch (error) {
-    console.error('[CloudAI] Extraction error:', error);
+    console.error('[CloudAI] Error extracting memory:', error);
     return null;
   }
 }
 
 /**
- * Rank memories by relevance to current message
- * @param {string} userMessage - Current user message
- * @param {Array} memories - All available memories
- * @param {number} topN - Number of memories to return
- * @returns {Promise<Array>} - Top N relevant memories
+ * Test API key validity
+ * @param {string} apiKey - OpenAI API key to test
+ * @returns {Promise<Object>} {valid: boolean, error: string|null}
  */
-async function rankMemoriesWithAI(userMessage, memories, topN = 5) {
-  if (!self.CONFIG || !self.self.CONFIG.USE_CLOUD_RANKING) {
-    console.log('[CloudAI] Cloud ranking disabled');
-    return memories.slice(0, topN);
-  }
-
-  if (!memories || memories.length === 0) {
-    return [];
-  }
-
-  if (memories.length <= topN) {
-    return memories;
-  }
-
-  console.log(`[CloudAI] Ranking ${memories.length} memories for message:`, userMessage);
-
-  // Create a summary of memories with indices
-  const memorySummary = memories.map((m, idx) => {
-    return `${idx}: ${m.category} - ${m.entity} (${m.description || m.entity})`;
-  }).join('\n');
-
-  const prompt = `Given this user message and list of memories, select the ${topN} most relevant memory indices.
-
-User message: "${userMessage}"
-
-Available memories:
-${memorySummary}
-
-Return ONLY a JSON array of the ${topN} most relevant memory indices (numbers only), ordered by relevance.
-Example: [3, 7, 1, 5, 2]
-
-JSON array:`;
-
+async function testApiKey(apiKey) {
   try {
-    const response = await fetch(self.CONFIG.API_ENDPOINT, {
-      method: 'POST',
+    const response = await fetch('https://api.openai.com/v1/models', {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${self.CONFIG.API_KEY}`
-      },
-      body: JSON.stringify({
-        model: self.CONFIG.MODEL,
-        messages: [
-          { role: 'system', content: 'You are a memory relevance ranking system. Return only a JSON array of indices.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: self.CONFIG.RANKING_TEMPERATURE,
-        max_tokens: self.CONFIG.RANKING_MAX_TOKENS
-      })
+        'Authorization': `Bearer ${apiKey}`
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+    if (response.ok) {
+      return { valid: true, error: null };
+    } else {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      return { valid: false, error: error.error?.message || 'Invalid API key' };
     }
-
-    const data = await response.json();
-    const content = data.choices[0].message.content.trim();
-    
-    console.log('[CloudAI] Ranking response:', content);
-
-    // Parse JSON array from response
-    const jsonMatch = content.match(/\[[\s\S]*?\]/);
-    if (!jsonMatch) {
-      console.warn('[CloudAI] No JSON array in response, using first N');
-      return memories.slice(0, topN);
-    }
-
-    const indices = JSON.parse(jsonMatch[0]);
-    
-    // Get memories at those indices
-    const rankedMemories = indices
-      .slice(0, topN)
-      .map(idx => memories[idx])
-      .filter(Boolean);
-
-    console.log(`[CloudAI] Selected ${rankedMemories.length} memories`);
-    return rankedMemories;
-
   } catch (error) {
-    console.error('[CloudAI] Ranking error:', error);
-    return memories.slice(0, topN);
+    return { valid: false, error: error.message };
   }
 }
-
-// Service will be initialized by background script

@@ -10,11 +10,12 @@ const CATEGORIES = [
   'family', 'friend', 'colleague',
   'skill', 'language', 'education',
   'allergy', 'medication', 'condition',
-  'visited', 'planning'
+  'visited', 'planning', 'preference',
+  'relationship', 'goal', 'interest', 'fact'
 ];
 
 /**
- * Extract memory from text using AI model
+ * Extract memory from text using Cloud AI (OpenAI) or fallback to patterns
  * @param {string} text - User's message text
  * @returns {Promise<Object|null>} - Extracted memory or null
  */
@@ -40,13 +41,29 @@ async function extractMemory(text) {
     
     console.log('[MemoryExtractor] Building extraction prompt...');
     
-    // Prepare prompt for the model
-    const prompt = buildExtractionPrompt(text);
+    // Try cloud AI first if API key is configured
+    const config = await loadConfig();
     
-    console.log('[MemoryExtractor] Prompt built, running model inference...');
+    if (config.apiKey) {
+      console.log('[EthMem] Attempting cloud AI extraction...');
+      const cloudResult = await extractMemoryWithAI(text, config.apiKey, config.model);
+      
+      if (cloudResult) {
+        // Validate and normalize result
+        const memory = validateAndNormalizeMemory(cloudResult, text);
+        if (memory) {
+          console.log('[EthMem] Memory extracted via cloud AI:', memory);
+          return memory;
+        }
+      }
+      
+      console.log('[EthMem] Cloud AI extraction failed, falling back to patterns');
+    } else {
+      console.log('[EthMem] No API key configured, using pattern-based extraction');
+    }
     
-    // Send to model for inference
-    const result = await runModelInference(prompt);
+    // Fallback to pattern-based extraction
+    const result = patternBasedExtraction(text);
     
     console.log('[MemoryExtractor] Model inference result:', result);
     
@@ -60,9 +77,7 @@ async function extractMemory(text) {
     const memory = validateAndNormalizeMemory(result, text);
     
     if (memory) {
-      console.log('[MemoryExtractor] Memory extracted successfully:', memory);
-    } else {
-      console.log('[MemoryExtractor] Validation failed, no memory created');
+      console.log('[EthMem] Memory extracted via patterns:', memory);
     }
     
     return memory;
@@ -97,145 +112,28 @@ async function runModelInference(prompt) {
     return patternBasedExtraction(prompt);
   }
   
-  // Check if active model is loaded
-  const modelState = modelStates?.[activeModel];
-  if (!modelState || modelState.status !== 'loaded') {
-    console.log('[MemoryExtractor] Active model not loaded, using pattern-based extraction');
-    return patternBasedExtraction(prompt);
-  }
-  
-  console.log('[MemoryExtractor] Using AI model for extraction:', activeModel);
-  
-  try {
-    // Find ChatGPT tab to send inference request
-    const tabs = await chrome.tabs.query({ url: 'https://chatgpt.com/*' });
-    
-    if (tabs.length === 0) {
-      console.warn('[MemoryExtractor] No ChatGPT tab found, using pattern fallback');
-      return patternBasedExtraction(prompt);
-    }
-    
-    const tab = tabs[0];
-    console.log('[MemoryExtractor] Sending inference request to tab:', tab.id);
-    
-    // Send to content script which will forward to page context
-    const response = await chrome.tabs.sendMessage(tab.id, {
-      type: 'RUN_MODEL_INFERENCE',
-      payload: {
-        prompt: prompt,
-        modelId: activeModel,
-        task: 'extraction'
-      }
+  // TODO: Send to actual model
+  // For now, use pattern-based fallback
+  return patternBasedExtraction(prompt);
+}
+
+/**
+ * Check if model is loaded
+ */
+async function checkModelStatus() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['modelLoaded'], (result) => {
+      resolve(result.modelLoaded || false);
     });
-    
-    console.log('[MemoryExtractor] Received response from tab:', response);
-    
-    if (response?.success && response?.result) {
-      console.log('[MemoryExtractor] Model extraction result:', response.result);
-      
-      // If result is empty or just whitespace, use pattern fallback
-      if (!response.result || response.result.trim() === '' || response.result === '{}') {
-        console.warn('[MemoryExtractor] Model returned empty result, using pattern fallback');
-        return patternBasedExtraction(text);
-      }
-      
-      // Try to parse model output as JSON first
-      const parsedResult = parseModelOutput(response.result);
-      
-      // If parsing succeeded, use the structured result
-      if (parsedResult !== null) {
-        console.log('[MemoryExtractor] Using structured model output');
-        return parsedResult;
-      }
-      
-      // If parsing failed, treat the model output as a description and extract entity
-      console.log('[MemoryExtractor] Model returned plain text, extracting entity from:', response.result);
-      return extractFromPlainText(text, response.result);
-    } else {
-      console.warn('[MemoryExtractor] Model inference failed or no result, using pattern fallback');
-      console.warn('[MemoryExtractor] Response was:', JSON.stringify(response));
-      return patternBasedExtraction(text);
-    }
-    
-  } catch (error) {
-    console.error('[MemoryExtractor] Model inference error:', error);
-    return patternBasedExtraction(prompt);
-  }
+  });
 }
 
 /**
- * Parse model output to extract JSON
- * If model returns plain text instead of JSON, return null to trigger fallback
+ * Pattern-based extraction (fallback when cloud AI is not available)
+ * This is a simple rule-based system
  */
-function parseModelOutput(output) {
-  try {
-    // Try to find JSON in the output
-    const jsonMatch = output.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.warn('[EthMem] No JSON found in model output, will use pattern fallback');
-      return null; // Return null to trigger fallback, not empty object
-    }
-    
-    const result = JSON.parse(jsonMatch[0]);
-    console.log('[EthMem] Parsed model result:', result);
-    return result;
-    
-  } catch (error) {
-    console.error('[EthMem] Failed to parse model output:', error);
-    return null; // Return null to trigger fallback
-  }
-}
-
-/**
- * Extract memory from plain text model output
- * When model returns description but not structured JSON
- */
-function extractFromPlainText(originalText, modelDescription) {
-  console.log('[MemoryExtractor] Extracting from plain text model output');
-  console.log('[MemoryExtractor] Original text:', originalText);
-  console.log('[MemoryExtractor] Model description:', modelDescription);
-  
-  // Use pattern matching on original text to determine category and entity
-  const patternResult = patternBasedExtraction(originalText);
-  
-  console.log('[MemoryExtractor] Pattern result:', patternResult);
-  
-  if (patternResult && Object.keys(patternResult).length > 0) {
-    // Found a pattern match, use its category and entity but add model description
-    const memory = {
-      category: patternResult.category,
-      entity: patternResult.entity,
-      description: modelDescription, // Use the model's natural language description
-      confidence: 0.90 // Higher confidence since model validated it
-    };
-    console.log('[MemoryExtractor] Created memory from pattern + model:', memory);
-    return memory;
-  }
-  
-  // If no pattern matched, create a general memory with model's description
-  // Try to extract a key entity from the original text
-  const words = originalText.toLowerCase().split(/\s+/);
-  const stopWords = ['i', 'me', 'my', 'am', 'is', 'are', 'the', 'a', 'an', 'and', 'or', 'but'];
-  const entity = words.find(w => w.length > 2 && !stopWords.includes(w)) || words[0];
-  
-  return {
-    category: 'preference', // Generic category
-    entity: entity,
-    description: modelDescription,
-    confidence: 0.85
-  };
-}
-
-/**
- * Pattern-based extraction (fallback when model is not available)
- * This is a simple rule-based system as fallback
- */
-function patternBasedExtraction(text) {
-  console.log('[EthMem] Running pattern-based extraction on:', text);
-  
-  if (!text) return {};
-  
-  const lowerText = text.toLowerCase();
+function patternBasedExtraction(inputText) {
+  const text = inputText.toLowerCase();
   
   // Location patterns
   if (lowerText.match(/\b(live in|from|in)\s+([a-z]+)/i)) {
@@ -360,15 +258,14 @@ function validateAndNormalizeMemory(result, sourceText) {
     return null;
   }
   
-  // Validate category
+  // Validate category - allow custom categories from AI but log a warning
   if (!CATEGORIES.includes(category)) {
-    console.warn('[EthMem] Invalid category:', category);
-    return null;
+    console.warn('[EthMem] Unknown category (accepting anyway):', category);
   }
   
   // Validate confidence
   const conf = parseFloat(confidence) || 0.5;
-  if (conf < 0.7) {
+  if (conf < 0.6) {
     console.log('[EthMem] Confidence too low:', conf);
     return null;
   }
@@ -376,21 +273,24 @@ function validateAndNormalizeMemory(result, sourceText) {
   // Generate unique ID
   const id = generateId();
   
-  // Build final memory object with rich context
+  // Determine model used
+  const modelUsed = result.source === 'cloud-ai' ? result.model || 'gpt-3.5-turbo' : 'pattern-based';
+    
+  // Build final memory object
   return {
     id,
     timestamp: Date.now(),
     source: sourceText,
     category,
     entity: String(entity).trim(),
-    description: description || null, // Rich description like "User loves mangoes"
+    description: description,
     context: {
       conversationId: 'chatgpt-' + Date.now(),
       platform: 'chatgpt'
     },
     metadata: {
       confidence: conf,
-      modelUsed: 'pattern-based',
+      modelUsed: modelUsed,
       extractionVersion: '2.0'
     },
     status: 'local' // Will be 'synced' or 'on-chain' later
@@ -402,6 +302,36 @@ function validateAndNormalizeMemory(result, sourceText) {
  */
 function generateId() {
   return 'mem-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+/**
+ * Generate human-readable description from category and entity
+ */
+function generateDescription(category, entity) {
+  const templates = {
+    food: `User likes ${entity}`,
+    location: `User is from ${entity}`,
+    name: `User's name is ${entity}`,
+    age: `User is ${entity} years old`,
+    occupation: `User works as ${entity}`,
+    hobby: `User enjoys ${entity}`,
+    skill: `User knows ${entity}`,
+    language: `User speaks ${entity}`,
+    visited: `User has visited ${entity}`,
+    music: `User likes ${entity} music`,
+    movie: `User likes ${entity} movies`,
+    preference: `User prefers ${entity}`,
+    relationship: `User has ${entity}`,
+    goal: `User wants to ${entity}`,
+    interest: `User is interested in ${entity}`,
+    family: `User's family: ${entity}`,
+    friend: `User's friend: ${entity}`,
+    colleague: `User's colleague: ${entity}`,
+    education: `User studied ${entity}`,
+    fact: `User: ${entity}`
+  };
+  
+  return templates[category] || `User: ${entity}`;
 }
 
 // Export for use in background script

@@ -173,33 +173,19 @@
     }
   }
 
-  // Inject smart memory injection system
+  // Inject smartInjector.js for AI-powered memory injection
   function injectSmartInjector() {
     try {
-      if (!isExtensionRuntimeAvailable()) {
-        console.warn('[EthMem] Extension runtime not available, skipping smart injector injection');
-        return;
-      }
-      
-      // Inject modelInferenceService first (dependency)
-      const serviceScript = document.createElement('script');
-      serviceScript.src = chrome.runtime.getURL('src/lib/modelInferenceService.js');
-      serviceScript.onload = function() {
-        console.log('[EthMem] modelInferenceService.js loaded');
+      const script = document.createElement('script');
+      script.src = chrome.runtime.getURL('src/page/smartInjector.js');
+      script.onload = function() {
+        console.log('[EthMem] smartInjector.js loaded successfully');
         this.remove();
-        
-        // Then inject smartInjector
-        const injectorScript = document.createElement('script');
-        injectorScript.src = chrome.runtime.getURL('src/page/smartInjector.js');
-        injectorScript.onload = function() {
-          console.log('[EthMem] smartInjector.js loaded - Smart injection active! 🧠');
-          this.remove();
-        };
-        (document.head || document.documentElement).appendChild(injectorScript);
       };
-      (document.head || document.documentElement).appendChild(serviceScript);
+      (document.head || document.documentElement).appendChild(script);
+      console.log('[EthMem] smartInjector.js injected into page context');
     } catch (e) {
-      console.error('[EthMem] failed to inject smart injector:', e);
+      console.error('[EthMem] failed to inject smartInjector.js', e);
     }
   }
 
@@ -857,6 +843,22 @@
     // Only accept messages from same origin
     if (event.source !== window) return;
     
+    // Handle smart injection requests
+    if (event.data && event.data.type === 'ETHMEM_SMART') {
+      console.log('[EthMem ContentScript] Smart injection request received');
+      
+      chrome.runtime.sendMessage({
+        type: 'PROCESS_MESSAGE_SMART',
+        payload: event.data.payload
+      }, (response) => {
+        window.postMessage({
+          type: 'ETHMEM_SMART_RES',
+          payload: response
+        }, '*');
+      });
+      return;
+    }
+    
     if (event.data && event.data.type === 'CHATGPT_LOG') {
       const payload = event.data.payload;
       
@@ -877,32 +879,16 @@
           entries.slice(-50).forEach(e => processedMessages.add(e));
         }
         
-        console.log('[EthMem] User message detected, sending for extraction:', payload.userMessage.substring(0, 100));
+        console.log('[EthMem] User message detected:', payload.userMessage.substring(0, 100));
         
-        // Send to background for memory extraction
-        safeRuntimeSendMessage({
-          type: 'EXTRACT_MEMORY',
-          payload: {
-            text: payload.userMessage,
-            messageId: payload.timestamp.toString(),
-            platform: isChatGPT ? 'chatgpt' : isClaude ? 'claude' : 'gemini',
-            url: window.location.href,
-            timestamp: payload.timestamp
-          }
-        }, (response, error) => {
-          if (error) {
-            console.error('[EthMem] Error extracting memory:', error);
-            
-            // Check if it's a context invalidated error
-            if (error.message.includes('Extension context invalidated') || 
-                error.message.includes('Receiving end does not exist')) {
-              console.warn('[EthMem] Extension context invalidated during memory extraction');
-              // Don't retry immediately for context invalidated errors
-            }
-          } else if (response && response.success) {
-            console.log('[EthMem] Memory extracted:', response.memory);
-          }
-        });
+        // NOTE: Memory extraction is now handled by the smart injection system
+        // The smartInjector.js intercepts messages BEFORE sending and handles both:
+        // 1. Extracting new memories
+        // 2. Injecting relevant memories
+        // This avoids duplicate extraction and ensures seamless UX
+        
+        // Old automatic extraction disabled to prevent duplicates
+        // Memory extraction now happens in smartInjector when user sends message
       }
     }
 
@@ -1451,6 +1437,7 @@
   // Inject scripts
   injectPageScript();
   injectEthAdapter();
+  injectSmartInjector();
   injectMemoryViewer();
   injectSmartInjector(); // Smart memory injection with Laflan
 

@@ -2,18 +2,13 @@
 console.log('[EthMem] Background script loaded');
 
 // Import memory extraction and storage modules
-// Note: importScripts paths are relative to extension root
-try {
-  self.importScripts(
-    '/src/lib/memoryStorage.js',
-    '/src/lib/memoryExtractor.js', 
-    '/src/lib/cloudService.js'
-  );
-  console.log('[EthMem] Scripts imported successfully');
-} catch (error) {
-  console.error('[EthMem] Failed to import scripts:', error);
-  console.error('[EthMem] Error details:', error.message, error.name);
-}
+importScripts(
+  '../lib/config.js',
+  '../lib/cloudService.js',
+  '../lib/smartMemoryService.js',
+  '../lib/memoryExtractor.js',
+  '../lib/memoryStorage.js'
+);
 
 // Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
@@ -70,16 +65,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   
-  if (message.type === 'RUN_MODEL_INFERENCE') {
-    handleModelInference(message.payload, sendResponse);
+  // API Key management
+  if (message.type === 'SAVE_API_KEY') {
+    handleSaveApiKey(message.payload, sendResponse);
     return true;
   }
   
-  if (message.type === 'GET_RANKED_MEMORIES') {
-    handleGetRankedMemories(message.userMessage, message.maxMemories || 5, sendResponse);
+  if (message.type === 'GET_API_STATUS') {
+    handleGetApiStatus(sendResponse);
     return true;
   }
   
+  if (message.type === 'TEST_API_KEY') {
+    handleTestApiKey(message.payload, sendResponse);
+    return true;
+  }
+  
+  // Smart memory processing
+  if (message.type === 'PROCESS_MESSAGE_SMART') {
+    handleProcessMessageSmart(message.payload, sendResponse);
+    return true;
+  }
 });
 
 /**
@@ -116,7 +122,11 @@ async function handleExtractMemory(payload, sendResponse) {
     // Save to IndexedDB
     await saveMemory(memory);
     
-    console.log('[EthMem Background] Memory saved successfully:', memory.id);
+    console.log('[EthMem] ✅ Memory saved successfully!');
+    console.log('[EthMem] ID:', memory.id);
+    console.log('[EthMem] Category:', memory.category);
+    console.log('[EthMem] Entity:', memory.entity);
+    console.log('[EthMem] Description:', memory.description);
     
     // Send success response
     sendResponse({
@@ -272,74 +282,170 @@ async function handleClearAll(sendResponse) {
 }
 
 /**
- * Handle model inference request
+ * Handle save API key request
  */
-async function handleModelInference(payload, sendResponse) {
+async function handleSaveApiKey(payload, sendResponse) {
   try {
-    const { prompt, modelId, task } = payload;
+    const { apiKey } = payload;
     
-    console.log('[EthMem Background] Running model inference for task:', task);
-    console.log('[EthMem Background] Model ID:', modelId);
-    console.log('[EthMem Background] Prompt preview:', prompt.substring(0, 200) + '...');
-    
-    // Get model states to verify model is loaded
-    const { modelStates } = await chrome.storage.local.get(['modelStates']);
-    const modelState = modelStates?.[modelId];
-    
-    if (!modelState || modelState.status !== 'loaded') {
-      console.warn('[EthMem Background] Model not loaded:', modelId, modelState);
+    if (!apiKey || apiKey.trim().length === 0) {
       sendResponse({
         success: false,
-        error: 'Model not loaded'
+        error: 'API key cannot be empty'
       });
       return;
     }
     
-    console.log('[EthMem Background] Model is loaded, finding active ChatGPT tab...');
+    await saveApiKey(apiKey);
     
-    // Find the active ChatGPT tab to send inference request through content script
-    const tabs = await chrome.tabs.query({ url: 'https://chatgpt.com/*' });
-    
-    if (tabs.length === 0) {
-      console.warn('[EthMem Background] No ChatGPT tab found for model inference');
-      sendResponse({
-        success: false,
-        error: 'No ChatGPT tab found - model inference requires active ChatGPT tab'
-      });
-      return;
-    }
-    
-    const tab = tabs[0];
-    console.log('[EthMem Background] Sending inference request to tab:', tab.id);
-    
-    // Send inference request to content script, which will forward to page context
-    chrome.tabs.sendMessage(tab.id, {
-      type: 'RUN_MODEL_INFERENCE',
-      payload: {
-        prompt,
-        modelId,
-        task
-      }
-    }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error('[EthMem Background] Error sending to content script:', chrome.runtime.lastError);
-        sendResponse({
-          success: false,
-          error: chrome.runtime.lastError.message
-        });
-        return;
-      }
-      
-      console.log('[EthMem Background] Model inference response:', response);
-      sendResponse(response);
+    sendResponse({
+      success: true,
+      message: 'API key saved securely'
     });
     
   } catch (error) {
-    console.error('[EthMem Background] Error in handleModelInference:', error);
-    console.error('[EthMem Background] Stack:', error.stack);
+    console.error('[EthMem] Error saving API key:', error);
     sendResponse({
       success: false,
       error: error.message
+    });
+  }
+}
+
+/**
+ * Handle get API status request
+ */
+async function handleGetApiStatus(sendResponse) {
+  try {
+    const configured = await isApiKeyConfigured();
+    const config = await loadConfig();
+    
+    sendResponse({
+      success: true,
+      configured: configured,
+      model: config.model || 'gpt-3.5-turbo'
+    });
+    
+  } catch (error) {
+    console.error('[EthMem] Error getting API status:', error);
+    sendResponse({
+      success: false,
+      error: error.message
+    });
+  }
+}
+
+/**
+ * Handle test API key request
+ */
+async function handleTestApiKey(payload, sendResponse) {
+  try {
+    const { apiKey } = payload;
+    
+    const result = await testApiKey(apiKey);
+    
+    sendResponse({
+      success: true,
+      valid: result.valid,
+      error: result.error
+    });
+    
+  } catch (error) {
+    console.error('[EthMem] Error testing API key:', error);
+    sendResponse({
+      success: false,
+      error: error.message
+    });
+  }
+}
+
+/**
+ * Handle smart message processing (extract + rank in one call)
+ */
+async function handleProcessMessageSmart(payload, sendResponse) {
+  try {
+    const { userMessage } = payload;
+    
+    console.log('[EthMem] Smart processing message:', userMessage.substring(0, 50));
+    
+    // Get API config
+    const config = await loadConfig();
+    if (!config.apiKey) {
+      console.warn('[EthMem] No API key configured for smart processing');
+      sendResponse({
+        success: false,
+        error: 'No API key configured',
+        relevant: [],
+        newMemory: null
+      });
+      return;
+    }
+    
+    // Get all existing memories
+    const allMemories = await getAllMemories();
+    console.log('[EthMem] Processing with', allMemories.length, 'existing memories');
+    
+    // Process with GPT
+    const result = await processMessageSmart(
+      userMessage,
+      allMemories,
+      config.apiKey,
+      config.model
+    );
+    
+    // If there's a new memory, save it (after checking for duplicates)
+    if (result.newMemory) {
+      const memory = {
+        id: 'mem-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+        timestamp: Date.now(),
+        source: userMessage,
+        category: result.newMemory.category,
+        entity: result.newMemory.entity,
+        description: result.newMemory.description,
+        context: {
+          conversationId: 'chatgpt-' + Date.now(),
+          platform: 'chatgpt'
+        },
+        metadata: {
+          confidence: result.newMemory.confidence || 0.8,
+          modelUsed: config.model || 'gpt-3.5-turbo',
+          extractionVersion: '3.0-smart'
+        },
+        status: 'local'
+      };
+      
+      // Check for duplicates before saving
+      const duplicate = await isDuplicate(memory);
+      
+      if (duplicate) {
+        console.log('[EthMem] ⚠️  Duplicate memory detected, skipping save');
+      } else {
+        await saveMemory(memory);
+        console.log('[EthMem] ✅ New memory saved:', memory.description);
+      }
+    }
+    
+    // Format relevant memories for injection
+    const injectionText = formatMemoriesForInjection(result.relevant);
+    
+    console.log('[EthMem] Smart processing complete:');
+    console.log('[EthMem]   Relevant memories:', result.relevant.length);
+    console.log('[EthMem]   New memory:', result.newMemory ? 'Yes' : 'No');
+    
+    sendResponse({
+      success: true,
+      relevant: result.relevant,
+      injectionText: injectionText,
+      newMemory: result.newMemory
+    });
+    
+  } catch (error) {
+    console.error('[EthMem] Error in smart processing:', error);
+    sendResponse({
+      success: false,
+      error: error.message,
+      relevant: [],
+      newMemory: null
     });
   }
 }
