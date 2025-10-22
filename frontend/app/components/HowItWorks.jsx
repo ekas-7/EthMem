@@ -35,10 +35,10 @@ export default function HowItWorks() {
             </p>
 
             <div className="flex justify-center pt-4 border-t border-emerald-100">
-              <a 
-                href="#" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="/Ethmem.zip"
+                download
+                aria-label="Download EthMem extension zip"
                 className="flex items-center justify-center gap-2 bg-gray-900 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

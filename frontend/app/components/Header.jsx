@@ -94,17 +94,18 @@ export default function Header() {
         <div className="px-2 sm:px-6 pt-8 sm:pt-12 pb-12 sm:pb-16 text-center">
           <div className="flex justify-center mb-6 sm:mb-8">
             <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-full px-3 py-2 shadow-inner">
-              <span className="bg-emerald-400 text-black text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">New</span>
-              <span className="text-gray-300 pr-2 sm:pr-3 text-xs sm:text-sm">Try our new zk-backed memory</span>
+              <span className="bg-emerald-400 text-black text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">Privacy-First</span>
+              <span className="text-gray-300 pr-2 sm:pr-3 text-xs sm:text-sm">On-device AI • Encrypted Storage • On-Chain</span>
             </div>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
-            Unified LLM Memory —<br /> <span className="text-emerald-400">Your Blockchain Identity.</span>
+            Your AI Memory, <br /> <span className="text-emerald-400">Your Data, Your Control</span>
           </h1>
 
           <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
-            Merge your digital mind with your decentralized self. Experience a new layer of digital continuity — where your LLM memory becomes your blockchain identity.
+            A privacy-first browser extension that builds your personal knowledge graph from AI conversations. 
+            On-device extraction, encrypted storage, and ZK-proof verification—giving every AI persistent context without compromising your privacy.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 px-4">
@@ -127,23 +128,27 @@ export default function Header() {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 lg:space-x-8 mt-6 sm:mt-8 text-gray-300 px-4">
-            <p className="text-xs sm:text-sm font-medium">Integration Partners:</p>
+            <p className="text-xs sm:text-sm font-medium">Compatible With:</p>
             <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6">
               <div className="flex items-center space-x-2">
-                <img alt="Next logo" className="h-4 w-4 sm:h-6 sm:w-6" src="/next.svg" />
-                <span className="text-xs sm:text-sm">Ethereum</span>
+                <img alt="ChatGPT logo" className="h-4 w-4 sm:h-6 sm:w-6 rounded" src="/chatgpt2.png" />
+                <span className="text-xs sm:text-sm">ChatGPT</span>
               </div>
               <div className="flex items-center space-x-2">
-                <img alt="Vercel logo" className="h-4 w-4 sm:h-6 sm:w-6" src="/vercel.svg" />
-                <span className="text-xs sm:text-sm">Polygon</span>
+                <img alt="Claude logo" className="h-4 w-4 sm:h-6 sm:w-6 rounded" src="/claude.jpeg" />
+                <span className="text-xs sm:text-sm">Claude</span>
               </div>
               <div className="flex items-center space-x-2">
-                <img alt="IPFS logo" className="h-4 w-4 sm:h-6 sm:w-6 invert-dark" src="/file.svg" />
-                <span className="text-xs sm:text-sm">IPFS</span>
+                <img alt="Gemini logo" className="h-4 w-4 sm:h-6 sm:w-6 rounded" src="/gemini.png" />
+                <span className="text-xs sm:text-sm">Gemini</span>
               </div>
               <div className="flex items-center space-x-2">
-                <img alt="OpenAI logo" className="h-4 w-4 sm:h-6 sm:w-6" src="/globe.svg" />
-                <span className="text-xs sm:text-sm">OpenAI</span>
+                <img alt="ASI logo" className="h-4 w-4 sm:h-6 sm:w-6 rounded" src="/asi.png" />
+                <span className="text-xs sm:text-sm">ASI</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <img alt="LLaMA logo" className="h-4 w-4 sm:h-6 sm:w-6 rounded" src="/llama.png" />
+                <span className="text-xs sm:text-sm">LLaMA</span>
               </div>
             </div>
           </div>

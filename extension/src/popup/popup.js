@@ -1,8 +1,9 @@
 // Helper: try to send a message to the content script, and if there's no receiver
 // inject the content script into the tab and retry once (Manifest V3 via scripting.executeScript).
 async function sendMessageWithInject(tabId, message) {
-  if (!tabId && typeof tabId !== 'number') {
-    const err = new Error('sendMessageWithInject: invalid tabId');
+  // Validate tabId: must be a valid number (including 0)
+  if (typeof tabId !== 'number' || tabId < 0) {
+    const err = new Error(`sendMessageWithInject: invalid tabId (received: ${tabId}, type: ${typeof tabId})`);
     console.error(err);
     throw err;
   }
@@ -11,7 +12,9 @@ async function sendMessageWithInject(tabId, message) {
   const trySend = () => new Promise((resolve, reject) => {
     try {
       chrome.tabs.sendMessage(tabId, message, (resp) => {
-        if (chrome.runtime && chrome.runtime.lastError) return reject(chrome.runtime.lastError);
+        if (chrome.runtime && chrome.runtime.lastError) {
+          return reject(new Error(chrome.runtime.lastError.message || 'Unknown runtime error'));
+        }
         resolve(resp);
       });
     } catch (sendErr) {
@@ -22,26 +25,42 @@ async function sendMessageWithInject(tabId, message) {
 
   // First attempt: try to send directly
   try {
+    console.log(`popup: attempting to send message to tab ${tabId}`, message);
     return await trySend();
   } catch (err) {
-    // If chrome.scripting isn't available (older MV2 or runtime mismatch), surface a clear error
-    console.table(err);
+    // Log the error properly
+    console.warn('popup: initial message send failed, attempting content script injection', err);
 
     if (!chrome.scripting || !chrome.scripting.executeScript) {
-      console.error('popup: chrome.scripting.executeScript is not available; cannot inject content script');
-      throw err;
+      const apiError = new Error('chrome.scripting.executeScript is not available; cannot inject content script. Ensure manifest.json has "scripting" permission.');
+      console.error('popup:', apiError.message);
+      throw apiError;
     }
 
     try {
-      await chrome.scripting.executeScript({ target: { tabId }, files: ['contentScript.js'] });
-      // allow the injected script to initialize and register its message listener
-      await new Promise(res => setTimeout(res, 250));
+      // Inject the content script (ensure correct path based on manifest.json)
+      await chrome.scripting.executeScript({ 
+        target: { tabId }, 
+        files: ['src/content/contentScript.js'] 
+      });
+      
+      console.log(`popup: content script injected into tab ${tabId}, waiting for initialization...`);
+      
+      // Allow the injected script to initialize and register its message listener
+      // Use a longer timeout for reliability
+      await new Promise(res => setTimeout(res, 500));
+      
       return await trySend();
     } catch (err2) {
       // Combine both errors for easier debugging
-      console.error('popup: failed to inject or send message after inject', { firstError: err, injectError: err2 });
-      // Prefer to throw the injection error
-      throw err2;
+      const detailedError = new Error(`Failed to inject content script or send message. Initial error: ${err.message}. Injection error: ${err2.message}`);
+      console.error('popup: injection and retry failed', { 
+        tabId, 
+        message, 
+        firstError: err, 
+        injectError: err2 
+      });
+      throw detailedError;
     }
   }
 }
