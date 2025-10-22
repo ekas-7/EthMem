@@ -172,26 +172,59 @@ echo "ASI_ONE_API_KEY=your_asi_api_key_here" > .env
 
 ### Run Any Ecosystem
 
+#### Option 1: Docker (Recommended for Production) 🐳
+
+Run all systems with Docker Compose:
+
+```bash
+# Copy and configure environment
+cp .env.example .env
+# Edit .env with your ASI_ONE_API_KEY
+
+# Start all systems
+docker-compose up -d
+
+# Or use the Makefile
+make all
+
+# Start individual systems
+make medical    # Port 8000
+make law        # Port 9000
+make support    # Port 10000
+make education  # Port 11000
+make financial  # Port 12000
+
+# View logs
+docker-compose logs -f
+
+# Stop all systems
+docker-compose down
+```
+
+**See [DOCKER.md](DOCKER.md) for complete Docker documentation.**
+
+#### Option 2: Direct Python Execution
+
 Each ecosystem can run **completely independently**:
 
 ```bash
-# 🏥 Medical System
+# 🏥 Medical System (Port 8000)
 cd medical
 python medical_system.py
 
-# ⚖️ Legal System
+# ⚖️ Legal System (Port 9000)
 cd law
 python law_system.py
 
-# 🎧 Customer Support System
+# 🎧 Customer Support System (Port 10000)
 cd customer-support
 python support_system.py
 
-# 📚 Education System
+# 📚 Education System (Port 11000)
 cd education
 python education_system.py
 
-# 💰 Financial Advisory System
+# 💰 Financial Advisory System (Port 12000)
 cd financial
 python financial_system.py
 ```
