@@ -4,10 +4,13 @@
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![uAgents](https://img.shields.io/badge/uAgents-0.12.0+-green.svg)](https://fetch.ai/)
 [![ASI API](https://img.shields.io/badge/ASI-API-purple)](https://asi1.ai)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 
 > **Five Complete Agent Ecosystems** - Medical 🏥 | Legal ⚖️ | Customer Support 🎧 | Education 📚 | Financial 💰
 > 
 > All Powered by ASI and Memory Integration
+>
+> **Now with Web Frontend!** 🌐
 
 <p align="center">
   <img src="https://img.shields.io/badge/Medical-🏥-green" alt="Medical"/>
@@ -31,6 +34,23 @@ Welcome to **ASI-Agents** - a comprehensive collection of **five independent mul
 
 Each ecosystem is **completely independent** yet follows the **same architecture pattern**, making it easy to understand, extend, and deploy any or all of them.
 
+### 🆕 Web Interface
+
+Access all agents through a modern web interface:
+- **Frontend**: Next.js application with responsive design (Port 3001)
+- **API Server**: FastAPI backend providing unified REST APIs (Port 8080)
+- **Real-time Memory Integration**: View user history alongside consultations
+- **Docker Support**: One-command deployment of entire stack
+
+**Quick Start:**
+```bash
+./start-frontend.sh
+# or
+docker-compose up
+```
+
+Then visit: **http://localhost:3001**
+
 ---
 
 ## 📁 Project Structure
@@ -38,8 +58,24 @@ Each ecosystem is **completely independent** yet follows the **same architecture
 ```
 ASI-agents/
 ├── README.md                    # This file - Main overview
+├── FRONTEND_GUIDE.md            # 🆕 Frontend & API documentation
 ├── requirements.txt             # Shared Python dependencies
-├── setup.sh                     # Setup script for all ecosystems
+├── docker-compose.yml           # Docker orchestration for all services
+├── api_server.py                # 🆕 FastAPI backend (Port 8080)
+├── start-frontend.sh            # 🆕 Quick start script for web interface
+│
+├── frontend/                    # 🆕 Next.js Web Interface (Port 3001)
+│   ├── app/
+│   │   ├── page.jsx             # Home page with agent cards
+│   │   ├── medical/page.jsx     # Medical consultation UI
+│   │   ├── legal/page.jsx       # Legal consultation UI
+│   │   ├── support/page.jsx     # Customer support UI
+│   │   ├── education/page.jsx   # Education tutoring UI
+│   │   ├── financial/page.jsx   # Financial advisory UI
+│   │   └── components/          # Shared React components
+│   ├── package.json
+│   ├── Dockerfile
+│   └── README.md
 │
 ├── medical/                     # 🏥 Medical Consultation Ecosystem
 │   ├── doctor_agent.py          # AI doctor agent

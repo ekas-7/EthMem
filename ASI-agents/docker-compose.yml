@@ -172,6 +172,57 @@ services:
       retries: 3
       start_period: 40s
 
+  # 🚀 API Server (Port 8080)
+  api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: asi-api-server
+    command: python -u api_server.py
+    ports:
+      - "8080:8080"
+    environment:
+      - ASI_ONE_API_KEY=${ASI_ONE_API_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./medical/user_memories.json:/app/medical/user_memories.json:ro
+      - ./law:/app/law:ro
+      - ./customer-support:/app/customer-support:ro
+      - ./education:/app/education:ro
+      - ./financial:/app/financial:ro
+    networks:
+      - asi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      - medical-system
+      - law-system
+      - support-system
+      - education-system
+      - financial-system
+
+  # 🌐 Frontend (Port 3002)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: asi-frontend
+    ports:
+      - "3002:3001"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+      - NODE_ENV=production
+    networks:
+      - asi-network
+    restart: unless-stopped
+    depends_on:
+      - api-server
+
 networks:
   asi-network:
     driver: bridge
