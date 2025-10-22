@@ -1,14 +1,22 @@
 // smartInjector.js - Smart Memory Injection
-console.log('[SmartInjector] Loaded');
+(function() {
+  // Prevent double initialization
+  if (window.__ETHMEM_INJECTOR_LOADED__) {
+    console.log('[SmartInjector] Already loaded, skipping');
+    return;
+  }
+  window.__ETHMEM_INJECTOR_LOADED__ = true;
+  
+  console.log('[SmartInjector] Loaded');
 
-let enabled = true;
-let processing = false;
+  let enabled = true;
+  let processing = false;
 
-function init() {
-  console.log('[SmartInjector] Init');
-  document.addEventListener('keydown', onKey, true);
-  document.addEventListener('click', onClick, true);
-}
+  function init() {
+    console.log('[SmartInjector] Init');
+    document.addEventListener('keydown', onKey, true);
+    document.addEventListener('click', onClick, true);
+  }
 
 async function onKey(e) {
   if (!enabled || processing || e.key !== 'Enter' || e.shiftKey) return;
@@ -149,3 +157,5 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+})(); // End of IIFE

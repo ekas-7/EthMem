@@ -1439,7 +1439,6 @@
   injectEthAdapter();
   injectSmartInjector();
   injectMemoryViewer();
-  injectSmartInjector(); // Smart memory injection with Laflan
 
   // Auto-inject header button with retry logic (Claude and Gemini only, NOT ChatGPT)
   let retryCount = 0;
