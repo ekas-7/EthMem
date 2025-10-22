@@ -8,6 +8,10 @@ import { pipeline, env } from './transformers.min.js';
     env.allowRemoteModels = true;
     env.backends.onnx.wasm.numThreads = 1;
     
+    // Suppress ONNX Runtime warnings about unused initializers
+    // Set log level to 'error' to only show errors, not warnings
+    env.backends.onnx.logLevel = 'error';
+    
     console.log('Transformers.js loaded in sandbox');
     
     // Listen for messages from parent
