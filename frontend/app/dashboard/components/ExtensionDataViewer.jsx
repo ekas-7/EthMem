@@ -237,22 +237,24 @@ export default function ExtensionDataViewer() {
   }
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6">
+    <div className="bg-card-dark rounded-xl p-6 shadow-lg border border-white/5">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <Database className="w-6 h-6 text-emerald-400" />
-          <h3 className="text-lg font-semibold">Extension Data</h3>
+          <div className="p-2 bg-card-darker rounded-lg">
+            <Database className="w-5 h-5 text-emerald-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-dark-primary">Extension Data</h3>
           {extensionStatus && (
             <div className="flex items-center space-x-2">
               {extensionStatus.isAvailable ? (
-                <div className="flex items-center space-x-1 text-green-400">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm">Connected</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-900/30 rounded-full border border-emerald-500/20">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-xs font-semibold text-emerald-400">Connected</span>
                 </div>
               ) : (
-                <div className="flex items-center space-x-1 text-red-400">
-                  <AlertCircle className="w-4 h-4" />
-                  <span className="text-sm">Disconnected</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-900/30 rounded-full border border-red-500/20">
+                  <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+                  <span className="text-xs font-semibold text-red-400">Disconnected</span>
                 </div>
               )}
             </div>
@@ -262,7 +264,7 @@ export default function ExtensionDataViewer() {
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg text-sm transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-card-darker hover:bg-gray-600 disabled:opacity-50 rounded-lg text-sm font-medium transition-all border border-white/5"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
@@ -270,7 +272,7 @@ export default function ExtensionDataViewer() {
           <button
             onClick={handleExportMemories}
             disabled={memories.length === 0}
-            className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg text-sm transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-card-darker hover:bg-gray-600 disabled:opacity-50 rounded-lg text-sm font-medium transition-all border border-white/5"
           >
             <Download className="w-4 h-4" />
             <span>Export</span>
@@ -278,7 +280,7 @@ export default function ExtensionDataViewer() {
           <button
             onClick={handleUploadToContract}
             disabled={uploading || memories.length === 0 || !isConnected || !isSepoliaConnected}
-            className="flex items-center space-x-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-all shadow-lg hover:shadow-emerald-500/30"
           >
             {uploading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -431,13 +433,13 @@ export default function ExtensionDataViewer() {
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 type="text"
                 placeholder="Search memories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full pl-10 pr-4 py-3 bg-card-darker border border-white/10 rounded-lg text-white placeholder-muted focus:outline-none focus:border-emerald-400 transition-colors"
               />
             </div>
           </div>
@@ -445,7 +447,7 @@ export default function ExtensionDataViewer() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-4 py-3 bg-card-darker border border-white/10 rounded-lg text-white focus:outline-none focus:border-emerald-400 transition-colors cursor-pointer"
             >
               {categories.map(category => (
                 <option key={category} value={category}>
@@ -460,7 +462,7 @@ export default function ExtensionDataViewer() {
                 setSortBy(field)
                 setSortOrder(order)
               }}
-              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-4 py-3 bg-card-darker border border-white/10 rounded-lg text-white focus:outline-none focus:border-emerald-400 transition-colors cursor-pointer"
             >
               <option value="timestamp-desc">Newest First</option>
               <option value="timestamp-asc">Oldest First</option>
@@ -473,23 +475,27 @@ export default function ExtensionDataViewer() {
 
       {/* Memories List */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <RefreshCw className="w-6 h-6 animate-spin text-emerald-400" />
-          <span className="ml-2 text-gray-400">Loading memories...</span>
+        <div className="flex flex-col items-center justify-center py-20">
+          <RefreshCw className="w-8 h-8 animate-spin text-emerald-400 mb-3" />
+          <span className="text-muted">Loading memories...</span>
         </div>
       ) : !extensionStatus?.isAvailable ? (
-        <div className="text-center py-12">
-          <AlertCircle className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-400 mb-2">Extension Required</h3>
-          <p className="text-gray-500">
+        <div className="text-center py-20">
+          <div className="p-4 bg-card-darker rounded-full w-fit mx-auto mb-4">
+            <AlertCircle className="w-12 h-12 text-muted" />
+          </div>
+          <h3 className="text-lg font-medium text-sidebar-text mb-2">Extension Required</h3>
+          <p className="text-muted">
             Install the EthMem browser extension to view your memories
           </p>
         </div>
       ) : filteredMemories.length === 0 ? (
-        <div className="text-center py-12">
-          <Database className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-400 mb-2">No memories found</h3>
-          <p className="text-gray-500">
+        <div className="text-center py-20">
+          <div className="p-4 bg-card-darker rounded-full w-fit mx-auto mb-4">
+            <Database className="w-12 h-12 text-muted" />
+          </div>
+          <h3 className="text-lg font-medium text-sidebar-text mb-2">No memories found</h3>
+          <p className="text-muted">
             {searchTerm || selectedCategory !== 'all' 
               ? 'Try adjusting your search or filters'
               : 'Start chatting to create memories'
@@ -497,13 +503,13 @@ export default function ExtensionDataViewer() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {filteredMemories.map((memory) => (
-            <div key={memory.id} className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
+            <div key={memory.id} className="bg-card-darker rounded-lg p-5 hover:bg-card-dark hover:border-emerald-400/20 transition-all border border-white/5">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(memory.category)}`}>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold text-white ${getCategoryColor(memory.category)}`}>
                       {memory.category}
                     </span>
                     <span className={`text-xs ${getStatusColor(memory.status)}`}>
@@ -542,13 +548,22 @@ export default function ExtensionDataViewer() {
 
       {/* Stats */}
       {extensionStatus?.isAvailable && (
-        <div className="mt-6 pt-4 border-t border-gray-700">
-          <div className="flex items-center justify-between text-sm text-gray-400">
-            <span>Showing {filteredMemories.length} of {memories.length} memories</span>
-            <div className="flex items-center space-x-4">
-              <span>Local: {memories.filter(m => m.status === 'local').length}</span>
-              <span>Synced: {memories.filter(m => m.status === 'synced').length}</span>
-              <span>On-chain: {memories.filter(m => m.status === 'on-chain').length}</span>
+        <div className="mt-6 pt-4 border-t border-white/5">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted">Showing {filteredMemories.length} of {memories.length} memories</span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <span className="text-muted">Local:</span>
+                <span className="font-semibold text-sidebar-text">{memories.filter(m => m.status === 'local').length}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-muted">Synced:</span>
+                <span className="font-semibold text-sidebar-text">{memories.filter(m => m.status === 'synced').length}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-muted">On-chain:</span>
+                <span className="font-semibold text-sidebar-text">{memories.filter(m => m.status === 'on-chain').length}</span>
+              </div>
             </div>
           </div>
         </div>

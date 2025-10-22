@@ -122,7 +122,7 @@ export default function Sidebar() {
     <>
       {/* Logo */}
       <div className="flex items-center space-x-3 mb-8">
-        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-400/30 p-1.5">
+        <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center  p-1.5">
           <img src="/logo.png" alt="EthMem" className="w-full h-full object-contain" />
         </div>
         <span className="text-2xl font-bold text-emerald-300">EthMem</span>
