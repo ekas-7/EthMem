@@ -56,14 +56,14 @@ const availableIntegrations = [
   {
     name: "Notion",
     description: "Connect your Notion workspace for seamless memory storage",
-    icon: "https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png",
     category: "Productivity",
     popular: true
   },
   {
     name: "Google Drive",
     description: "Backup memories to your Google Drive",
-    icon: "https://cdn.worldvectorlogo.com/logos/google-drive-2020.svg",
+    icon: "https://ssl.gstatic.com/images/branding/product/2x/hh_drive_96dp.png",
     category: "Storage",
     popular: false
   },
@@ -121,7 +121,7 @@ export default function IntegrationsPage() {
           </div>
           <button className="bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-black px-5 py-2.5 rounded-lg flex items-center space-x-2 font-semibold shadow-lg shadow-emerald-400/30 transition-all">
             <Plus className="w-4 h-4" />
-            <span>Add Integration</span>
+            <span>Suggest Integration</span>
           </button>
         </div>
 
@@ -139,7 +139,7 @@ export default function IntegrationsPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-card-darker rounded-lg p-1 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 p-1 rounded-lg  flex items-center justify-center group-hover:scale-110 transition-transform">
                       <img 
                         src={integration.icon} 
                         alt={integration.name}
