@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import axios from 'axios'
-import { Activity, Send, AlertCircle, CheckCircle2, Clock, FileText } from 'lucide-react'
+import { HiOutlineHeart, HiOutlinePaperAirplane, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlineClock, HiOutlineDocumentText } from 'react-icons/hi2'
 import LoadingSpinner from '../components/LoadingSpinner'
 import MemoryViewer from '../components/MemoryViewer'
 
@@ -59,7 +59,7 @@ export default function MedicalPage() {
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
             <div className="relative w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center mr-4">
-              <Activity size={28} className="text-white" />
+              <HiOutlineHeart className="text-white text-3xl" />
             </div>
           </div>
           <div>
@@ -133,7 +133,7 @@ export default function MedicalPage() {
 
             {error && (
               <div className="flex items-center p-4 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20">
-                <AlertCircle size={20} className="mr-2" />
+                <HiOutlineExclamationCircle className="text-xl mr-2" />
                 <span>{error}</span>
               </div>
             )}
@@ -147,7 +147,7 @@ export default function MedicalPage() {
                 <>Processing...</>
               ) : (
                 <>
-                  <Send size={20} className="mr-2" />
+                  <HiOutlinePaperAirplane className="text-xl mr-2" />
                   Get Consultation
                 </>
               )}
@@ -160,7 +160,7 @@ export default function MedicalPage() {
           {consultation && !isLoading && (
             <div className="mt-6 glass-strong rounded-xl border border-white/10 p-6 space-y-6">
               <h2 className="text-2xl font-bold text-white flex items-center">
-                <CheckCircle2 size={24} className="text-emerald-400 mr-2" />
+                <HiOutlineCheckCircle className="text-emerald-400 text-2xl mr-2" />
                 Consultation Results
               </h2>
 
@@ -174,7 +174,7 @@ export default function MedicalPage() {
                 <ul className="space-y-2">
                   {consultation.recommendations.map((rec, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle2 size={18} className="text-emerald-400 mr-2 mt-0.5 flex-shrink-0" />
+                      <HiOutlineCheckCircle className="text-emerald-400 text-lg mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-400">{rec}</span>
                     </li>
                   ))}
@@ -204,7 +204,7 @@ export default function MedicalPage() {
               </div>
 
               <div className="flex items-center text-sm text-gray-500">
-                <Clock size={16} className="mr-2" />
+                <HiOutlineClock className="text-base mr-2" />
                 {new Date(consultation.timestamp).toLocaleString()}
               </div>
             </div>
