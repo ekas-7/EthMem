@@ -121,9 +121,9 @@ export default function Sidebar() {
   const SidebarContent = () => (
     <>
       {/* Logo */}
-      <div className="flex items-center space-x-2 mb-8">
-        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-400/30">
-          <span className="text-black font-bold text-xl">E</span>
+      <div className="flex items-center space-x-3 mb-8">
+        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-400/30 p-1.5">
+          <img src="/logo.png" alt="EthMem" className="w-full h-full object-contain" />
         </div>
         <span className="text-2xl font-bold text-emerald-300">EthMem</span>
       </div>
