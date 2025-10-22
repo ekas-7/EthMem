@@ -1,0 +1,40 @@
+{
+  "memories": [
+    {
+      "id": "mem_001",
+      "entity": "John Doe",
+      "category": "name",
+      "context": "User's name is John Doe",
+      "timestamp": 1729598400000,
+      "status": "local",
+      "metadata": {
+        "source": "chat",
+        "confidence": 0.95
+      }
+    },
+    {
+      "id": "mem_003",
+      "entity": "peanuts",
+      "category": "allergy",
+      "context": "User is allergic to peanuts",
+      "timestamp": 1729598600000,
+      "status": "local",
+      "metadata": {
+        "source": "chat",
+        "confidence": 0.98
+      }
+    },
+    {
+      "id": "mem_005",
+      "entity": "diabetes",
+      "category": "condition",
+      "context": "User has type 2 diabetes",
+      "timestamp": 1729598800000,
+      "status": "local",
+      "metadata": {
+        "source": "chat",
+        "confidence": 0.96
+      }
+    }
+  ]
+}
