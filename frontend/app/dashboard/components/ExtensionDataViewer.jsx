@@ -503,46 +503,83 @@ export default function ExtensionDataViewer() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filteredMemories.map((memory) => (
-            <div key={memory.id} className="bg-card-darker rounded-lg p-5 hover:bg-card-dark hover:border-emerald-400/20 transition-all border border-white/5">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-3">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Category</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Entity</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Description</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Source</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Confidence</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Status</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Time</th>
+                <th className="text-right py-3 px-4 text-xs font-semibold text-muted uppercase tracking-wider">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {filteredMemories.map((memory) => (
+                <tr 
+                  key={memory.id} 
+                  className="hover:bg-card-darker transition-colors group"
+                >
+                  <td className="py-4 px-4">
                     <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold text-white ${getCategoryColor(memory.category)}`}>
                       {memory.category}
                     </span>
-                    <span className={`text-xs ${getStatusColor(memory.status)}`}>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="font-medium text-white">{memory.entity}</div>
+                    <div className="text-xs text-gray-500 mt-0.5 font-mono">
+                      {memory.id.slice(0, 12)}...
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 max-w-xs">
+                    <div className="text-sm text-gray-300 truncate">
+                      {memory.description || '-'}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="text-sm text-gray-400 italic">
+                      {memory.source || 'Unknown'}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-gray-700 rounded-full h-2">
+                        <div 
+                          className="bg-emerald-400 h-2 rounded-full transition-all"
+                          style={{ width: `${Math.round((memory.metadata?.confidence || 0) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-400 font-medium">
+                        {Math.round((memory.metadata?.confidence || 0) * 100)}%
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className={`text-xs font-medium ${getStatusColor(memory.status)}`}>
                       {memory.status}
                     </span>
+                  </td>
+                  <td className="py-4 px-4">
                     <span className="text-xs text-gray-400">
                       {formatTimestamp(memory.timestamp)}
                     </span>
-                  </div>
-                  <h4 className="font-medium text-white mb-1">{memory.entity}</h4>
-                  {memory.description && (
-                    <p className="text-sm text-gray-300 mb-2">{memory.description}</p>
-                  )}
-                  {memory.source && (
-                    <p className="text-xs text-gray-500 mb-2 italic">"{memory.source}"</p>
-                  )}
-                  <div className="flex items-center space-x-4 text-xs text-gray-400">
-                    <span>Confidence: {Math.round((memory.metadata?.confidence || 0) * 100)}%</span>
-                    <span>ID: {memory.id}</span>
-                    {memory.metadata?.modelUsed && (
-                      <span>Model: {memory.metadata.modelUsed}</span>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDeleteMemory(memory.id)}
-                  className="p-2 text-gray-400 hover:text-red-400 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+                  </td>
+                  <td className="py-4 px-4 text-right">
+                    <button
+                      onClick={() => handleDeleteMemory(memory.id)}
+                      className="p-2 text-gray-400 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                      title="Delete memory"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
