@@ -41,7 +41,7 @@ export const SEPOLIA_CONFIG = {
 
 // Sepolia-specific contract addresses (update these with your deployed contracts)
 export const SEPOLIA_CONTRACTS = {
-  MEMORY_STORAGE: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0x...',
+  MEMORY_STORAGE: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0x1A68e87eaFbD252c9622D2De93Ec231a5D7AD7D6',
   // Add other contract addresses as needed
 }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useAccount, useConnect, useDisconnect, useBalance, useChainId, useSwitchChain } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useBalance, useChainId, useSwitchChain, useWalletClient } from 'wagmi'
 import { formatEther } from 'viem'
 import { SEPOLIA_CHAIN_ID, isSepoliaNetwork, formatSepoliaETH, SEPOLIA_CONFIG } from '../lib/sepoliaConfig'
 
@@ -13,6 +13,7 @@ export function useWallet() {
   const { data: balance, isLoading: balanceLoading } = useBalance({
     address: address,
   })
+  const { data: walletClient } = useWalletClient()
 
   const formatAddress = (addr) => {
     if (!addr) return ''
@@ -83,6 +84,9 @@ export function useWallet() {
     // Balance info
     balance: balance ? formatBalance(balance) : '0',
     balanceLoading,
+    
+    // Wallet client for contract interactions
+    walletClient,
     
     // Connection methods
     connectWallet,

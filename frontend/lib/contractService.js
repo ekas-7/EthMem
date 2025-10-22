@@ -1,6 +1,7 @@
 'use client'
 
 import { ethers } from 'ethers'
+import { uploadToIPFS } from './ipfsService'
 
 // Contract ABI - this should match your deployed MemoryStorage contract
 const MEMORY_STORAGE_ABI = [
@@ -80,32 +81,44 @@ const MEMORY_STORAGE_ABI = [
 ]
 
 // Contract configuration
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0x...' // Replace with your deployed contract address
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0x1A68e87eaFbD252c9622D2De93Ec231a5D7AD7D6' // Sepolia deployed contract address
+
+// Sepolia network configuration
+const SEPOLIA_CONFIG = {
+  chainId: 11155111,
+  name: 'Sepolia',
+  rpcUrl: process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_PROJECT_ID',
+  blockExplorer: 'https://sepolia.etherscan.io',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18
+  }
+}
+
 const NETWORK_CONFIG = {
-  // Add your network configurations here
   localhost: {
     chainId: 1337,
     rpcUrl: 'http://127.0.0.1:8545'
   },
-  sepolia: {
-    chainId: 11155111,
-    rpcUrl: 'https://sepolia.infura.io/v3/YOUR_PROJECT_ID'
-  }
+  sepolia: SEPOLIA_CONFIG
 }
 
 /**
- * Get contract instance
+ * Get contract instance with signer
  * @param {Object} walletClient - Wagmi wallet client
- * @returns {Object} - Contract instance
+ * @returns {Object} - Contract instance with signer
  */
-export function getContract(walletClient) {
+export async function getContract(walletClient) {
   if (!CONTRACT_ADDRESS || CONTRACT_ADDRESS === '0x...') {
     throw new Error('Contract address not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS in your environment variables.')
   }
   
   // Create provider from wallet client
   const provider = new ethers.BrowserProvider(walletClient)
-  return new ethers.Contract(CONTRACT_ADDRESS, MEMORY_STORAGE_ABI, provider)
+  // Get signer for sending transactions
+  const signer = await provider.getSigner()
+  return new ethers.Contract(CONTRACT_ADDRESS, MEMORY_STORAGE_ABI, signer)
 }
 
 /**
@@ -118,7 +131,7 @@ export async function storeMemory(ipfsHash, walletClient) {
   try {
     console.log('[Contract] Storing memory with IPFS hash:', ipfsHash)
     
-    const contract = getContract(walletClient)
+    const contract = await getContract(walletClient)
     
     // Call storeMemory function
     const tx = await contract.storeMemory(ipfsHash)
@@ -166,7 +179,7 @@ export async function getMemory(memoryId, walletClient) {
   try {
     console.log('[Contract] Getting memory:', memoryId)
     
-    const contract = getContract(walletClient)
+    const contract = await getContract(walletClient)
     const result = await contract.getMemory(memoryId)
     
     return {
@@ -190,7 +203,7 @@ export async function getMemoriesByAddress(address, walletClient) {
   try {
     console.log('[Contract] Getting memories for address:', address)
     
-    const contract = getContract(walletClient)
+    const contract = await getContract(walletClient)
     const memoryIds = await contract.getMemoriesByAddress(address)
     
     return memoryIds.map(id => id.toString())
@@ -210,7 +223,7 @@ export async function deleteMemory(memoryId, walletClient) {
   try {
     console.log('[Contract] Deleting memory:', memoryId)
     
-    const contract = getContract(walletClient)
+    const contract = await getContract(walletClient)
     const tx = await contract.deleteMemory(memoryId)
     
     const receipt = await tx.wait()
@@ -234,7 +247,7 @@ export async function deleteMemory(memoryId, walletClient) {
  */
 export async function getTotalMemoryCount(walletClient) {
   try {
-    const contract = getContract(walletClient)
+    const contract = await getContract(walletClient)
     const count = await contract.getTotalMemoryCount()
     return count.toString()
   } catch (error) {
@@ -252,10 +265,117 @@ export async function getTotalMemoryCount(walletClient) {
  */
 export async function isMemoryOwner(address, memoryId, walletClient) {
   try {
-    const contract = getContract(walletClient)
+    const contract = await getContract(walletClient)
     return await contract.isMemoryOwner(address, memoryId)
   } catch (error) {
     console.error('[Contract] Error checking ownership:', error)
     throw new Error(`Failed to check ownership: ${error.message}`)
+  }
+}
+
+/**
+ * Upload memories to IPFS and store hash in smart contract
+ * @param {Array} memories - Array of memory objects to upload
+ * @param {Object} walletClient - Wagmi wallet client
+ * @param {Function} onProgress - Optional progress callback function
+ * @returns {Promise<Object>} - Upload result with transaction details
+ */
+export async function uploadMemoriesToContract(memories, walletClient, onProgress = null) {
+  try {
+    console.log('[Upload] Starting upload process for', memories.length, 'memories')
+    
+    if (!memories || memories.length === 0) {
+      throw new Error('No memories provided for upload')
+    }
+
+    // Step 1: Prepare data for IPFS upload
+    const uploadData = {
+      memories: memories,
+      metadata: {
+        uploadTimestamp: new Date().toISOString(),
+        totalMemories: memories.length,
+        version: '1.0'
+      }
+    }
+
+    if (onProgress) onProgress({ step: 'preparing', message: 'Preparing data for upload...' })
+
+    // Step 2: Upload to IPFS
+    console.log('[Upload] Uploading to IPFS...')
+    if (onProgress) onProgress({ step: 'ipfs', message: 'Uploading to IPFS...' })
+    
+    const ipfsHash = await uploadToIPFS(uploadData)
+    console.log('[Upload] IPFS upload successful. Hash:', ipfsHash)
+
+    // Step 3: Store IPFS hash in smart contract
+    console.log('[Upload] Storing IPFS hash in contract...')
+    if (onProgress) onProgress({ step: 'contract', message: 'Storing in smart contract...' })
+    
+    const contractResult = await storeMemory(ipfsHash, walletClient)
+    console.log('[Upload] Contract storage successful:', contractResult)
+
+    if (onProgress) onProgress({ step: 'complete', message: 'Upload completed successfully!' })
+
+    return {
+      success: true,
+      ipfsHash,
+      ipfsUrl: `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
+      transactionHash: contractResult.transactionHash,
+      memoryId: contractResult.memoryId,
+      gasUsed: contractResult.gasUsed,
+      totalMemories: memories.length
+    }
+
+  } catch (error) {
+    console.error('[Upload] Error in upload process:', error)
+    if (onProgress) onProgress({ step: 'error', message: `Upload failed: ${error.message}` })
+    throw new Error(`Upload failed: ${error.message}`)
+  }
+}
+
+/**
+ * Upload single memory to IPFS and store hash in smart contract
+ * @param {Object} memory - Single memory object to upload
+ * @param {Object} walletClient - Wagmi wallet client
+ * @param {Function} onProgress - Optional progress callback function
+ * @returns {Promise<Object>} - Upload result with transaction details
+ */
+export async function uploadSingleMemoryToContract(memory, walletClient, onProgress = null) {
+  return uploadMemoriesToContract([memory], walletClient, onProgress)
+}
+
+/**
+ * Get network configuration for current chain
+ * @param {Object} walletClient - Wagmi wallet client
+ * @returns {Promise<Object>} - Network configuration
+ */
+export async function getNetworkConfig(walletClient) {
+  try {
+    const provider = new ethers.BrowserProvider(walletClient)
+    const network = await provider.getNetwork()
+    
+    return {
+      chainId: Number(network.chainId),
+      name: network.name,
+      isSepolia: Number(network.chainId) === 11155111
+    }
+  } catch (error) {
+    console.error('[Contract] Error getting network config:', error)
+    throw new Error(`Failed to get network config: ${error.message}`)
+  }
+}
+
+/**
+ * Check if user is connected to Sepolia network
+ * @param {Object} walletClient - Wagmi wallet client
+ * @returns {Promise<boolean>} - Whether connected to Sepolia
+ */
+export async function isConnectedToSepolia(walletClient) {
+  try {
+    const networkConfig = await getNetworkConfig(walletClient)
+    return networkConfig.isSepolia
+  } catch (error) {
+    console.error('[Contract] Error checking Sepolia connection:', error)
+    return false
   }
 }
