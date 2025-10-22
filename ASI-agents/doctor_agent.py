@@ -2,10 +2,21 @@
 Doctor Agent - ASI-based Medical Assistant Agent
 This agent acts as a medical consultation assistant with mailbox enabled
 for asynchronous communication with users and other agents.
+Integrates with ASI (Artificial Superintelligence) API for intelligent medical consultations.
+Uses Protocol-based communication for structured agent-to-agent interactions.
 """
 
-from uagents import Agent, Context, Model
-from uagents.setup import fund_agent_if_low
+import os
+import requests
+from uagents import Agent, Context, Model, Protocol, Bureau
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# ASI API Configuration
+ASI_API_URL = "https://api.asi1.ai/v1/chat/completions"
+ASI_API_KEY = os.getenv("ASI_ONE_API_KEY")
 
 
 # Define message models for communication
@@ -42,28 +53,27 @@ class AppointmentConfirmation(Model):
 
 
 # Initialize the Doctor Agent with mailbox enabled
+# Using Agentverse mailbox - no local port/endpoint needed
 doctor_agent = Agent(
     name="doctor_agent",
     seed="doctor_agent_seed_phrase_zkMem_2024",
-    port=8001,
-    endpoint=["http://localhost:8001/submit"],
-    mailbox=True  # Enable mailbox for asynchronous messaging
+    mailbox="eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3NjM3MDg1OTUsImlhdCI6MTc2MTExNjU5NSwiaXNzIjoiZmV0Y2guYWkiLCJqdGkiOiJjODZiYWRmYTY3OGZiYzVlMWM1YzdiNTciLCJzY29wZSI6ImF2Iiwic3ViIjoiMDdiNzQ2Y2NlYjQzOTNiNDgzZjNiZjVjZjJkNmRkNjYwMGU5ODUyZjNjM2FkMDNiIn0.QJNlslN5SQ2LPr-_oWoEXH2k3jwQZLgV22neCxBkrIUzolG7RG-Y8QPhfEyLa7uF7fqtV3KDJgbuhcIfDdCLRkkAjkukHek41du5iM0WM3gtXJZbv_x2KProX3EcZXt-a1BQ35LciFUf4U7IS-OGawOo3VI87SMAM_OExA4DcSFTqiBg3ECPAkmFz9HdzdBEQUCrKkLfj68LpKJAGi2aPYRwCjFTJUuuv9m9x6HWILn7FPlCKLa3pA1C5qbairCJr9LuA1jkIKPx3N4FcsYYWVe_x48J_tS-UCZ9GEmRc88JoUowLreZTMOhAJR8_3o_LBCvrZ0vPTJDJjcGlRfOcw"  # Agentverse mailbox API key
 )
 
-# Fund agent if needed (for testnet)
-fund_agent_if_low(doctor_agent.wallet.address())
+# Define Doctor Protocol for medical consultation
+doctor_protocol = Protocol(name="MedicalConsultationProtocol", version="1.0.0")
 
 
-@doctor_agent.on_event("startup")
+@doctor_protocol.on_event("startup")
 async def introduce(ctx: Context):
-    """Agent startup event handler"""
+    """Protocol startup event handler"""
     ctx.logger.info(f"Doctor Agent started")
     ctx.logger.info(f"Agent address: {doctor_agent.address}")
-    ctx.logger.info(f"Mailbox enabled: {doctor_agent.mailbox is not None}")
+    ctx.logger.info("Medical Consultation Protocol initialized")
     ctx.logger.info("Ready to receive medical consultations...")
 
 
-@doctor_agent.on_message(model=MedicalQuery)
+@doctor_protocol.on_message(model=MedicalQuery, replies=MedicalAdvice)
 async def handle_medical_query(ctx: Context, sender: str, msg: MedicalQuery):
     """
     Handle incoming medical queries from patients or other agents
@@ -97,7 +107,7 @@ async def handle_medical_query(ctx: Context, sender: str, msg: MedicalQuery):
     log_interaction(ctx, msg, advice)
 
 
-@doctor_agent.on_message(model=AppointmentRequest)
+@doctor_protocol.on_message(model=AppointmentRequest, replies=AppointmentConfirmation)
 async def handle_appointment_request(ctx: Context, sender: str, msg: AppointmentRequest):
     """
     Handle appointment scheduling requests
@@ -119,7 +129,7 @@ async def handle_appointment_request(ctx: Context, sender: str, msg: Appointment
     ctx.logger.info(f"Appointment confirmed: {appointment_id}")
 
 
-@doctor_agent.on_interval(period=300.0)  # Check every 5 minutes
+@doctor_protocol.on_interval(period=300.0)  # Check every 5 minutes
 async def check_patient_follow_ups(ctx: Context):
     """
     Periodic task to check for required patient follow-ups
@@ -132,56 +142,136 @@ async def check_patient_follow_ups(ctx: Context):
 # Helper functions for medical logic
 def analyze_symptoms(symptoms: str, medical_history: str) -> str:
     """
-    Analyze patient symptoms and medical history
-    In production, this would use medical AI models or knowledge bases
+    Analyze patient symptoms and medical history using ASI API
     """
-    # Simplified logic for demonstration
-    symptoms_lower = symptoms.lower()
-    
-    if "fever" in symptoms_lower and "cough" in symptoms_lower:
-        return "Possible respiratory infection or flu"
-    elif "chest pain" in symptoms_lower:
-        return "Requires immediate attention - possible cardiac issue"
-    elif "headache" in symptoms_lower and "fatigue" in symptoms_lower:
-        return "Possible tension headache or stress-related condition"
-    else:
-        return "General consultation recommended for symptom assessment"
+    try:
+        if not ASI_API_KEY:
+            raise ValueError("ASI_ONE_API_KEY not configured")
+        
+        # Construct prompt for ASI
+        prompt = f"""You are a medical assistant AI helping with initial patient assessment.
+        
+Patient Symptoms: {symptoms}
+Medical History: {medical_history if medical_history else "No significant medical history provided"}
+
+Please provide a preliminary diagnosis or assessment. Be professional, cautious, and recommend seeking professional medical care when appropriate. Keep your response concise (2-3 sentences).
+
+IMPORTANT: This is for educational/informational purposes only and should not replace professional medical advice."""
+
+        # Make request to ASI API
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {ASI_API_KEY}"
+        }
+        
+        payload = {
+            "model": "asi1-mini",
+            "messages": [
+                {"role": "system", "content": "You are a helpful medical assistant AI providing preliminary assessments. Always emphasize the importance of consulting with healthcare professionals."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 200,
+            "temperature": 0.7
+        }
+        
+        response = requests.post(ASI_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        diagnosis = result['choices'][0]['message']['content'].strip()
+        return diagnosis
+        
+    except Exception as e:
+        # Fallback to rule-based logic if ASI API fails
+        print(f"ASI API error: {e}. Using fallback logic.")
+        symptoms_lower = symptoms.lower()
+        
+        if "fever" in symptoms_lower and "cough" in symptoms_lower:
+            return "Possible respiratory infection or flu. Please consult a healthcare provider for proper diagnosis."
+        elif "chest pain" in symptoms_lower:
+            return "Requires immediate attention - possible cardiac issue. Seek emergency medical care immediately."
+        elif "headache" in symptoms_lower and "fatigue" in symptoms_lower:
+            return "Possible tension headache or stress-related condition. Monitor symptoms and consult a doctor if they persist."
+        else:
+            return "General consultation recommended for symptom assessment. Please schedule an appointment with a healthcare provider."
 
 
 def generate_recommendations(diagnosis: str, urgency: str) -> list[str]:
     """
-    Generate medical recommendations based on diagnosis
+    Generate medical recommendations based on diagnosis using ASI API
     """
-    recommendations = []
-    
-    if "respiratory" in diagnosis.lower():
-        recommendations = [
-            "Rest and stay hydrated",
-            "Monitor temperature regularly",
-            "Consider over-the-counter fever reducers if needed",
-            "Seek immediate care if breathing difficulty occurs"
-        ]
-    elif "cardiac" in diagnosis.lower():
-        recommendations = [
-            "URGENT: Seek immediate medical attention",
-            "Do not drive yourself - call emergency services",
-            "Avoid physical exertion"
-        ]
-    elif "tension" in diagnosis.lower():
-        recommendations = [
-            "Ensure adequate rest and sleep",
-            "Practice stress management techniques",
-            "Stay hydrated",
-            "Consider over-the-counter pain relief if needed"
-        ]
-    else:
-        recommendations = [
-            "Schedule an in-person consultation",
-            "Monitor symptoms and note any changes",
-            "Maintain healthy lifestyle practices"
-        ]
-    
-    return recommendations
+    try:
+        if not ASI_API_KEY:
+            raise ValueError("ASI_ONE_API_KEY not configured")
+            
+        prompt = f"""Based on this preliminary diagnosis: "{diagnosis}"
+        
+Urgency Level: {urgency}
+
+Provide 3-4 practical, actionable recommendations for the patient. Format as a simple list.
+Keep recommendations professional and emphasize seeking medical care when needed."""
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {ASI_API_KEY}"
+        }
+        
+        payload = {
+            "model": "asi1-mini",
+            "messages": [
+                {"role": "system", "content": "You are a medical assistant providing practical health recommendations. Be clear, concise, and responsible."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 250,
+            "temperature": 0.7
+        }
+        
+        response = requests.post(ASI_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        recommendations_text = result['choices'][0]['message']['content'].strip()
+        
+        # Parse recommendations from response
+        # Split by newlines and clean up
+        recommendations = [line.strip().lstrip('•-*123456789. ') for line in recommendations_text.split('\n') if line.strip()]
+        
+        return recommendations[:4]  # Limit to 4 recommendations
+        
+    except Exception as e:
+        print(f"ASI API error: {e}. Using fallback logic.")
+        # Fallback logic
+        recommendations = []
+        
+        if "respiratory" in diagnosis.lower():
+            recommendations = [
+                "Rest and stay hydrated",
+                "Monitor temperature regularly",
+                "Consider over-the-counter fever reducers if needed",
+                "Seek immediate care if breathing difficulty occurs"
+            ]
+        elif "cardiac" in diagnosis.lower() or "chest pain" in diagnosis.lower():
+            recommendations = [
+                "URGENT: Seek immediate medical attention",
+                "Do not drive yourself - call emergency services",
+                "Avoid physical exertion"
+            ]
+        elif "tension" in diagnosis.lower() or "headache" in diagnosis.lower():
+            recommendations = [
+                "Ensure adequate rest and sleep",
+                "Practice stress management techniques",
+                "Stay hydrated",
+                "Consider over-the-counter pain relief if needed"
+            ]
+        else:
+            recommendations = [
+                "Schedule an in-person consultation with a healthcare provider",
+                "Monitor symptoms and note any changes",
+                "Maintain healthy lifestyle practices",
+                "Seek immediate care if symptoms worsen"
+            ]
+        
+        return recommendations
 
 
 def assess_urgency(symptoms: str, declared_urgency: str) -> str:
@@ -226,4 +316,6 @@ def log_interaction(ctx: Context, query: MedicalQuery, advice: MedicalAdvice):
 
 
 if __name__ == "__main__":
+    # Include protocol and publish manifest to Almanac
+    doctor_agent.include(doctor_protocol, publish_manifest=True)
     doctor_agent.run()
