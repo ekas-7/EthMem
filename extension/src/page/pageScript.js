@@ -182,12 +182,20 @@
       // Check if we have pending memory injection for chat endpoints
       if (isChatEndpoint && parsedBody) {
         // Debug: Check if injection data exists
+        console.log('[EthMem PageScript] Chat endpoint detected, checking for injection data...');
+        console.log('[EthMem PageScript] Injection data exists?', !!window.__ETHMEM_INJECTION__);
+        
         if (window.__ETHMEM_INJECTION__) {
           const injection = window.__ETHMEM_INJECTION__;
           const age = Date.now() - injection.timestamp;
           
-          // Only inject if less than 3 seconds old (fresh)
-          if (age < 3000) {
+          console.log('[EthMem PageScript] Injection data found!');
+          console.log('[EthMem PageScript] Age:', age, 'ms');
+          console.log('[EthMem PageScript] Original message:', injection.originalMessage);
+          console.log('[EthMem PageScript] Injection text length:', injection.injectionText.length);
+          
+          // Only inject if less than 5 seconds old (increased from 3)
+          if (age < 5000) {
             const platformName = isClaudeCompletionEndpoint ? 'Claude' : isGeminiEndpoint ? 'Gemini' : 'ChatGPT';
             console.log('[EthMem PageScript] 🧠 Injecting memories into API request...');
             console.log('[EthMem PageScript] Platform:', platformName);
@@ -201,6 +209,7 @@
           // No injection data - message sent without smart injector
           if (isClaudeCompletionEndpoint) {
             console.log('[EthMem PageScript] ⚠️ Claude completion endpoint but no injection data');
+            console.log('[EthMem PageScript] This might mean injection was consumed by earlier call or not prepared yet');
           }
           return originalFetch.call(this, input, init);
         }

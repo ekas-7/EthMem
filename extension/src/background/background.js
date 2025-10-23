@@ -385,21 +385,13 @@ async function handleProcessMessageSmart(payload, sendResponse) {
     const allMemories = await getAllMemories();
     console.log('[EthMem] Processing with', allMemories.length, 'existing memories');
     
-    if (allMemories.length === 0) {
-      console.warn('[EthMem] No memories stored yet!');
-      sendResponse({
-        success: true,
-        relevant: [],
-        injectionText: '',
-        newMemory: null
-      });
-      return;
-    }
+    // Note: Even if no memories exist yet, we should still try to extract new ones
+    // So we don't return early here anymore
     
     // Process with GPT
     const result = await processMessageSmart(
       userMessage,
-      allMemories,
+      allMemories, // Can be empty array
       config.apiKey,
       config.model
     );
