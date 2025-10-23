@@ -71,6 +71,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     handleClearAll(sendResponse);
     return true;
   }
+
+  if (message.type === 'ADD_MEMORIES') {
+    handleAddMemories(message.payload?.memories || [], sendResponse);
+    return true;
+  }
   
   // API Key management
   if (message.type === 'SAVE_API_KEY') {
@@ -285,6 +290,47 @@ async function handleClearAll(sendResponse) {
       success: false,
       error: error.message
     });
+  }
+}
+
+/**
+ * Handle add multiple memories (for sync from contract)
+ */
+async function handleAddMemories(memories, sendResponse) {
+  try {
+    if (!Array.isArray(memories) || memories.length === 0) {
+      sendResponse({ success: false, error: 'No memories provided' });
+      return;
+    }
+
+    let saved = 0;
+    for (const m of memories) {
+      // Ensure an id
+      const memory = {
+        id: m.id || ('mem-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)),
+        timestamp: m.timestamp || Date.now(),
+        category: m.category || 'general',
+        entity: m.entity || 'Memory',
+        description: m.description || '',
+        source: m.source || 'Smart Contract',
+        metadata: m.metadata || {},
+        status: m.status || 'synced'
+      };
+
+      const duplicate = await isDuplicate({
+        category: memory.category,
+        entity: memory.entity
+      });
+      if (!duplicate) {
+        await saveMemory(memory);
+        saved += 1;
+      }
+    }
+
+    sendResponse({ success: true, saved });
+  } catch (error) {
+    console.error('[EthMem] Error in handleAddMemories:', error);
+    sendResponse({ success: false, error: error.message });
   }
 }
 

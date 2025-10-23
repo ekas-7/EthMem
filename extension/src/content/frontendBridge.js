@@ -59,6 +59,13 @@ window.addEventListener('message', async (event) => {
         case 'CLEAR_ALL_MEMORIES':
           response = await sendMessageToBackground({ type: 'CLEAR_ALL_MEMORIES' });
           break;
+
+        case 'ADD_MEMORIES':
+          response = await sendMessageToBackground({ 
+            type: 'ADD_MEMORIES', 
+            payload: { memories: event.data.memories || [] }
+          });
+          break;
           
         default:
           response = { success: false, error: 'Unknown action' };
