@@ -2,13 +2,20 @@
 console.log('[EthMem] Background script loaded');
 
 // Import memory extraction and storage modules
-importScripts(
-  '../lib/config.js',
-  '../lib/cloudService.js',
-  '../lib/smartMemoryService.js',
-  '../lib/memoryExtractor.js',
-  '../lib/memoryStorage.js'
-);
+// Note: Service workers require absolute paths from extension root
+try {
+  importScripts(
+    '/src/lib/config.js',
+    '/src/lib/cloudService.js',
+    '/src/lib/smartMemoryService.js',
+    '/src/lib/memoryExtractor.js',
+    '/src/lib/memoryStorage.js'
+  );
+  console.log('[EthMem] All scripts imported successfully');
+} catch (error) {
+  console.error('[EthMem] Failed to import scripts:', error);
+  console.error('[EthMem] Error details:', error.message, error.stack);
+}
 
 // Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
