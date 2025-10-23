@@ -6,41 +6,96 @@
 [![ASI API](https://img.shields.io/badge/ASI-API-purple)](https://asi1.ai)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 
-> **Five Complete Agent Ecosystems** - Medical 🏥 | Legal ⚖️ | Customer Support 🎧 | Education 📚 | Financial 💰
+> **Five Complete Agent Ecosystems** - Medical | Legal | Customer Support | Education | Financial
 > 
 > All Powered by ASI and Memory Integration
 >
-> **Now with Web Frontend!** 🌐
+> **Now with Web Frontend**
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Medical-🏥-green" alt="Medical"/>
-  <img src="https://img.shields.io/badge/Legal-⚖️-blue" alt="Legal"/>
-  <img src="https://img.shields.io/badge/Support-🎧-orange" alt="Support"/>
-  <img src="https://img.shields.io/badge/Education-📚-purple" alt="Education"/>
-  <img src="https://img.shields.io/badge/Financial-💰-yellow" alt="Financial"/>
+  <img src="https://img.shields.io/badge/Medical-System-green" alt="Medical"/>
+  <img src="https://img.shields.io/badge/Legal-System-blue" alt="Legal"/>
+  <img src="https://img.shields.io/badge/Support-System-orange" alt="Support"/>
+  <img src="https://img.shields.io/badge/Education-System-purple" alt="Education"/>
+  <img src="https://img.shields.io/badge/Financial-System-yellow" alt="Financial"/>
 </p>
 
 ---
 
-## 🌟 Overview
+## Overview
 
 Welcome to **ASI-Agents** - a comprehensive collection of **five independent multi-agent systems**, each designed for a specific domain but sharing the same powerful architecture:
 
-- **🏥 Medical Consultation System** - AI-powered healthcare consultations with personalized medical memory
-- **⚖️ Legal Consultation System** - Intelligent legal advice with case history integration
-- **🎧 Customer Support System** - Smart customer service with support ticket memory
-- **📚 Education System** - Personalized AI tutoring with adaptive learning profiles
-- **💰 Financial Advisory System** - Portfolio analysis and investment guidance with risk profiling
+- **Medical Consultation System** - AI-powered healthcare consultations with personalized medical memory
+- **Legal Consultation System** - Intelligent legal advice with case history integration
+- **Customer Support System** - Smart customer service with support ticket memory
+- **Education System** - Personalized AI tutoring with adaptive learning profiles
+- **Financial Advisory System** - Portfolio analysis and investment guidance with risk profiling
 
 Each ecosystem is **completely independent** yet follows the **same architecture pattern**, making it easy to understand, extend, and deploy any or all of them.
 
-### 🆕 Web Interface
+### Web Interface
 
 Access all agents through a modern web interface:
 - **Frontend**: Next.js application with responsive design (Port 3001)
 - **API Server**: FastAPI backend providing unified REST APIs (Port 8080)
 - **Real-time Memory Integration**: View user history alongside consultations
 - **Docker Support**: One-command deployment of entire stack
+
+```mermaid
+graph LR
+    subgraph "Client Layer"
+        Browser[Web Browser]
+    end
+    
+    subgraph "Frontend Layer - Port 3001"
+        NextJS[Next.js Application]
+        Medical[Medical UI]
+        Legal[Legal UI]
+        Support[Support UI]
+        Education[Education UI]
+        Financial[Financial UI]
+    end
+    
+    subgraph "API Layer - Port 8080"
+        FastAPI[FastAPI Server]
+    end
+    
+    subgraph "Agent Layer"
+        MedicalSys[Medical System<br/>Port 8000]
+        LegalSys[Legal System<br/>Port 9000]
+        SupportSys[Support System<br/>Port 10000]
+        EducationSys[Education System<br/>Port 11000]
+        FinancialSys[Financial System<br/>Port 12000]
+    end
+    
+    Browser --> NextJS
+    NextJS --> Medical
+    NextJS --> Legal
+    NextJS --> Support
+    NextJS --> Education
+    NextJS --> Financial
+    
+    Medical --> FastAPI
+    Legal --> FastAPI
+    Support --> FastAPI
+    Education --> FastAPI
+    Financial --> FastAPI
+    
+    FastAPI --> MedicalSys
+    FastAPI --> LegalSys
+    FastAPI --> SupportSys
+    FastAPI --> EducationSys
+    FastAPI --> FinancialSys
+    
+    style NextJS fill:#000000,color:#ffffff
+    style FastAPI fill:#009688
+    style MedicalSys fill:#4caf50
+    style LegalSys fill:#2196f3
+    style SupportSys fill:#ff9800
+    style EducationSys fill:#9c27b0
+    style FinancialSys fill:#ffc107
+```
 
 **Quick Start:**
 ```bash
@@ -53,18 +108,18 @@ Then visit: **http://localhost:3001**
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ASI-agents/
 ├── README.md                    # This file - Main overview
-├── FRONTEND_GUIDE.md            # 🆕 Frontend & API documentation
+├── FRONTEND_GUIDE.md            # Frontend & API documentation
 ├── requirements.txt             # Shared Python dependencies
 ├── docker-compose.yml           # Docker orchestration for all services
-├── api_server.py                # 🆕 FastAPI backend (Port 8080)
-├── start-frontend.sh            # 🆕 Quick start script for web interface
+├── api_server.py                # FastAPI backend (Port 8080)
+├── start-frontend.sh            # Quick start script for web interface
 │
-├── frontend/                    # 🆕 Next.js Web Interface (Port 3001)
+├── frontend/                    # Next.js Web Interface (Port 3001)
 │   ├── app/
 │   │   ├── page.jsx             # Home page with agent cards
 │   │   ├── medical/page.jsx     # Medical consultation UI
@@ -77,7 +132,7 @@ ASI-agents/
 │   ├── Dockerfile
 │   └── README.md
 │
-├── medical/                     # 🏥 Medical Consultation Ecosystem
+├── medical/                     # Medical Consultation Ecosystem
 │   ├── doctor_agent.py          # AI doctor agent
 │   ├── patient_agent.py         # Patient simulation agent
 │   ├── memory_agent.py          # Medical memory management
@@ -86,7 +141,7 @@ ASI-agents/
 │   ├── ARCHITECTURE.md          # Medical system architecture
 │   └── README.md                # Medical system documentation
 │
-├── law/                         # ⚖️ Legal Consultation Ecosystem
+├── law/                         # Legal Consultation Ecosystem
 │   ├── lawyer_agent.py          # AI lawyer agent
 │   ├── client_agent.py          # Client simulation agent
 │   ├── case_memory_agent.py     # Legal memory management
@@ -94,7 +149,7 @@ ASI-agents/
 │   ├── case_memories.json       # Legal case memory storage
 │   └── ARCHITECTURE.md          # Legal system architecture
 │
-├── customer-support/            # 🎧 Customer Support Ecosystem
+├── customer-support/            # Customer Support Ecosystem
 │   ├── support_agent.py         # AI support agent
 │   ├── customer_agent.py        # Customer simulation agent
 │   ├── ticket_memory_agent.py   # Support memory management
@@ -102,7 +157,7 @@ ASI-agents/
 │   ├── customer_memories.json   # Customer memory storage
 │   └── ARCHITECTURE.md          # Support system architecture
 │
-├── education/                   # 📚 Education Ecosystem
+├── education/                   # Education Ecosystem
 │   ├── tutor_agent.py           # AI tutor agent
 │   ├── student_agent.py         # Student simulation agent
 │   ├── learning_memory_agent.py # Learning profile management
@@ -110,7 +165,7 @@ ASI-agents/
 │   ├── student_memories.json    # Student learning profiles
 │   └── ARCHITECTURE.md          # Education system architecture
 │
-└── financial/                   # 💰 Financial Advisory Ecosystem
+└── financial/                   # Financial Advisory Ecosystem
     ├── advisor_agent.py         # AI financial advisor agent
     ├── investor_agent.py        # Investor simulation agent
     ├── portfolio_memory_agent.py # Portfolio memory management
@@ -121,49 +176,66 @@ ASI-agents/
 
 ---
 
-## 🏗️ Shared Architecture
+## Shared Architecture
 
 All five ecosystems follow the **same proven architecture**:
 
+```mermaid
+graph TB
+    subgraph "Multi-Agent Ecosystem"
+        Client[Client Agent<br/>Patient/Client/Customer/Student/Investor]
+        Expert[Expert Agent<br/>Doctor/Lawyer/Support/Tutor/Advisor]
+        Memory[Memory Agent<br/>Medical/Legal/Support/Learning/Portfolio]
+        Bureau[Fetch.ai Bureau<br/>Coordination Layer]
+    end
+    
+    subgraph "External Systems"
+        Browser[Browser Extension<br/>ETHMem]
+        ASI[ASI API<br/>asi1-mini]
+        Blockchain[Blockchain<br/>Memory Storage]
+    end
+    
+    Client <-->|Query/Response| Expert
+    Expert -->|Request Memories| Memory
+    Memory -->|Enhanced Context| Expert
+    Browser -->|JSON Export| Memory
+    Expert -->|Analysis Request| ASI
+    ASI -->|AI Response| Expert
+    Memory <-->|Sync| Blockchain
+    Bureau -.->|Manages| Client
+    Bureau -.->|Manages| Expert
+    Bureau -.->|Manages| Memory
+    
+    style Expert fill:#4a90e2
+    style Client fill:#50c878
+    style Memory fill:#f39c12
+    style ASI fill:#9b59b6
+    style Browser fill:#e74c3c
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     ECOSYSTEM ARCHITECTURE                   │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────────┐        ┌──────────────┐                   │
-│  │   Expert     │◄──────►│   Client     │                   │
-│  │   Agent      │        │   Agent      │                   │
-│  │  (Doctor/    │        │  (Patient/   │                   │
-│  │   Lawyer/    │        │   Client/    │                   │
-│  │   Support/   │        │   Customer/  │                   │
-│  │   Tutor/     │        │   Student/   │                   │
-│  │   Advisor)   │        │   Investor)  │                   │
-│  └──────┬───────┘        └──────────────┘                   │
-│         │                                                     │
-│         │ Request                                            │
-│         │ Memories                                           │
-│         ▼                                                     │
-│  ┌──────────────┐                                            │
-│  │   Memory     │                                            │
-│  │   Agent      │◄──── Browser Extension                    │
-│  │  (Medical/   │      (JSON Export)                        │
-│  │   Legal/     │                                            │
-│  │   Support/   │                                            │
-│  │   Learning/  │                                            │
-│  │   Portfolio) │                                            │
-│  └──────────────┘                                            │
-│         │                                                     │
-│         │ Enhanced                                           │
-│         │ Context                                            │
-│         ▼                                                     │
-│  ┌──────────────┐                                            │
-│  │   ASI API    │                                            │
-│  │ (asi1-mini)  │                                            │
-│  └──────────────┘                                            │
-│                                                               │
-│  All agents managed by Fetch.ai Bureau                       │
-│  Protocol-based communication via Agentverse                 │
-└─────────────────────────────────────────────────────────────┘
+
+### System Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Client Agent
+    participant E as Expert Agent
+    participant M as Memory Agent
+    participant A as ASI API
+    participant B as Browser Extension
+    
+    Note over B,M: Memory Sync
+    B->>M: Export user memories (JSON)
+    M->>M: Store in local database
+    
+    Note over C,E: Consultation Flow
+    C->>E: Submit query with user ID
+    E->>M: Request user memories
+    M->>E: Return relevant context
+    E->>A: Send query + context
+    A->>E: Return AI analysis
+    E->>C: Deliver personalized response
+    
+    Note over M: Memory persists for future consultations
 ```
 
 ### Key Components (Same for All)
@@ -177,7 +249,7 @@ All five ecosystems follow the **same proven architecture**:
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -208,7 +280,53 @@ echo "ASI_ONE_API_KEY=your_asi_api_key_here" > .env
 
 ### Run Any Ecosystem
 
-#### Option 1: Docker (Recommended for Production) 🐳
+#### Option 1: Docker (Recommended for Production)
+
+```mermaid
+graph TB
+    subgraph "Docker Compose Stack"
+        subgraph "Frontend Container - Port 3001"
+            Next[Next.js App]
+        end
+        
+        subgraph "API Container - Port 8080"
+            API[FastAPI Server]
+        end
+        
+        subgraph "Agent Containers"
+            M[Medical<br/>Port 8000]
+            L[Legal<br/>Port 9000]
+            S[Support<br/>Port 10000]
+            E[Education<br/>Port 11000]
+            F[Financial<br/>Port 12000]
+        end
+        
+        subgraph "Shared Volume"
+            VOL[(Memory Storage<br/>JSON Files)]
+        end
+    end
+    
+    Next --> API
+    API --> M
+    API --> L
+    API --> S
+    API --> E
+    API --> F
+    
+    M -.->|Persist| VOL
+    L -.->|Persist| VOL
+    S -.->|Persist| VOL
+    E -.->|Persist| VOL
+    F -.->|Persist| VOL
+    
+    style Next fill:#000000,color:#ffffff
+    style API fill:#009688
+    style M fill:#4caf50
+    style L fill:#2196f3
+    style S fill:#ff9800
+    style E fill:#9c27b0
+    style F fill:#ffc107
+```
 
 Run all systems with Docker Compose:
 
@@ -244,40 +362,66 @@ docker-compose down
 Each ecosystem can run **completely independently**:
 
 ```bash
-# 🏥 Medical System (Port 8000)
+# Medical System (Port 8000)
 cd medical
 python medical_system.py
 
-# ⚖️ Legal System (Port 9000)
+# Legal System (Port 9000)
 cd law
 python law_system.py
 
-# 🎧 Customer Support System (Port 10000)
+# Customer Support System (Port 10000)
 cd customer-support
 python support_system.py
 
-# 📚 Education System (Port 11000)
+# Education System (Port 11000)
 cd education
 python education_system.py
 
-# 💰 Financial Advisory System (Port 12000)
+# Financial Advisory System (Port 12000)
 cd financial
 python financial_system.py
 ```
 
 ---
 
-## 🏥 Medical Consultation System
+## Medical Consultation System
 
 **Purpose**: AI-powered medical consultations with personalized health memory integration.
 
 ### Features
 
-- 🩺 Symptom analysis and preliminary diagnosis
-- 💊 Personalized recommendations based on medical history
-- 🧬 Allergy and condition awareness
-- ⚠️ Urgency assessment and triage
-- 📋 Medical memory integration from browser extension
+- Symptom analysis and preliminary diagnosis
+- Personalized recommendations based on medical history
+- Allergy and condition awareness
+- Urgency assessment and triage
+- Medical memory integration from browser extension
+
+### Architecture
+
+```mermaid
+graph TD
+    subgraph "Medical Ecosystem - Port 8000"
+        PA[Patient Agent]
+        DA[Doctor Agent]
+        MA[Memory Agent]
+        MEM[(user_memories.json)]
+    end
+    
+    PA -->|Medical Query| DA
+    DA -->|Request History| MA
+    MA -->|Allergies, Conditions| DA
+    MA <-->|Read/Write| MEM
+    DA -->|Analysis| ASI[ASI API]
+    ASI -->|Diagnosis| DA
+    DA -->|Personalized Advice| PA
+    
+    EXT[Browser Extension] -.->|Export Memories| MEM
+    
+    style DA fill:#4caf50
+    style PA fill:#81c784
+    style MA fill:#aed581
+```
 
 ### Example Use Case
 
@@ -299,17 +443,43 @@ query = MedicalQuery(
 
 ---
 
-## ⚖️ Legal Consultation System
+## Legal Consultation System
 
 **Purpose**: Intelligent legal consultations with case history and jurisdiction awareness.
 
 ### Features
 
-- 📜 Legal case analysis and preliminary assessment
-- ⚖️ Jurisdiction-specific legal advice
-- 📚 Case precedent and history integration
-- 🔍 Contract review and analysis
-- 📊 Legal risk assessment
+- Legal case analysis and preliminary assessment
+- Jurisdiction-specific legal advice
+- Case precedent and history integration
+- Contract review and analysis
+- Legal risk assessment
+
+### Architecture
+
+```mermaid
+graph TD
+    subgraph "Legal Ecosystem - Port 9000"
+        CA[Client Agent]
+        LA[Lawyer Agent]
+        CMA[Case Memory Agent]
+        CMEM[(case_memories.json)]
+    end
+    
+    CA -->|Legal Query| LA
+    LA -->|Request Case History| CMA
+    CMA -->|Jurisdiction, Precedents| LA
+    CMA <-->|Read/Write| CMEM
+    LA -->|Analysis| ASI[ASI API]
+    ASI -->|Legal Opinion| LA
+    LA -->|Legal Advice| CA
+    
+    EXT[Browser Extension] -.->|Export Case Data| CMEM
+    
+    style LA fill:#2196f3
+    style CA fill:#64b5f6
+    style CMA fill:#90caf9
+```
 
 ### Example Use Case
 
@@ -332,17 +502,43 @@ query = LegalQuery(
 
 ---
 
-## 🎧 Customer Support System
+## Customer Support System
 
 **Purpose**: Smart customer service with intelligent ticket resolution and customer history.
 
 ### Features
 
-- 🎫 Ticket creation and management
-- 📞 Customer history tracking
-- 🚨 Priority assessment based on urgency
-- 💬 Personalized support responses
-- 📈 Issue pattern recognition
+- Ticket creation and management
+- Customer history tracking
+- Priority assessment based on urgency
+- Personalized support responses
+- Issue pattern recognition
+
+### Architecture
+
+```mermaid
+graph TD
+    subgraph "Support Ecosystem - Port 10000"
+        CUS[Customer Agent]
+        SA[Support Agent]
+        TMA[Ticket Memory Agent]
+        TMEM[(customer_memories.json)]
+    end
+    
+    CUS -->|Support Ticket| SA
+    SA -->|Request History| TMA
+    TMA -->|Past Tickets, Purchases| SA
+    TMA <-->|Read/Write| TMEM
+    SA -->|Analysis| ASI[ASI API]
+    ASI -->|Resolution Steps| SA
+    SA -->|Support Response| CUS
+    
+    EXT[Browser Extension] -.->|Export Customer Data| TMEM
+    
+    style SA fill:#ff9800
+    style CUS fill:#ffb74d
+    style TMA fill:#ffcc80
+```
 
 ### Example Use Case
 
@@ -365,17 +561,43 @@ ticket = SupportQuery(
 
 ---
 
-## 📚 Education System
+## Education System
 
 **Purpose**: Personalized AI tutoring with adaptive learning and student profiling.
 
 ### Features
 
-- 📖 Personalized tutoring based on learning style (visual/auditory/kinesthetic)
-- 🎯 Subject mastery tracking
-- 📊 Adaptive difficulty adjustment
-- 🧠 Learning pattern recognition
-- 🏆 Progress monitoring and feedback
+- Personalized tutoring based on learning style (visual/auditory/kinesthetic)
+- Subject mastery tracking
+- Adaptive difficulty adjustment
+- Learning pattern recognition
+- Progress monitoring and feedback
+
+### Architecture
+
+```mermaid
+graph TD
+    subgraph "Education Ecosystem - Port 11000"
+        STU[Student Agent]
+        TUT[Tutor Agent]
+        LMA[Learning Memory Agent]
+        LMEM[(student_memories.json)]
+    end
+    
+    STU -->|Learning Query| TUT
+    TUT -->|Request Profile| LMA
+    LMA -->|Learning Style, Progress| TUT
+    LMA <-->|Read/Write| LMEM
+    TUT -->|Analysis| ASI[ASI API]
+    ASI -->|Personalized Lesson| TUT
+    TUT -->|Adaptive Teaching| STU
+    
+    EXT[Browser Extension] -.->|Export Learning Data| LMEM
+    
+    style TUT fill:#9c27b0
+    style STU fill:#ba68c8
+    style LMA fill:#ce93d8
+```
 
 ### Example Use Case
 
@@ -398,17 +620,43 @@ query = TutoringQuery(
 
 ---
 
-## 💰 Financial Advisory System
+## Financial Advisory System
 
 **Purpose**: Portfolio analysis and investment guidance with personalized risk profiling.
 
 ### Features
 
-- 📊 Portfolio analysis and optimization
-- 💹 Risk-based investment recommendations
-- 🎯 Goal-based financial planning
-- 📈 Market trend analysis
-- ⚖️ Asset allocation strategies (Conservative/Moderate/Aggressive)
+- Portfolio analysis and optimization
+- Risk-based investment recommendations
+- Goal-based financial planning
+- Market trend analysis
+- Asset allocation strategies (Conservative/Moderate/Aggressive)
+
+### Architecture
+
+```mermaid
+graph TD
+    subgraph "Financial Ecosystem - Port 12000"
+        INV[Investor Agent]
+        ADV[Advisor Agent]
+        PMA[Portfolio Memory Agent]
+        PMEM[(portfolio_memories.json)]
+    end
+    
+    INV -->|Investment Query| ADV
+    ADV -->|Request Portfolio| PMA
+    PMA -->|Risk Profile, Holdings| ADV
+    PMA <-->|Read/Write| PMEM
+    ADV -->|Analysis| ASI[ASI API]
+    ASI -->|Investment Strategy| ADV
+    ADV -->|Financial Advice| INV
+    
+    EXT[Browser Extension] -.->|Export Portfolio Data| PMEM
+    
+    style ADV fill:#ffc107
+    style INV fill:#ffd54f
+    style PMA fill:#ffe082
+```
 
 ### Example Use Case
 
@@ -431,9 +679,9 @@ query = FinancialQuery(
 
 ---
 
-## 📊 Ecosystem Comparison
+## Ecosystem Comparison
 
-| Feature | Medical 🏥 | Legal ⚖️ | Support 🎧 | Education 📚 | Financial 💰 |
+| Feature | Medical | Legal | Support | Education | Financial |
 |---------|-----------|----------|------------|--------------|--------------|
 | **Expert Agent** | Doctor | Lawyer | Support Agent | Tutor | Financial Advisor |
 | **Client Agent** | Patient | Client | Customer | Student | Investor |
@@ -445,7 +693,7 @@ query = FinancialQuery(
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -476,7 +724,7 @@ These files are auto-created with sample data on first run and can be populated 
 
 ---
 
-## 🛠️ Development
+## Development
 
 ### Project Dependencies
 
@@ -503,7 +751,7 @@ cosmpy                   # Cosmos blockchain integration
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 - **[Medical System Architecture](medical/ARCHITECTURE.md)** - Detailed medical consultation system design
 - **[Medical System README](medical/README.md)** - User guide for medical system
@@ -514,9 +762,9 @@ cosmpy                   # Cosmos blockchain integration
 
 ---
 
-## 🚧 Roadmap
+## Roadmap
 
-### Completed ✅
+### Completed
 - [x] Medical Consultation System with memory integration
 - [x] Legal Consultation System with case history
 - [x] Customer Support System with ticket management
@@ -526,7 +774,7 @@ cosmpy                   # Cosmos blockchain integration
 - [x] Protocol-based agent communication
 - [x] Comprehensive architecture documentation
 
-### Planned 🔮
+### Planned
 - [ ] Web dashboard for all ecosystems
 - [ ] Real-time blockchain memory sync (ETHMem integration)
 - [ ] Multi-language support
@@ -538,7 +786,7 @@ cosmpy                   # Cosmos blockchain integration
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -550,13 +798,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Fetch.ai** - For the uAgents framework and Agentverse platform
 - **ASI** - For the powerful ASI API
@@ -564,7 +812,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## Support
 
 For questions, issues, or feature requests:
 
@@ -575,7 +823,7 @@ For questions, issues, or feature requests:
 ---
 
 <p align="center">
-  Made with ❤️ using Fetch.ai uAgents and ASI API
+  Built using Fetch.ai uAgents and ASI API
 </p>
 
 <p align="center">
