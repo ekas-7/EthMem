@@ -1,53 +1,73 @@
-# 🤖 AI E-commerce Negotiation with Hedera & A2A Protocol
+# AI E-commerce Negotiation with Hedera & A2A Protocol
 
 An AI-powered multi-agent system that demonstrates autonomous price negotiation between buyer and seller agents using the **Hedera Agent Kit** and **A2A (Agent-to-Agent) Protocol**, with payment settlement on the **Hedera Network**.
 
-## 🏆 Hedera Agent Kit & Google A2A Bounty Submission
+## Hedera Agent Kit & Google A2A Bounty Submission
 
 This project qualifies for the **Best Use of Hedera Agent Kit & Google A2A** bounty by implementing:
 
-✅ **Multi-agent communication** - Buyer and Seller agents exchange A2A messages for negotiation  
-✅ **Agent Kit integration** - Built with Hedera Agent Kit and its LangChain adaptors  
-✅ **Payment settlement** - HBAR transfers on Hedera testnet using AP2 protocol  
-✅ **Multiple Hedera services** - Uses Account Service, Consensus Service, and Token Service  
-✅ **Human-in-the-loop mode** - Configurable autonomous or manual approval modes  
-✅ **Open-source** - Complete code, documentation, and demo included
+- **Multi-agent communication** - Buyer and Seller agents exchange A2A messages for negotiation  
+- **Agent Kit integration** - Built with Hedera Agent Kit and its LangChain adaptors  
+- **Payment settlement** - HBAR transfers on Hedera testnet using AP2 protocol  
+- **Multiple Hedera services** - Uses Account Service, Consensus Service, and Token Service  
+- **Human-in-the-loop mode** - Configurable autonomous or manual approval modes  
+- **Open-source** - Complete code, documentation, and demo included
 
-## 🎯 Features
+## Features
 
-- 🤝 **AI-Powered Negotiation**: Two autonomous agents negotiate product prices using LLMs
-- 📨 **A2A Protocol**: Standardized agent-to-agent communication for offers, counter-offers, and acceptance
-- 💰 **Hedera Payment Settlement**: Secure HBAR transfers on Hedera testnet
-- 🛠️ **Hedera Agent Kit Integration**: Full integration with Hedera's AI agent toolkit
-- 🔄 **Multi-Round Negotiation**: Intelligent back-and-forth negotiation with configurable strategies
-- 📊 **Transaction Tracking**: Complete audit trail of negotiations and payments
-- 🎨 **Beautiful CLI Output**: Clear visualization of the negotiation process
+- **AI-Powered Negotiation**: Two autonomous agents negotiate product prices using LLMs
+- **A2A Protocol**: Standardized agent-to-agent communication for offers, counter-offers, and acceptance
+- **Hedera Payment Settlement**: Secure HBAR transfers on Hedera testnet
+- **Hedera Agent Kit Integration**: Full integration with Hedera's AI agent toolkit
+- **Multi-Round Negotiation**: Intelligent back-and-forth negotiation with configurable strategies
+- **Transaction Tracking**: Complete audit trail of negotiations and payments
+- **Beautiful CLI Output**: Clear visualization of the negotiation process
 
-## 🏗️ Architecture
+## Architecture
 
+```mermaid
+graph TB
+    subgraph "AI Agents"
+        Seller[Seller Agent<br/>AI-Powered Pricing]
+        Buyer[Buyer Agent<br/>AI-Powered Bidding]
+    end
+    
+    subgraph "Communication Layer"
+        A2A[A2A Protocol<br/>Message Exchange]
+    end
+    
+    subgraph "Hedera Agent Kit"
+        LangChain[LangChain Adapters]
+        Tools[Blockchain Tools<br/>Transfer, Query, Consensus]
+    end
+    
+    subgraph "Hedera Network"
+        Account[Account Service<br/>HAPI]
+        Transfer[HBAR Transfer<br/>Payment Settlement]
+        HCS[Consensus Service<br/>Message Log]
+        HTS[Token Service<br/>Custom Tokens]
+    end
+    
+    Seller <-->|Offers/Counter-Offers| A2A
+    Buyer <-->|Bids/Acceptance| A2A
+    
+    Seller --> LangChain
+    Buyer --> LangChain
+    LangChain --> Tools
+    
+    Tools --> Account
+    Tools --> Transfer
+    Tools --> HCS
+    Tools --> HTS
+    
+    style Seller fill:#4a90e2
+    style Buyer fill:#50c878
+    style A2A fill:#f39c12
+    style LangChain fill:#9b59b6
+    style Transfer fill:#e74c3c
 ```
-┌─────────────────┐         A2A Messages         ┌─────────────────┐
-│  Seller Agent   │◄──────────────────────────────►│  Buyer Agent    │
-│  (AI-Powered)   │                                │  (AI-Powered)   │
-└────────┬────────┘                                └────────┬────────┘
-         │                                                  │
-         │         Hedera Agent Kit                         │
-         │         (LangChain Tools)                        │
-         │                                                  │
-         └──────────────────┬───────────────────────────────┘
-                            │
-                            ▼
-                  ┌──────────────────┐
-                  │  Hedera Network  │
-                  │    (Testnet)     │
-                  │                  │
-                  │  • HBAR Transfer │
-                  │  • HCS Messages  │
-                  │  • Account Query │
-                  └──────────────────┘
-```
 
-## 🌐 Hedera Integration & Usage
+## Hedera Integration & Usage
 
 This project demonstrates comprehensive integration with the Hedera network through the **Hedera Agent Kit**, showcasing how blockchain technology can power autonomous AI agent interactions.
 
@@ -74,10 +94,10 @@ const buyerAccount = "0.0.7118542";   // Buyer's Hedera account
 - **Transaction History**: All negotiations are tied to specific Hedera accounts
 
 **Benefits:**
-- ✅ Decentralized identity for each agent
-- ✅ Cryptographically secure transactions
-- ✅ Transparent balance tracking
-- ✅ Immutable audit trail
+- Decentralized identity for each agent
+- Cryptographically secure transactions
+- Transparent balance tracking
+- Immutable audit trail
 
 #### 2. **HBAR Cryptocurrency Transfers**
 Native cryptocurrency transfers for payment settlement after successful negotiations.
@@ -244,35 +264,69 @@ const receipt = await signedTx.execute(client);
 
 Here's a complete example of how Hedera is used in a negotiation:
 
+```mermaid
+sequenceDiagram
+    participant S as Seller Agent<br/>(0.0.7118560)
+    participant H as Hedera Network
+    participant B as Buyer Agent<br/>(0.0.7118542)
+    
+    Note over S,B: Phase 1: Initialization
+    S->>H: Query balance
+    H->>S: 1,000 HBAR
+    B->>H: Query balance
+    H->>B: 500 HBAR
+    
+    Note over S,B: Phase 2: Negotiation (Off-chain A2A)
+    S->>B: Initial offer: 150 HBAR
+    B->>S: Counter-offer: 105 HBAR
+    S->>B: Counter-offer: 130 HBAR
+    B->>S: Final acceptance: 120 HBAR
+    
+    Note over S,B: Phase 3: Payment Execution
+    S->>B: Create invoice (120 HBAR)
+    B->>H: Initiate transfer (120 HBAR)
+    Note over H: Network consensus<br/>(~3 seconds)
+    H->>B: Receipt: 0.0.7118542@1729845623
+    H->>S: Payment received: 120 HBAR
+    
+    Note over S,B: Phase 4: Confirmation
+    S->>H: Verify transaction
+    H->>S: Confirmed
+    B->>H: Query new balance
+    H->>B: 380 HBAR
+    S->>H: Query new balance
+    H->>S: 1,120 HBAR
 ```
-1️⃣ INITIALIZATION
-   ├─ Seller connects to Hedera (Account 0.0.7118560)
-   ├─ Buyer connects to Hedera (Account 0.0.7118542)
-   └─ Both agents query initial balances
-      Seller: 1,000 HBAR
-      Buyer: 500 HBAR
 
-2️⃣ NEGOTIATION (Off-chain A2A Messages)
-   ├─ Seller offers: 150 HBAR
-   ├─ Buyer counters: 105 HBAR
-   ├─ Seller counters: 130 HBAR
-   └─ Buyer accepts: 120 HBAR
+**Step-by-step breakdown:**
 
-3️⃣ PAYMENT EXECUTION (On Hedera Network)
-   ├─ Seller creates invoice (120 HBAR)
-   ├─ Buyer initiates HBAR transfer
-   ├─ Transaction signed with buyer's private key
-   ├─ Transaction submitted to Hedera network
-   ├─ Network consensus (~3 seconds)
-   └─ Receipt generated: 0.0.7118542@1729845623.456789123
+1. **Initialization**
+   - Seller connects to Hedera (Account 0.0.7118560)
+   - Buyer connects to Hedera (Account 0.0.7118542)
+   - Both agents query initial balances
+     - Seller: 1,000 HBAR
+     - Buyer: 500 HBAR
 
-4️⃣ CONFIRMATION
-   ├─ Seller verifies transaction
-   ├─ Both agents update local records
-   └─ Final balances:
-      Seller: 1,120 HBAR (+120)
-      Buyer: 380 HBAR (-120)
-```
+2. **Negotiation (Off-chain A2A Messages)**
+   - Seller offers: 150 HBAR
+   - Buyer counters: 105 HBAR
+   - Seller counters: 130 HBAR
+   - Buyer accepts: 120 HBAR
+
+3. **Payment Execution (On Hedera Network)**
+   - Seller creates invoice (120 HBAR)
+   - Buyer initiates HBAR transfer
+   - Transaction signed with buyer's private key
+   - Transaction submitted to Hedera network
+   - Network consensus (~3 seconds)
+   - Receipt generated: 0.0.7118542@1729845623.456789123
+
+4. **Confirmation**
+   - Seller verifies transaction
+   - Both agents update local records
+   - Final balances:
+     - Seller: 1,120 HBAR (+120)
+     - Buyer: 380 HBAR (-120)
 
 ### Network Configuration
 
@@ -348,7 +402,7 @@ Our Hedera integration achieves:
 
 ### Future Hedera Enhancements
 
-🔮 **Planned Features:**
+**Planned Features:**
 
 1. **Smart Contracts (Hedera Smart Contract Service)**
    - Deploy negotiation contracts
@@ -391,21 +445,43 @@ View our demo transactions on Hashscan:
 
 We chose Hedera for this project because:
 
-✅ **Fast**: 3-5 second finality vs. minutes/hours on other chains  
-✅ **Cheap**: $0.0001 per transaction vs. $1-50 on Ethereum  
-✅ **Scalable**: 10,000+ TPS with aBFT consensus  
-✅ **Secure**: Bank-grade security with Hashgraph consensus  
-✅ **Sustainable**: Carbon-negative blockchain  
-✅ **Enterprise-Ready**: Governed by Google, IBM, Boeing, etc.  
-✅ **AI-Native**: Built-in Agent Kit for AI integration
+```mermaid
+graph LR
+    subgraph "Hedera Advantages"
+        Fast[Fast<br/>3-5 sec finality]
+        Cheap[Cheap<br/>$0.0001/tx]
+        Scalable[Scalable<br/>10,000+ TPS]
+        Secure[Secure<br/>aBFT Consensus]
+        Green[Sustainable<br/>Carbon Negative]
+        Enterprise[Enterprise<br/>Google, IBM, Boeing]
+        AI[AI-Native<br/>Agent Kit]
+    end
+    
+    style Fast fill:#4caf50
+    style Cheap fill:#2196f3
+    style Scalable fill:#ff9800
+    style Secure fill:#f44336
+    style Green fill:#8bc34a
+    style Enterprise fill:#9c27b0
+    style AI fill:#00bcd4
+```
 
-## 📋 Prerequisites
+**Key advantages:**
+- **Fast**: 3-5 second finality vs. minutes/hours on other chains  
+- **Cheap**: $0.0001 per transaction vs. $1-50 on Ethereum  
+- **Scalable**: 10,000+ TPS with aBFT consensus  
+- **Secure**: Bank-grade security with Hashgraph consensus  
+- **Sustainable**: Carbon-negative blockchain  
+- **Enterprise-Ready**: Governed by Google, IBM, Boeing, etc.  
+- **AI-Native**: Built-in Agent Kit for AI integration
+
+## Prerequisites
 
 - Node.js v20.11.1 or higher
 - Hedera testnet account (get free at [portal.hedera.com](https://portal.hedera.com/dashboard))
 - API key for one of: OpenAI, Anthropic, Groq, or Ollama (local)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone and Install
 
@@ -473,9 +549,32 @@ npm run dev
 
 Then open http://localhost:5173 in your browser!
 
-📖 **See [RUNNING.md](./RUNNING.md) for detailed instructions on running the full system.**
+**See [RUNNING.md](./RUNNING.md) for detailed instructions on running the full system.**
 
-## 📖 Usage Examples
+## Usage Examples
+
+### Negotiation Flow Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initialization
+    Initialization --> SellerOffer: Agents connected
+    SellerOffer --> BuyerAnalysis: Initial offer sent
+    BuyerAnalysis --> BuyerCounter: Offer too high
+    BuyerCounter --> SellerAnalysis: Counter-offer sent
+    SellerAnalysis --> SellerCounter: Below minimum
+    SellerCounter --> BuyerAnalysis: Counter-offer sent
+    BuyerAnalysis --> Agreement: Price acceptable
+    Agreement --> PaymentRequest: Create invoice
+    PaymentRequest --> PaymentExecution: Buyer accepts
+    PaymentExecution --> Verification: HBAR transfer
+    Verification --> Complete: Transaction confirmed
+    Complete --> [*]
+    
+    BuyerAnalysis --> Rejected: Price too high (max rounds)
+    SellerAnalysis --> Rejected: Price too low
+    Rejected --> [*]
+```
 
 ### Basic Negotiation Demo
 
@@ -492,35 +591,35 @@ node demo.js
 ║  AI Agents + A2A Protocol + Hedera Network                 ║
 ╚════════════════════════════════════════════════════════════╝
 
-🏪 Initializing Seller Agent...
-✅ Seller Agent initialized
+[INIT] Initializing Seller Agent...
+[SUCCESS] Seller Agent initialized
    Account: 0.0.xxxxx
    Product: Premium Wireless Headphones
    Initial Price: 150 HBAR
 
-🛒 Initializing Buyer Agent...
-✅ Buyer Agent initialized
+[INIT] Initializing Buyer Agent...
+[SUCCESS] Buyer Agent initialized
    Account: 0.0.xxxxx
    Target Price: 105 HBAR
 
-📤 → A2A Message →
+[A2A] Message Sent
    From: EcommerceSellerAgent
    To: EcommerceBuyerAgent
    Type: negotiation.offer
    Price: 150 HBAR
 
-🤔 Buyer analyzing offer...
-💬 Buyer counter-offers at 105 HBAR
+[AGENT] Buyer analyzing offer...
+[NEGOTIATE] Buyer counter-offers at 105 HBAR
 
-🤔 Seller analyzing counter-offer...
-💬 Seller counter-offers at 127 HBAR
+[AGENT] Seller analyzing counter-offer...
+[NEGOTIATE] Seller counter-offers at 127 HBAR
 
 ...
 
-🎉 Negotiation successful!
-✅ Payment successful! Transaction ID: 0.0.xxxxx@1234567890.123456789
+[SUCCESS] Negotiation successful!
+[PAYMENT] Payment successful! Transaction ID: 0.0.xxxxx@1234567890.123456789
 
-📊 Transaction Summary:
+[SUMMARY] Transaction Summary:
    Product: Premium Wireless Headphones
    Initial Price: 150 HBAR
    Final Price: 120 HBAR
@@ -538,7 +637,7 @@ node index.js
 
 This runs a simple balance check using the Hedera Agent Kit.
 
-## 🔧 Configuration
+## Configuration
 
 ### Product Settings
 
@@ -574,7 +673,7 @@ The system automatically selects the first available AI provider:
 3. Groq Llama (if `GROQ_API_KEY` is set)
 4. Ollama (local, free - requires Ollama running)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 hedera/
@@ -598,7 +697,7 @@ hedera/
 └── RUNNING.md            # Full system guide
 ```
 
-## 🔌 API Reference
+## API Reference
 
 ### SellerAgent
 
@@ -672,11 +771,11 @@ const balance = await payment.getBalance();
 const invoice = payment.createInvoice(amount, productName, description);
 ```
 
-## 🎥 Demo Video
+## Demo Video
 
 [Link to demo video showing negotiation and payment flow]
 
-## 🧪 Testing
+## Testing
 
 The project includes comprehensive testing scenarios:
 
@@ -685,14 +784,14 @@ The project includes comprehensive testing scenarios:
 3. **Timeout**: Maximum negotiation rounds reached
 4. **Payment Failure**: Insufficient balance handling
 
-## 🔐 Security Considerations
+## Security Considerations
 
 - Private keys are stored in `.env` (never commit this file!)
 - All transactions use Hedera testnet (no real money)
 - Payment verification before completing transactions
 - Transaction memos for audit trail
 
-## 🌟 Advanced Features
+## Advanced Features
 
 ### Human-in-the-Loop Mode
 
@@ -730,42 +829,4 @@ const tools = hederaToolkit.getTools();
 // Tools include: createToken, transferToken, getTokenInfo
 ```
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-MIT License - feel free to use this project for your own applications!
-
-## 🔗 Resources
-
-- [Hedera Agent Kit Documentation](https://docs.hedera.com/hedera/open-source-solutions/ai-studio-on-hedera/hedera-ai-agent-kit)
-- [Hedera Agent Kit GitHub](https://github.com/hashgraph/hedera-agent-kit)
-- [A2A Protocol Documentation](https://a2aprotocol.ai/docs/guide/a2a-javascript-sdk)
-- [Hedera SDK Documentation](https://docs.hedera.com/hedera/sdks-and-apis/sdks)
-- [LangChain Documentation](https://js.langchain.com/docs/)
-
-## 📧 Support
-
-For questions or issues:
-- Open an issue on GitHub
-- Check Hedera Discord community
-- Review Hedera Agent Kit examples
-
-## 🎯 Bounty Qualification Checklist
-
-- ✅ Multi-agent communication using A2A standard
-- ✅ Hedera Agent Kit integration with adaptors
-- ✅ Open-source code with comprehensive documentation
-- ✅ Demo showing agents negotiating via A2A/AP2
-- ✅ Payment settlement on Hedera network
-- ✅ Multiple Hedera services (Account, Consensus, Token)
-- ✅ Human-in-the-loop mode support
-- ✅ Complete README with setup instructions
-- ✅ Example configuration and environment setup
-
----
-
-Built with ❤️ using Hedera Agent Kit and A2A Protocol
 
