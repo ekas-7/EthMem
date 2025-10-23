@@ -1,0 +1,36 @@
+{
+  "name": "hedera-a2a-ecommerce-agents",
+  "version": "1.0.0",
+  "description": "AI-powered multi-agent e-commerce negotiation system using Hedera Agent Kit and A2A Protocol",
+  "main": "demo.js",
+  "type": "module",
+  "scripts": {
+    "demo": "node demo.js",
+    "test": "node index.js",
+    "start": "node demo.js",
+    "server": "node server.js"
+  },
+  "keywords": [
+    "hedera",
+    "a2a",
+    "ai-agents",
+    "blockchain",
+    "negotiation",
+    "ecommerce",
+    "langchain"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@a2a-js/sdk": "^0.3.4",
+    "@hashgraph/sdk": "^2.75.0",
+    "@langchain/core": "^1.0.1",
+    "@langchain/groq": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "hedera-agent-kit": "^3.4.0",
+    "langchain": "^1.0.1",
+    "ws": "^8.18.3"
+  }
+}
