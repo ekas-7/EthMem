@@ -80,7 +80,7 @@ Memories: [1. User loves banana]
 Question: "i love mangoes"
 Analysis: Banana not relevant to this statement
 New memory: YES - "loves mangoes" is a PREFERENCE (permanent fact)
-Response: {"relevant": [], "newMemory": {"category": "food", "entity": "mangoes", "description": "User loves mangoes", "confidence": 0.95}}
+Response: {"relevant": [], "newMemory": {"category": "location|name|age|occupation|food|hobby|music|movie|family|friend|colleague|skill|language|education|allergy|medication|condition|visited|planning|preference|relationship|goal|interest|fact", "entity": "mangoes", "description": "User loves mangoes", "confidence": 0.95}}
 
 Example 5 - REQUEST vs PREFERENCE:
 Question: "i want to eat pizza"
@@ -89,7 +89,7 @@ Response: {"relevant": [], "newMemory": null}
 
 Question: "i love pizza"
 Analysis: "love" = permanent preference
-Response: {"relevant": [], "newMemory": {"category": "food", "entity": "pizza", "description": "User loves pizza", "confidence": 0.95}}
+Response: {"relevant": [], "newMemory": {"category": "location|name|age|occupation|food|hobby|music|movie|family|friend|colleague|skill|language|education|allergy|medication|condition|visited|planning|preference|relationship|goal|interest|fact", "entity": "pizza", "description": "User loves pizza", "confidence": 0.95}}
 
 NOW ANALYZE:
 Return ONLY valid JSON with this structure:
@@ -97,7 +97,6 @@ Return ONLY valid JSON with this structure:
   "relevant": [array of memory numbers like 1, 2, 3 or empty []],
   "newMemory": {category, entity, description, confidence} or null
 }
-
 JSON:`;
 
   try {
