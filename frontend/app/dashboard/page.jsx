@@ -12,15 +12,61 @@ import UnifiedDataViewer from "./components/UnifiedDataViewer";
 import extensionBridge from "../../lib/extensionBridge";
 
 export default function DashboardPage() {
-  const [memories, setMemories] = useState([]);
-  const [contractMemories, setContractMemories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalMemories: 0,
-    dataUsage: '0 MB',
-    linkedApps: 0,
-    growth: 0
-  });
+  // Load initial memories from localStorage
+  const [memories, setMemories] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ethmem_dashboard_memories')
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          console.error('Failed to parse saved dashboard memories:', e)
+        }
+      }
+    }
+    return []
+  })
+  const [contractMemories, setContractMemories] = useState([])
+  const [loading, setLoading] = useState(true)
+  // Load initial stats from localStorage
+  const [stats, setStats] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ethmem_dashboard_stats')
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          console.error('Failed to parse saved stats:', e)
+        }
+      }
+    }
+    return {
+      totalMemories: 0,
+      dataUsage: '0 MB',
+      linkedApps: 0,
+      growth: 0
+    }
+  })
+
+  // Persist memories to localStorage whenever they change
+  useEffect(() => {
+    if (memories.length > 0) {
+      try {
+        localStorage.setItem('ethmem_dashboard_memories', JSON.stringify(memories))
+      } catch (e) {
+        console.error('Failed to save memories to localStorage:', e)
+      }
+    }
+  }, [memories])
+
+  // Persist stats to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('ethmem_dashboard_stats', JSON.stringify(stats))
+    } catch (e) {
+      console.error('Failed to save stats to localStorage:', e)
+    }
+  }, [stats])
 
   useEffect(() => {
     loadDashboardData();

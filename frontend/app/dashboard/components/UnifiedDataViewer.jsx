@@ -21,7 +21,20 @@ import { useWallet } from '../../../hooks/useWallet'
 import { useContractData } from '../../../hooks/useContractData'
 
 export default function UnifiedDataViewer({ onMemoriesUpdate }) {
-  const [extensionMemories, setExtensionMemories] = useState([])
+  // Load initial state from localStorage
+  const [extensionMemories, setExtensionMemories] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ethmem_extension_memories')
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          console.error('Failed to parse saved memories:', e)
+        }
+      }
+    }
+    return []
+  })
   const [loading, setLoading] = useState(true)
   const [extensionStatus, setExtensionStatus] = useState(null)
   const [error, setError] = useState(null)
@@ -53,6 +66,17 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
     loadExtensionData()
   }, [])
 
+  // Persist extension memories to localStorage whenever they change
+  useEffect(() => {
+    if (extensionMemories.length > 0) {
+      try {
+        localStorage.setItem('ethmem_extension_memories', JSON.stringify(extensionMemories))
+      } catch (e) {
+        console.error('Failed to save memories to localStorage:', e)
+      }
+    }
+  }, [extensionMemories])
+
   // Check Sepolia connection when wallet changes
   useEffect(() => {
     const checkSepoliaConnection = async () => {
@@ -83,8 +107,23 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
       
       if (status.isAvailable) {
         // Load memories from extension
-        const extensionMemories = await extensionBridge.getMemories()
-        setExtensionMemories(extensionMemories)
+        const freshExtensionMemories = await extensionBridge.getMemories()
+        
+        // Get existing memories from state (which were loaded from localStorage)
+        const existingMemories = extensionMemories || []
+        
+        // If extension has data, use it
+        if (freshExtensionMemories && freshExtensionMemories.length > 0) {
+          console.log('[UnifiedDataViewer] Loaded', freshExtensionMemories.length, 'memories from extension')
+          setExtensionMemories(freshExtensionMemories)
+        } else if (existingMemories.length > 0) {
+          // If extension is empty but we have cached data, keep the cached data
+          console.log('[UnifiedDataViewer] Extension empty, keeping', existingMemories.length, 'cached memories')
+        } else {
+          // Both are empty
+          console.log('[UnifiedDataViewer] No memories available')
+          setExtensionMemories([])
+        }
         
         // Notify parent component about the update
         if (onMemoriesUpdate) {
@@ -348,7 +387,7 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-card-dark to-card-darker rounded-2xl p-6 shadow-xl border border-white/10">
+    <div className="bg-card-dark rounded-xl p-5 shadow-lg border border-white/5">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
