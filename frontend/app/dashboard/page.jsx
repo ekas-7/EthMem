@@ -8,12 +8,12 @@ import MemoryGrowthChart from "./components/MemoryGrowthChart";
 import RecentActivity from "./components/RecentActivity";
 import UsagePie from "./components/UsagePie";
 import ConnectedLLMs from "./components/ConnectedLLMs";
-import ExtensionDataViewer from "./components/ExtensionDataViewer";
-import SepoliaStatus from "./components/SepoliaStatus";
+import UnifiedDataViewer from "./components/UnifiedDataViewer";
 import extensionBridge from "../../lib/extensionBridge";
 
 export default function DashboardPage() {
   const [memories, setMemories] = useState([]);
+  const [contractMemories, setContractMemories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalMemories: 0,
@@ -91,9 +91,9 @@ export default function DashboardPage() {
       <div className="flex-1 md:ml-64 p-4 md:p-6 lg:p-10">
         <DashboardHeader />
 
-        {/* Extension Data Viewer - Memories at top */}
+        {/* Unified Data Viewer */}
         <div className="mt-8">
-          <ExtensionDataViewer onMemoriesUpdate={loadDashboardData} />
+          <UnifiedDataViewer onMemoriesUpdate={loadDashboardData} />
         </div>
 
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
