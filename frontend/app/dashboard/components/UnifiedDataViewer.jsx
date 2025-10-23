@@ -26,6 +26,7 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
   const [extensionStatus, setExtensionStatus] = useState(null)
   const [error, setError] = useState(null)
   const [isSepoliaConnected, setIsSepoliaConnected] = useState(false)
+  const [selectedKeys, setSelectedKeys] = useState(new Set())
   
   // Upload-related state
   const [uploading, setUploading] = useState(false)
@@ -206,6 +207,129 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
     mem.status !== 'on-chain' && mem.status !== 'synced' && !mem.metadata?.contractId
   )
 
+  // Build unified memory list (de-duplicated by content)
+  const canonicalKey = (entity, description) => `${(entity || '').trim().toLowerCase()}__${(description || '').trim().toLowerCase()}`
+
+  const flattenedContractItems = (contractData.contractMemories || []).flatMap(cm =>
+    (cm.individualMemories || []).map(im => ({
+      key: canonicalKey(im.entity, im.description),
+      entity: im.entity,
+      description: im.description,
+      category: im.category,
+      timestamp: cm.timestamp || im.timestamp,
+      onChain: true,
+      contractId: cm.contractId,
+      ipfsHash: cm.ipfsHash,
+      source: 'Smart Contract',
+      original: im
+    }))
+  )
+
+  const unifiedMap = new Map()
+
+  // Seed with extension memories
+  extensionMemories.forEach(em => {
+    const key = canonicalKey(em.entity, em.description)
+    const existing = unifiedMap.get(key)
+    if (!existing) {
+      unifiedMap.set(key, {
+        key,
+        entity: em.entity,
+        description: em.description,
+        category: em.category,
+        timestamps: [em.timestamp],
+        extension: { memory: em },
+        contract: null,
+      })
+    } else {
+      existing.extension = { memory: em }
+      existing.timestamps.push(em.timestamp)
+    }
+  })
+
+  // Merge contract items
+  flattenedContractItems.forEach(ci => {
+    const existing = unifiedMap.get(ci.key)
+    if (!existing) {
+      unifiedMap.set(ci.key, {
+        key: ci.key,
+        entity: ci.entity,
+        description: ci.description,
+        category: ci.category,
+        timestamps: [ci.timestamp],
+        extension: null,
+        contract: { item: ci },
+      })
+    } else {
+      existing.contract = { item: ci }
+      existing.timestamps.push(ci.timestamp)
+    }
+  })
+
+  const unifiedMemories = Array.from(unifiedMap.values())
+    .map(u => ({
+      ...u,
+      latestTimestamp: Math.max(...u.timestamps.filter(Boolean))
+    }))
+    .sort((a, b) => (b.latestTimestamp || 0) - (a.latestTimestamp || 0))
+
+  const isSelectableForUpload = (u) => !!(u.extension && !u.contract && (u.extension.memory.status !== 'on-chain' && !u.extension.memory.metadata?.contractId))
+
+  const toggleSelect = (key) => {
+    setSelectedKeys(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const selectAllUnsynced = () => {
+    const next = new Set()
+    unifiedMemories.forEach(u => { if (isSelectableForUpload(u)) next.add(u.key) })
+    setSelectedKeys(next)
+  }
+
+  const clearSelection = () => setSelectedKeys(new Set())
+
+  const handleUploadSelected = async () => {
+    if (!isConnected || !walletClient) {
+      setError('Please connect your wallet first')
+      return
+    }
+    if (!isSepoliaConnected) {
+      setError('Please switch to Sepolia network to upload memories')
+      return
+    }
+    const toUpload = unifiedMemories
+      .filter(u => selectedKeys.has(u.key) && isSelectableForUpload(u))
+      .map(u => u.extension.memory)
+    if (toUpload.length === 0) return
+    try {
+      setUploading(true)
+      setUploadProgress(null)
+      setUploadResult(null)
+      setError(null)
+      const result = await uploadMemoriesToContract(toUpload, walletClient, (progress) => setUploadProgress(progress))
+      setUploadResult(result)
+      // Mark uploaded items as on-chain locally
+      setExtensionMemories(prev => prev.map(m => {
+        const key = canonicalKey(m.entity, m.description)
+        if (selectedKeys.has(key)) {
+          return { ...m, status: 'on-chain', metadata: { ...(m.metadata || {}), contractStored: true } }
+        }
+        return m
+      }))
+      clearSelection()
+      if (onMemoriesUpdate) onMemoriesUpdate()
+    } catch (err) {
+      setError(`Upload failed: ${err.message}`)
+    } finally {
+      setUploading(false)
+      setUploadProgress(null)
+    }
+  }
+
   return (
     <div className="bg-gradient-to-br from-card-dark to-card-darker rounded-2xl p-6 shadow-xl border border-white/10">
       {/* Header */}
@@ -298,136 +422,92 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
         </div>
       )}
 
-      {/* Extension Data Section */}
-      {hasExtensionData && (
+      {/* Unified Memories Section */}
+      {unifiedMemories.length > 0 && (
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
               <Database className="w-5 h-5 text-emerald-400" />
-              <span>Extension Memories</span>
-              <span className="bg-emerald-600 text-white text-xs px-2 py-1 rounded-full">
-                {extensionMemories.length}
+              <span>All Memories</span>
+              <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">
+                {unifiedMemories.length}
               </span>
             </h4>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={selectAllUnsynced}
+                className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg text-white"
+              >
+                Select all unsynced
+              </button>
+              <button
+                onClick={clearSelection}
+                className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg text-white"
+              >
+                Clear
+              </button>
+              <button
+                onClick={handleUploadSelected}
+                disabled={uploading || selectedKeys.size === 0}
+                className="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-lg text-white flex items-center gap-2"
+              >
+                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                <span>Upload selected</span>
+              </button>
+              <button
+                onClick={checkContractData}
+                disabled={contractChecking}
+                className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg text-white flex items-center gap-2"
+              >
+                {contractChecking ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                <span>Refresh chain</span>
+              </button>
+            </div>
           </div>
-          
-          <div className="space-y-3">
-            {extensionMemories.slice(0, 3).map((memory, index) => (
-              <div key={memory.id} className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 rounded-lg p-3 border border-emerald-500/20">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h5 className="text-sm font-medium text-white">{memory.entity || 'Untitled Memory'}</h5>
-                    <p className="text-xs text-gray-300 mt-1 line-clamp-2">
-                      {memory.description || 'No description'}
-                    </p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <span className="text-xs bg-emerald-600/20 text-emerald-300 px-2 py-1 rounded">
-                        {memory.category || 'general'}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {formatDate(memory.timestamp)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      memory.status === 'on-chain' ? 'bg-blue-600/20 text-blue-300' :
-                      memory.status === 'synced' ? 'bg-green-600/20 text-green-300' :
-                      'bg-gray-600/20 text-gray-300'
-                    }`}>
-                      {memory.status || 'local'}
-                    </span>
-                    {memory.metadata?.contractStored && (
-                      <span className="text-xs text-green-400 flex items-center space-x-1">
-                        <CheckCircle className="w-3 h-3" />
-                        <span>On Blockchain</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {extensionMemories.length > 3 && (
-              <div className="text-center py-2">
-                <span className="text-xs text-gray-400">
-                  + {extensionMemories.length - 3} more extension memories
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Contract Data Section */}
-      {hasContractData && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
-              <Cloud className="w-5 h-5 text-blue-400" />
-              <span>Smart Contract Memories</span>
-              <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                {contractData.totalContractMemories}
-              </span>
-            </h4>
-            <button
-              onClick={checkContractData}
-              disabled={contractChecking}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all"
-            >
-              {contractChecking ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-              <span>Refresh</span>
-            </button>
-          </div>
-          
-          <div className="space-y-3">
-            {contractData.contractMemories.slice(0, 3).map((mem, idx) => (
-              <div key={idx} className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-500/20">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-sm font-medium text-white">Contract #{mem.contractId}</span>
-                      <span className="text-xs text-blue-300">
-                        {mem.individualMemories?.length || 0} memories
-                      </span>
+          <div className="space-y-2">
+            {unifiedMemories.map(u => (
+              <div key={u.key} className="bg-white/5 rounded-lg p-3 flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedKeys.has(u.key)}
+                    onChange={() => toggleSelect(u.key)}
+                    disabled={!isSelectableForUpload(u)}
+                    className="mt-1 accent-emerald-600 disabled:opacity-40"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h5 className="text-sm font-medium text-white">{u.entity || 'Untitled Memory'}</h5>
+                      {u.category && (
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-gray-300">{u.category}</span>
+                      )}
                     </div>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Hash className="w-3 h-3 text-gray-400" />
-                      <code className="text-xs bg-gray-800 px-2 py-1 rounded text-blue-300">
-                        {formatIPFSHash(mem.ipfsHash)}
-                      </code>
+                    <p className="text-xs text-gray-300 mt-1">{u.description || 'No description'}</p>
+                    <div className="flex items-center gap-2 mt-2 text-[10px]">
+                      {u.extension && (
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">extension</span>
+                      )}
+                      {u.contract && (
+                        <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">on-chain</span>
+                      )}
+                      {!u.contract && u.extension && (
+                        <span className="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300">not on-chain</span>
+                      )}
                     </div>
-                    {mem.individualMemories && mem.individualMemories.length > 0 && (
-                      <div className="space-y-1">
-                        {mem.individualMemories.slice(0, 2).map((individual, i) => (
-                          <div key={i} className="bg-white/5 rounded p-2">
-                            <p className="text-xs font-medium text-white">{individual.entity || 'Untitled'}</p>
-                            <p className="text-xs text-gray-300 line-clamp-1">
-                              {individual.description || 'No description'}
-                            </p>
-                          </div>
-                        ))}
-                        {mem.individualMemories.length > 2 && (
-                          <p className="text-xs text-gray-400">
-                            + {mem.individualMemories.length - 2} more memories
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </div>
+                </div>
+                <div className="text-right text-[10px] text-gray-400">
+                  <div>{u.latestTimestamp ? formatDate(u.latestTimestamp) : ''}</div>
+                  {u.contract?.item?.ipfsHash && (
+                    <div className="mt-1 flex items-center gap-1 justify-end">
+                      <Hash className="w-3 h-3" />
+                      <code>{formatIPFSHash(u.contract.item.ipfsHash)}</code>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
-            {contractData.contractMemories.length > 3 && (
-              <div className="text-center py-2">
-                <span className="text-xs text-gray-400">
-                  + {contractData.contractMemories.length - 3} more contract memories
-                </span>
-              </div>
-            )}
           </div>
         </div>
       )}
