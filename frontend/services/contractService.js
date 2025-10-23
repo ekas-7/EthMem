@@ -1,7 +1,7 @@
 'use client'
 
 import { ethers } from 'ethers'
-import { uploadToIPFS } from './ipfsService'
+import { uploadToIPFS } from '../lib/ipfsService'
 
 // Contract ABI - this should match your deployed MemoryStorage contract
 const MEMORY_STORAGE_ABI = [
