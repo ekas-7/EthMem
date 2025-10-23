@@ -387,20 +387,26 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
   }
 
   return (
-    <div className="bg-card-dark rounded-xl p-5 shadow-lg border border-white/5">
+    <div className="bg-card-dark rounded-2xl p-6 shadow-2xl border border-white/10 backdrop-blur-sm">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-4">
-          <div className="p-3 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-xl">
-            <Database className="w-6 h-6 text-emerald-400" />
+          <div className="relative p-3 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-2xl ring-1 ring-white/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-blue-400/10 rounded-2xl blur-xl"></div>
+            <Database className="relative w-7 h-7 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">Memory Data</h3>
-            <p className="text-sm text-gray-400">
-              {hasBothData ? 'Extension + Smart Contract' : 
-               hasExtensionData ? 'Extension Data' : 
-               hasContractData ? 'Smart Contract Data' : 
-               'No data available'}
+            <h3 className="text-2xl font-bold text-white tracking-tight">Memory Data</h3>
+            <p className="text-sm text-gray-400 mt-0.5 flex items-center gap-2">
+              {hasBothData ? (
+                <><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Extension + Smart Contract</>
+              ) : hasExtensionData ? (
+                <><Database className="w-3.5 h-3.5 text-blue-400" /> Extension Data</>
+              ) : hasContractData ? (
+                <><Cloud className="w-3.5 h-3.5 text-purple-400" /> Smart Contract Data</>
+              ) : (
+                <><AlertCircle className="w-3.5 h-3.5 text-gray-500" /> No data available</>
+              )}
             </p>
           </div>
         </div>
@@ -408,72 +414,89 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
           <button
             onClick={loadExtensionData}
             disabled={loading}
-            className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-50"
+            className="group relative p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all disabled:opacity-50 border border-white/5 hover:border-white/20"
             title="Refresh Data"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''} group-hover:scale-110 transition-transform`} />
           </button>
         </div>
       </div>
 
       {/* Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {/* Extension Status */}
-        <div className="bg-white/5 rounded-xl p-4">
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-lg ${hasExtensionData ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
-              <Database className="w-4 h-4 text-emerald-400" />
+        <div className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl p-5 border border-white/10 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2.5 rounded-xl transition-all ${hasExtensionData ? 'bg-emerald-500/20 ring-1 ring-emerald-500/30' : 'bg-gray-500/20'}`}>
+                <Database className={`w-5 h-5 ${hasExtensionData ? 'text-emerald-400' : 'text-gray-500'}`} />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-0.5">Extension</p>
+                <p className="text-base font-bold text-white">
+                  {hasExtensionData ? `${extensionMemories.length}` : '0'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-400">Extension</p>
-              <p className="text-sm font-semibold text-white">
-                {hasExtensionData ? `${extensionMemories.length} memories` : 'Not available'}
-              </p>
-            </div>
+            {hasExtensionData && (
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+            )}
           </div>
         </div>
 
         {/* Contract Status */}
-        <div className="bg-white/5 rounded-xl p-4">
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-lg ${hasContractData ? 'bg-blue-500/20' : 'bg-gray-500/20'}`}>
-              <Cloud className="w-4 h-4 text-blue-400" />
+        <div className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl p-5 border border-white/10 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2.5 rounded-xl transition-all ${hasContractData ? 'bg-blue-500/20 ring-1 ring-blue-500/30' : 'bg-gray-500/20'}`}>
+                <Cloud className={`w-5 h-5 ${hasContractData ? 'text-blue-400' : 'text-gray-500'}`} />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-0.5">On-Chain</p>
+                <p className="text-base font-bold text-white">
+                  {hasContractData ? `${contractData.totalContractMemories}` : '0'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-400">Smart Contract</p>
-              <p className="text-sm font-semibold text-white">
-                {hasContractData ? `${contractData.totalContractMemories} memories` : 'Not available'}
-              </p>
-            </div>
+            {hasContractData && (
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+            )}
           </div>
         </div>
 
         {/* Sync Status */}
-        <div className="bg-white/5 rounded-xl p-4">
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-lg ${needsSync ? 'bg-yellow-500/20' : 'bg-green-500/20'}`}>
-              {needsSync ? (
-                <AlertCircle className="w-4 h-4 text-yellow-400" />
-              ) : (
-                <CheckCircle className="w-4 h-4 text-green-400" />
-              )}
+        <div className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl p-5 border border-white/10 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2.5 rounded-xl transition-all ${needsSync ? 'bg-yellow-500/20 ring-1 ring-yellow-500/30' : 'bg-green-500/20 ring-1 ring-green-500/30'}`}>
+                {needsSync ? (
+                  <AlertCircle className="w-5 h-5 text-yellow-400" />
+                ) : (
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                )}
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-0.5">Status</p>
+                <p className="text-base font-bold text-white">
+                  {needsSync ? 'Pending' : 'Synced'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-400">Sync Status</p>
-              <p className="text-sm font-semibold text-white">
-                {needsSync ? 'Sync available' : 'Up to date'}
-              </p>
-            </div>
+            {needsSync && (
+              <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Error Messages */}
       {error && (
-        <div className="mb-4 p-4 bg-red-900/20 border border-red-500/20 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 text-red-400" />
-            <span className="text-sm text-red-400">{error}</span>
+        <div className="mb-6 p-4 bg-gradient-to-r from-red-900/30 to-red-800/20 border border-red-500/30 rounded-2xl backdrop-blur-sm">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-red-500/20 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-400" />
+            </div>
+            <span className="text-sm text-red-300 font-medium">{error}</span>
           </div>
         </div>
       )}
@@ -481,84 +504,95 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
       {/* Unified Memories Section */}
       {unifiedMemories.length > 0 && (
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
-              <Database className="w-5 h-5 text-emerald-400" />
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-lg font-bold text-white flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-xl">
+                <Database className="w-5 h-5 text-emerald-400" />
+              </div>
               <span>All Memories</span>
-              <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">
+              <span className="bg-gradient-to-r from-emerald-500/20 to-blue-500/20 text-white text-xs px-3 py-1.5 rounded-full font-semibold border border-white/10">
                 {unifiedMemories.length}
               </span>
             </h4>
             <div className="flex items-center gap-2">
               <button
                 onClick={selectAllUnsynced}
-                className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg text-white"
+                className="px-3 py-2 text-xs font-medium bg-white/10 hover:bg-white/20 rounded-xl text-white border border-white/10 hover:border-white/20 transition-all"
               >
                 Select all unsynced
               </button>
               <button
                 onClick={clearSelection}
-                className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg text-white"
+                className="px-3 py-2 text-xs font-medium bg-white/10 hover:bg-white/20 rounded-xl text-white border border-white/10 hover:border-white/20 transition-all"
               >
                 Clear
               </button>
               <button
                 onClick={handleUploadSelected}
                 disabled={uploading || selectedKeys.size === 0}
-                className="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-lg text-white flex items-center gap-2"
+                className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white flex items-center gap-2 shadow-lg shadow-emerald-500/20 border border-emerald-400/20 transition-all"
               >
-                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                 <span>Upload selected</span>
               </button>
               <button
                 onClick={checkContractData}
                 disabled={contractChecking}
-                className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg text-white flex items-center gap-2"
+                className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white flex items-center gap-2 shadow-lg shadow-blue-500/20 border border-blue-400/20 transition-all"
               >
-                {contractChecking ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                {contractChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                 <span>Refresh chain</span>
               </button>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             {unifiedMemories.map(u => (
-              <div key={u.key} className="bg-white/5 rounded-lg p-3 flex items-start justify-between">
-                <div className="flex items-start gap-3">
+              <div key={u.key} className="group bg-gradient-to-br from-white/5 to-white/[0.02] hover:from-white/10 hover:to-white/5 rounded-2xl p-4 flex items-start justify-between border border-white/5 hover:border-white/20 transition-all duration-300 shadow-sm hover:shadow-lg">
+                <div className="flex items-start gap-4">
                   <input
                     type="checkbox"
                     checked={selectedKeys.has(u.key)}
                     onChange={() => toggleSelect(u.key)}
                     disabled={!isSelectableForUpload(u)}
-                    className="mt-1 accent-emerald-600 disabled:opacity-40"
+                    className="mt-1.5 w-4 h-4 accent-emerald-500 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed rounded"
                   />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h5 className="text-sm font-medium text-white">{u.entity || 'Untitled Memory'}</h5>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <h5 className="text-sm font-semibold text-white group-hover:text-emerald-400 transition-colors">{u.entity || 'Untitled Memory'}</h5>
                       {u.category && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-gray-300">{u.category}</span>
+                        <span className="text-[10px] px-2.5 py-1 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 font-medium border border-purple-500/20">{u.category}</span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-300 mt-1">{u.description || 'No description'}</p>
-                    <div className="flex items-center gap-2 mt-2 text-[10px]">
+                    <p className="text-xs text-gray-300 leading-relaxed mb-2">{u.description || 'No description'}</p>
+                    <div className="flex items-center gap-2 text-[10px]">
                       {u.extension && (
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">extension</span>
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-medium border border-emerald-500/30 flex items-center gap-1">
+                          <Database className="w-3 h-3" /> extension
+                        </span>
                       )}
                       {u.contract && (
-                        <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">on-chain</span>
+                        <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 font-medium border border-blue-500/30 flex items-center gap-1">
+                          <Cloud className="w-3 h-3" /> on-chain
+                        </span>
                       )}
                       {!u.contract && u.extension && (
-                        <span className="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300">not on-chain</span>
+                        <span className="px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-300 font-medium border border-yellow-500/30 flex items-center gap-1 animate-pulse">
+                          <AlertCircle className="w-3 h-3" /> not on-chain
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="text-right text-[10px] text-gray-400">
-                  <div>{u.latestTimestamp ? formatDate(u.latestTimestamp) : ''}</div>
+                <div className="text-right text-[10px] text-gray-400 ml-4">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Clock className="w-3 h-3" />
+                    <span>{u.latestTimestamp ? formatDate(u.latestTimestamp) : ''}</span>
+                  </div>
                   {u.contract?.item?.ipfsHash && (
-                    <div className="mt-1 flex items-center gap-1 justify-end">
-                      <Hash className="w-3 h-3" />
-                      <code>{formatIPFSHash(u.contract.item.ipfsHash)}</code>
+                    <div className="mt-2 flex items-center gap-1 justify-end bg-white/5 px-2 py-1 rounded-lg border border-white/10">
+                      <Hash className="w-3 h-3 text-purple-400" />
+                      <code className="text-purple-300">{formatIPFSHash(u.contract.item.ipfsHash)}</code>
                     </div>
                   )}
                 </div>
@@ -570,13 +604,13 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
 
       {/* Auto-Sync Notification */}
       {contractData.autoSyncedCount > 0 && (
-        <div className="mb-4 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl">
+        <div className="mb-6 p-5 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border border-green-500/30 rounded-2xl backdrop-blur-sm">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-500/20 rounded-lg">
+            <div className="p-2.5 bg-green-500/20 rounded-xl ring-1 ring-green-500/30">
               <CheckCircle className="w-5 h-5 text-green-400" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-green-400">Auto-Synchronized</h4>
+              <h4 className="text-sm font-bold text-green-400 mb-1">Auto-Synchronized</h4>
               <p className="text-xs text-green-300">
                 {contractData.autoSyncedCount} local memories automatically matched with blockchain data
               </p>
@@ -587,16 +621,17 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
 
       {/* Debug Information */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="mb-4 p-3 bg-gray-800/50 rounded-lg text-xs">
-          <h5 className="text-gray-400 mb-2">Debug Info:</h5>
-          <div className="space-y-1 text-gray-300">
-            <div>needsSync: {needsSync ? 'true' : 'false'}</div>
-            <div>hasNewMemories: {hasNewMemories ? 'true' : 'false'}</div>
-            <div>hasUpdatedMemories: {hasUpdatedMemories ? 'true' : 'false'}</div>
-            <div>newMemories count: {contractData.newMemories?.length || 0}</div>
-            <div>updatedMemories count: {contractData.updatedMemories?.length || 0}</div>
-            <div>autoSyncedCount: {contractData.autoSyncedCount || 0}</div>
-            <div>hasUnsyncedExtensionData: {hasUnsyncedExtensionData ? 'true' : 'false'}</div>
+        <div className="mb-6 p-4 bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl text-xs border border-white/10 backdrop-blur-sm">
+          <h5 className="text-gray-300 mb-3 font-semibold flex items-center gap-2">
+            <Info className="w-4 h-4" /> Debug Info
+          </h5>
+          <div className="grid grid-cols-2 gap-2 text-gray-300">
+            <div className="bg-white/5 p-2 rounded-lg"><span className="text-gray-400">needsSync:</span> <span className="font-mono text-emerald-400">{needsSync ? 'true' : 'false'}</span></div>
+            <div className="bg-white/5 p-2 rounded-lg"><span className="text-gray-400">hasNewMemories:</span> <span className="font-mono text-emerald-400">{hasNewMemories ? 'true' : 'false'}</span></div>
+            <div className="bg-white/5 p-2 rounded-lg"><span className="text-gray-400">newMemories:</span> <span className="font-mono text-blue-400">{contractData.newMemories?.length || 0}</span></div>
+            <div className="bg-white/5 p-2 rounded-lg"><span className="text-gray-400">updatedMemories:</span> <span className="font-mono text-blue-400">{contractData.updatedMemories?.length || 0}</span></div>
+            <div className="bg-white/5 p-2 rounded-lg"><span className="text-gray-400">autoSyncedCount:</span> <span className="font-mono text-purple-400">{contractData.autoSyncedCount || 0}</span></div>
+            <div className="bg-white/5 p-2 rounded-lg col-span-2"><span className="text-gray-400">hasUnsyncedExtensionData:</span> <span className="font-mono text-yellow-400">{hasUnsyncedExtensionData ? 'true' : 'false'}</span></div>
           </div>
         </div>
       )}
@@ -605,21 +640,26 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
       <div className="space-y-4">
         {/* Sync from Contract */}
         {needsSync && (
-          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border border-blue-500/30 rounded-2xl p-5 backdrop-blur-sm hover:border-blue-400/50 transition-all">
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-blue-400 mb-1">Sync from Contract</h4>
-                <p className="text-xs text-blue-300 mb-2">
-                  {hasNewMemories && `${contractData.newMemories?.length || 0} new memories available from contract`}
-                  {hasUpdatedMemories && ` • ${contractData.updatedMemories?.length || 0} updated memories`}
-                </p>
-                <p className="text-xs text-gray-400">
-                  Download these memories to your extension
-                </p>
+              <div className="flex-1 flex items-start gap-4">
+                <div className="p-2.5 bg-blue-500/20 rounded-xl ring-1 ring-blue-500/30">
+                  <Download className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-blue-400 mb-1">Sync from Contract</h4>
+                  <p className="text-xs text-blue-300 mb-2 font-medium">
+                    {hasNewMemories && `${contractData.newMemories?.length || 0} new memories available from contract`}
+                    {hasUpdatedMemories && ` • ${contractData.updatedMemories?.length || 0} updated memories`}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Download these memories to your extension
+                  </p>
+                </div>
               </div>
               <button
                 onClick={handleSync}
-                className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl transition-all font-semibold shadow-lg shadow-blue-500/20 border border-blue-400/20"
               >
                 <Download className="w-4 h-4" />
                 <span>Sync from Contract</span>
@@ -630,22 +670,27 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
 
         {/* Upload to Contract */}
         {hasUnsyncedExtensionData && (
-          <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/30 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 backdrop-blur-sm hover:border-emerald-400/50 transition-all">
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-emerald-400 mb-1">Upload to Contract</h4>
-                <p className="text-xs text-emerald-300 mb-2">
-                  {extensionMemories.filter(m => m.status !== 'on-chain' && m.status !== 'synced' && !m.metadata?.contractId).length} local memories not yet on blockchain
-                </p>
-                <p className="text-xs text-gray-400">
-                  Store your memories on the blockchain for permanent storage
-                </p>
+              <div className="flex-1 flex items-start gap-4">
+                <div className="p-2.5 bg-emerald-500/20 rounded-xl ring-1 ring-emerald-500/30">
+                  <Upload className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-emerald-400 mb-1">Upload to Contract</h4>
+                  <p className="text-xs text-emerald-300 mb-2 font-medium">
+                    {extensionMemories.filter(m => m.status !== 'on-chain' && m.status !== 'synced' && !m.metadata?.contractId).length} local memories not yet on blockchain
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Store your memories on the blockchain for permanent storage
+                  </p>
+                </div>
               </div>
               {isConnected && isSepoliaConnected ? (
                 <button
                   onClick={handleUploadToContract}
                   disabled={uploading}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white px-4 py-2 rounded-lg hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 transition-all"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl transition-all font-semibold shadow-lg shadow-emerald-500/20 border border-emerald-400/20"
                 >
                   {uploading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -655,7 +700,7 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
                   <span>{uploading ? 'Uploading...' : 'Upload to Contract'}</span>
                 </button>
               ) : (
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-400 bg-white/5 px-4 py-2 rounded-xl border border-white/10">
                   {!isConnected ? 'Connect wallet to upload' : 'Switch to Sepolia network'}
                 </div>
               )}
@@ -665,13 +710,13 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
 
         {/* Synchronized Status */}
         {!needsSync && !hasUnsyncedExtensionData && hasBothData && (
-          <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-400" />
+          <div className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border border-green-500/30 rounded-2xl p-5 backdrop-blur-sm">
+            <div className="flex items-center space-x-4">
+              <div className="p-2.5 bg-green-500/20 rounded-xl ring-1 ring-green-500/30">
+                <CheckCircle className="w-6 h-6 text-green-400" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-green-400">Data Synchronized</h4>
+                <h4 className="text-sm font-bold text-green-400 mb-1">Data Synchronized</h4>
                 <p className="text-xs text-green-300">
                   Your memories are stored in both extension and blockchain
                 </p>
@@ -683,10 +728,15 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
 
       {/* No Data Message */}
       {!hasAnyData && !loading && (
-        <div className="text-center py-8">
-          <Database className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-400 mb-2">No Memory Data</h3>
-          <p className="text-gray-500 text-sm">
+        <div className="text-center py-12">
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-full blur-2xl"></div>
+            <div className="relative p-6 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-full border border-white/10">
+              <Database className="w-14 h-14 text-gray-500" />
+            </div>
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No Memory Data</h3>
+          <p className="text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
             {!extensionStatus?.isAvailable 
               ? 'Install the EthMem extension to start collecting memories'
               : 'Start chatting to create memories or upload existing ones to the contract'
