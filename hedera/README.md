@@ -22,6 +22,7 @@ This project qualifies for the **Best Use of Hedera Agent Kit & Google A2A** bou
 - **Multi-Round Negotiation**: Intelligent back-and-forth negotiation with configurable strategies
 - **Transaction Tracking**: Complete audit trail of negotiations and payments
 - **Beautiful CLI Output**: Clear visualization of the negotiation process
+- **EthMem Memory Integration**: Personalized negotiation using blockchain-stored user preferences and history
 
 ## Architecture
 
@@ -66,6 +67,262 @@ graph TB
     style LangChain fill:#9b59b6
     style Transfer fill:#e74c3c
 ```
+
+## EthMem Extension Integration
+
+This negotiation system integrates with the **EthMem Chrome Extension** to provide personalized, memory-enhanced negotiations based on user preferences and historical behavior stored on the blockchain.
+
+### What is EthMem?
+
+**EthMem** is a decentralized memory system for AI interactions that:
+- Captures and stores user preferences from ChatGPT, Claude, and Gemini conversations
+- Extracts meaningful memories using AI-powered memory extraction
+- Stores memories on blockchain (Ethereum/Hedera) for decentralized, persistent storage
+- Provides browser extension for seamless memory injection into AI conversations
+
+### How Memory Enhances Negotiations
+
+```mermaid
+graph TB
+    subgraph "EthMem Extension"
+        Browser[Browser Extension]
+        Extractor[AI Memory Extractor]
+        Storage[(Blockchain Storage<br/>User Preferences)]
+    end
+    
+    subgraph "Negotiation System"
+        Buyer[Buyer Agent]
+        Seller[Seller Agent]
+        Memory[Memory Service]
+    end
+    
+    subgraph "Hedera Network"
+        Payment[HBAR Payment]
+        History[Transaction History]
+    end
+    
+    Browser -->|Extract from chats| Extractor
+    Extractor -->|Store memories| Storage
+    Storage -->|Load preferences| Memory
+    Memory -->|User budget preferences| Buyer
+    Memory -->|Purchase history| Buyer
+    Memory -->|Price sensitivity| Buyer
+    Memory -->|Product preferences| Seller
+    
+    Buyer <-->|Negotiate| Seller
+    Buyer -->|Execute payment| Payment
+    Payment -->|Record| History
+    History -->|Update preferences| Storage
+    
+    style Browser fill:#e74c3c
+    style Storage fill:#f39c12
+    style Memory fill:#9b59b6
+    style Buyer fill:#50c878
+```
+
+### Personalized Negotiation Features
+
+#### 1. **Budget-Aware Negotiations**
+The buyer agent uses stored user preferences to negotiate within budget constraints:
+
+```javascript
+// Memory retrieved from EthMem extension
+const userMemories = {
+  budget_preferences: "Prefers products under $200",
+  price_sensitivity: "High - always negotiates for discounts",
+  purchase_history: "Previously bought electronics at 15-20% discount"
+};
+
+// Buyer agent adapts strategy
+const maxPrice = userMemories.budget_preferences.extractedAmount || 200;
+const targetDiscount = 0.20; // Based on purchase history
+```
+
+**Example memories that enhance negotiation:**
+- "User typically spends $100-$150 on electronics"
+- "Prefers to negotiate for at least 15% discount"
+- "Budget-conscious, avoids luxury brands"
+- "Values quality over price for tech products"
+
+#### 2. **Product Preference Learning**
+The system learns what products users are interested in:
+
+```javascript
+const productMemories = {
+  interests: "Wireless headphones, noise cancellation",
+  brand_preferences: "Sony, Bose preferred over generic brands",
+  feature_priorities: "Sound quality > battery life > design"
+};
+
+// Seller agent personalizes offers
+if (productMemories.interests.includes("noise cancellation")) {
+  offer.highlight = "Premium ANC technology";
+  offer.price = calculatePremiumPrice();
+}
+```
+
+#### 3. **Negotiation Style Adaptation**
+Agents learn user negotiation patterns:
+
+```javascript
+const negotiationStyle = {
+  approach: "Gradual - starts with low offer, incrementally increases",
+  patience: "High - willing to negotiate for 5-7 rounds",
+  acceptance_threshold: "Accepts when price is within 10% of target"
+};
+
+// Buyer agent matches user's negotiation style
+buyer.setStrategy({
+  initialOffer: negotiationStyle.approach === "Gradual" ? 0.6 : 0.8,
+  maxRounds: negotiationStyle.patience === "High" ? 7 : 3,
+  acceptanceThreshold: 0.10
+});
+```
+
+#### 4. **Historical Transaction Context**
+Past purchases inform future negotiations:
+
+```javascript
+const purchaseHistory = [
+  { product: "Headphones", paid: 120, listed: 150, discount: 0.20 },
+  { product: "Speaker", paid: 80, listed: 100, discount: 0.20 },
+  { product: "Charger", paid: 25, listed: 30, discount: 0.17 }
+];
+
+// Calculate user's average discount expectation
+const avgDiscount = purchaseHistory.reduce((sum, p) => sum + p.discount, 0) / purchaseHistory.length;
+// User typically gets 19% discount - agent targets similar savings
+```
+
+### Memory Storage Architecture
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser as EthMem Extension
+    participant AI as ChatGPT/Claude/Gemini
+    participant Extractor as Memory Extractor
+    participant BC as Blockchain
+    participant Negotiation as Hedera Negotiation System
+    
+    User->>AI: "I prefer wireless headphones under $150"
+    AI->>User: "Here are some options..."
+    Browser->>Extractor: Extract memory from conversation
+    Extractor->>Extractor: AI analyzes: "budget=$150, product=headphones"
+    Extractor->>BC: Store memory on-chain
+    
+    Note over User,Negotiation: Later: User shops for headphones
+    
+    User->>Negotiation: Start negotiation for headphones ($180 listed)
+    Negotiation->>BC: Retrieve user memories
+    BC->>Negotiation: Return: "budget=$150, prefers discounts"
+    Negotiation->>Negotiation: Buyer agent targets $150 or below
+    Negotiation->>User: Counter-offer: $145 (within budget!)
+```
+
+### Integration Setup
+
+To enable EthMem memory integration in negotiations:
+
+**Step 1: Install EthMem Extension**
+```bash
+# The extension is in ../extension directory
+cd ../extension
+# Load unpacked extension in Chrome
+```
+
+**Step 2: Configure Memory Service**
+```javascript
+// In your negotiation config
+import { MemoryService } from './memoryService.js';
+
+const memoryService = new MemoryService({
+  contractAddress: process.env.ETHMEM_CONTRACT_ADDRESS,
+  provider: process.env.BLOCKCHAIN_RPC_URL
+});
+
+// Load user memories before negotiation
+const userMemories = await memoryService.getUserMemories(userId);
+```
+
+**Step 3: Initialize Agents with Memory Context**
+```javascript
+const buyer = new BuyerAgent({
+  memories: userMemories,
+  adaptToUserStyle: true
+});
+
+// Buyer agent now negotiates based on:
+// - User's budget preferences
+// - Past purchase behavior
+// - Preferred negotiation style
+```
+
+### Example: Memory-Enhanced Negotiation Flow
+
+**Without Memory (Generic):**
+```
+Seller: $150 for Premium Headphones
+Buyer: $105 (standard 30% off)
+Seller: $130
+Buyer: $115
+Seller: $120
+Deal: $120
+```
+
+**With EthMem Memory (Personalized):**
+```
+User Memory: "Budget max $140, prefers Sony, got 15% off last time"
+
+Seller: $150 for Premium Sony Headphones (matched brand preference)
+Buyer: $127.50 (targeting 15% discount based on history)
+Seller: $140 (respecting user's known budget limit)
+Buyer: $135
+Deal: $135 (within budget, similar discount to past purchases)
+```
+
+### Memory Categories for E-commerce
+
+The EthMem extension can extract and utilize various memory types:
+
+| Memory Category | Example | Use in Negotiation |
+|----------------|---------|-------------------|
+| **Budget Constraints** | "I only spend up to $200 on electronics" | Sets maximum bid price |
+| **Price Sensitivity** | "I always look for deals and discounts" | Aggressive negotiation strategy |
+| **Brand Preferences** | "I prefer Sony over generic brands" | Influences product matching |
+| **Feature Priorities** | "Noise cancellation is a must-have" | Justifies premium pricing |
+| **Purchase History** | "Last headphones: paid $120 for $150 item" | Targets similar discount |
+| **Negotiation Style** | "I'm patient and willing to walk away" | Influences acceptance threshold |
+| **Product Interests** | "Looking for wireless, over-ear headphones" | Product recommendation |
+
+### Benefits of Memory Integration
+
+**For Buyers:**
+- Negotiations respect your budget automatically
+- Agents learn your preferred negotiation style
+- Better deals based on your historical discounts
+- Personalized product recommendations
+
+**For Sellers:**
+- Understand customer price sensitivity
+- Offer products matching user interests
+- Optimize pricing based on customer segment
+- Improve conversion rates
+
+**For the System:**
+- More efficient negotiations (fewer rounds)
+- Higher success rate (memory-informed pricing)
+- Better user satisfaction
+- Continuous learning from transaction history
+
+### Privacy and Decentralization
+
+**EthMem ensures:**
+- Memories stored on-chain (user controls access)
+- Cryptographic security for sensitive data
+- No central database of user preferences
+- Users can delete/modify memories anytime
+- Zero-knowledge proofs for privacy-preserving negotiations (planned)
 
 ## Hedera Integration & Usage
 
@@ -679,13 +936,14 @@ The system automatically selects the first available AI provider:
 hedera/
 ├── index.js              # Simple Hedera Agent Kit test
 ├── demo.js               # CLI negotiation demo
-├── server.js             # Express + WebSocket server (NEW!)
+├── server.js             # Express + WebSocket server
 ├── config.js             # Configuration management
 ├── sellerAgent.js        # Seller agent implementation
-├── buyerAgent.js         # Buyer agent implementation
+├── buyerAgent.js         # Buyer agent implementation (with memory integration)
 ├── a2aHandler.js         # A2A protocol message handler
 ├── paymentHandler.js     # Hedera payment handler
-├── frontend/             # React frontend (NEW!)
+├── memoryService.js      # EthMem memory integration service
+├── frontend/             # React frontend
 │   ├── src/
 │   │   ├── components/   # React components
 │   │   ├── services/     # API service
@@ -695,6 +953,14 @@ hedera/
 ├── .env.example          # Environment template
 ├── README.md             # This file
 └── RUNNING.md            # Full system guide
+
+../extension/             # EthMem Chrome Extension (Memory Source)
+├── manifest.json         # Extension manifest
+├── src/
+│   ├── background/       # Memory extraction service
+│   ├── content/          # Content script for AI platforms
+│   └── lib/              # Memory storage and extraction
+└── README.md             # Extension documentation
 ```
 
 ## API Reference
@@ -829,4 +1095,117 @@ const tools = hederaToolkit.getTools();
 // Tools include: createToken, transferToken, getTokenInfo
 ```
 
+## Related Projects
+
+### EthMem Extension
+This negotiation system is part of the larger **EthMem ecosystem**, which provides decentralized memory for AI interactions:
+
+- **Location**: `../extension/` directory
+- **Purpose**: Capture and store user preferences from AI conversations
+- **Integration**: Provides memory context for personalized negotiations
+- **Documentation**: See [Extension README](../extension/README.md) for setup instructions
+
+### Memory Flow Across Projects
+
+```mermaid
+graph LR
+    subgraph "User Interaction Layer"
+        ChatGPT[ChatGPT]
+        Claude[Claude AI]
+        Gemini[Gemini]
+    end
+    
+    subgraph "Memory Layer"
+        Extension[EthMem Extension<br/>Memory Extraction]
+        Blockchain[Blockchain Storage<br/>Ethereum/Hedera]
+    end
+    
+    subgraph "Application Layer"
+        Negotiation[Hedera Negotiation<br/>This Project]
+        ASI[ASI Agents<br/>../ASI-agents]
+    end
+    
+    ChatGPT -->|Conversations| Extension
+    Claude -->|Conversations| Extension
+    Gemini -->|Conversations| Extension
+    
+    Extension -->|Extract & Store| Blockchain
+    
+    Blockchain -->|Load Memories| Negotiation
+    Blockchain -->|Load Memories| ASI
+    
+    Negotiation -->|Personalized Deals| ChatGPT
+    ASI -->|Context-Aware Advice| Claude
+    
+    style Extension fill:#e74c3c
+    style Blockchain fill:#f39c12
+    style Negotiation fill:#4a90e2
+```
+
+### Complete EthMem Ecosystem
+
+**1. Browser Extension** (`../extension/`)
+- Captures memories from ChatGPT, Claude, Gemini
+- AI-powered memory extraction
+- Blockchain storage integration
+
+**2. Hedera Negotiation** (This project)
+- Memory-enhanced price negotiations
+- Hedera blockchain payments
+- A2A protocol communication
+
+**3. ASI Multi-Agent Systems** (`../ASI-agents/`)
+- Medical, Legal, Support, Education, Financial agents
+- Memory-informed consultations
+- Personalized AI assistance
+
+**4. Smart Contracts** (`../smart-contract/`)
+- On-chain memory storage
+- Decentralized data ownership
+- Cross-chain compatibility
+
+### Getting Started with Full Stack
+
+To experience the complete memory-enhanced negotiation system:
+
+```bash
+# 1. Set up EthMem Extension
+cd ../extension
+# Load in Chrome (see extension README)
+
+# 2. Use ChatGPT/Claude to create memories
+# Example: "I prefer wireless headphones under $150"
+
+# 3. Start Hedera negotiation system
+cd ../hedera
+npm install
+npm run server
+
+# 4. Negotiate with personalized context
+# The system automatically loads your preferences!
+```
+
+## Resources
+
+- [Hedera Agent Kit Documentation](https://docs.hedera.com/hedera/open-source-solutions/ai-studio-on-hedera/hedera-ai-agent-kit)
+- [Hedera Agent Kit GitHub](https://github.com/hashgraph/hedera-agent-kit)
+- [A2A Protocol Documentation](https://a2aprotocol.ai/docs/guide/a2a-javascript-sdk)
+- [Hedera SDK Documentation](https://docs.hedera.com/hedera/sdks-and-apis/sdks)
+- [LangChain Documentation](https://js.langchain.com/docs/)
+- [EthMem Extension](../extension/README.md) - Memory capture and storage
+- [ASI Agents](../ASI-agents/README.md) - Multi-domain agent systems
+
+## Support
+
+For questions or issues:
+- Open an issue on GitHub
+- Check Hedera Discord community
+- Review Hedera Agent Kit examples
+- See EthMem documentation for memory integration
+
+---
+
+**Part of the EthMem Ecosystem** - Decentralized Memory for AI Agents
+
+Built using Hedera Agent Kit, A2A Protocol, and EthMem Memory System
 
