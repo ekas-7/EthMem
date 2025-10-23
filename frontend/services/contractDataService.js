@@ -195,41 +195,114 @@ class ContractDataService {
     const newMemories = []
     const updatedMemories = []
     
-    // Create lookup map for extension memories by contract ID
-    const extensionMap = new Map()
+    console.log('[ContractDataService] Comparing memories:', {
+      contractCount: contractMemories.length,
+      extensionCount: extensionMemories.length
+    })
+    
+    // Create lookup maps for extension memories
+    const extensionByContractId = new Map()
+    const extensionByContent = new Map()
+    
     extensionMemories.forEach(mem => {
+      // Map by contract ID if available
       if (mem.metadata?.contractId) {
-        extensionMap.set(mem.metadata.contractId, mem)
+        extensionByContractId.set(mem.metadata.contractId, mem)
       }
+      
+      // Map by content for fuzzy matching
+      const contentKey = `${mem.entity || ''}-${mem.description || ''}`.toLowerCase().trim()
+      if (contentKey) {
+        extensionByContent.set(contentKey, mem)
+      }
+    })
+    
+    console.log('[ContractDataService] Extension maps:', {
+      byContractId: extensionByContractId.size,
+      byContent: extensionByContent.size
     })
     
     // Check each contract memory
     contractMemories.forEach(contractMem => {
-      const extensionMem = extensionMap.get(contractMem.contractId)
+      let isAlreadySynced = false
+      let matchingExtensionMem = null
       
-      if (!extensionMem) {
+      // First, try to match by contract ID
+      if (contractMem.contractId) {
+        matchingExtensionMem = extensionByContractId.get(contractMem.contractId)
+        if (matchingExtensionMem) {
+          isAlreadySynced = true
+          console.log('[ContractDataService] Found match by contract ID:', contractMem.contractId)
+        }
+      }
+      
+      // If no match by contract ID, try to match by content
+      if (!isAlreadySynced && contractMem.individualMemories) {
+        for (const individualMem of contractMem.individualMemories) {
+          const contentKey = `${individualMem.entity || ''}-${individualMem.description || ''}`.toLowerCase().trim()
+          if (contentKey) {
+            matchingExtensionMem = extensionByContent.get(contentKey)
+            if (matchingExtensionMem) {
+              isAlreadySynced = true
+              console.log('[ContractDataService] Found match by content:', contentKey)
+              
+              // Update the extension memory to mark it as synced
+              matchingExtensionMem.status = 'synced'
+              matchingExtensionMem.metadata = {
+                ...matchingExtensionMem.metadata,
+                contractId: contractMem.contractId,
+                ipfsHash: contractMem.ipfsHash,
+                contractStored: true
+              }
+              
+              break
+            }
+          }
+        }
+      }
+      
+      if (!isAlreadySynced) {
         // New memory from contract
+        console.log('[ContractDataService] New memory from contract:', contractMem.contractId)
         newMemories.push(contractMem)
       } else {
         // Check if memory was updated (different timestamp or IPFS hash)
         const contractTimestamp = contractMem.timestamp
-        const extensionTimestamp = extensionMem.timestamp
+        const extensionTimestamp = matchingExtensionMem.timestamp
         
         if (contractTimestamp > extensionTimestamp || 
-            contractMem.ipfsHash !== extensionMem.metadata?.ipfsHash) {
+            contractMem.ipfsHash !== matchingExtensionMem.metadata?.ipfsHash) {
+          console.log('[ContractDataService] Updated memory:', contractMem.contractId)
           updatedMemories.push({
             contract: contractMem,
-            extension: extensionMem
+            extension: matchingExtensionMem
           })
+        } else {
+          console.log('[ContractDataService] Memory already synced:', contractMem.contractId)
         }
       }
     })
+    
+    console.log('[ContractDataService] Comparison results:', {
+      newMemories: newMemories.length,
+      updatedMemories: updatedMemories.length
+    })
+    
+    // Notify about auto-synced memories
+    const autoSyncedCount = extensionMemories.filter(mem => 
+      mem.metadata?.contractStored && mem.status === 'synced'
+    ).length
+    
+    if (autoSyncedCount > 0) {
+      console.log('[ContractDataService] Auto-synced', autoSyncedCount, 'memories by content matching')
+    }
     
     return {
       newMemories,
       updatedMemories,
       totalNew: newMemories.length,
-      totalUpdated: updatedMemories.length
+      totalUpdated: updatedMemories.length,
+      autoSyncedCount
     }
   }
 
