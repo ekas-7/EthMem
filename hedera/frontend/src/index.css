@@ -4,28 +4,54 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900;
+    background: linear-gradient(135deg, #111714 0%, #1a2720 50%, #111714 100%);
     @apply text-white min-h-screen;
+    @apply overflow-x-hidden;
+  }
+  
+  * {
+    @apply transition-colors duration-200;
   }
 }
 
 @layer components {
   .card {
     @apply bg-white/10 backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20;
+    @apply transition-all duration-300 hover:shadow-3xl;
+    animation: fadeInUp 0.5s ease-out;
   }
   
   .btn-primary {
-    @apply bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700;
-    @apply text-white font-semibold py-3 px-6 rounded-lg;
-    @apply transition-all duration-300 transform hover:scale-105;
-    @apply shadow-lg hover:shadow-xl;
+    background: linear-gradient(135deg, #37d974 0%, #2ab85f 100%);
+    @apply text-white font-semibold py-3 px-8 rounded-lg;
+    @apply transition-all duration-300 transform hover:scale-105 active:scale-95;
+    @apply shadow-lg hover:shadow-2xl;
+    box-shadow: 0 10px 30px rgba(55, 217, 116, 0.3);
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+    @apply relative overflow-hidden;
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #2ab85f 0%, #37d974 100%);
+    box-shadow: 0 15px 40px rgba(55, 217, 116, 0.5);
+  }
+  
+  .btn-primary::before {
+    content: '';
+    @apply absolute inset-0 bg-white/20;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .btn-primary:hover::before {
+    transform: translateX(100%);
   }
   
   .btn-secondary {
     @apply bg-white/10 hover:bg-white/20 backdrop-blur-sm;
     @apply text-white font-semibold py-3 px-6 rounded-lg;
-    @apply transition-all duration-300;
-    @apply border border-white/30;
+    @apply transition-all duration-300 hover:scale-105 active:scale-95;
+    @apply border border-white/30 hover:border-white/50;
   }
   
   .message-box {
@@ -35,7 +61,117 @@
   }
   
   .agent-card {
-    @apply card hover:shadow-2xl transition-all duration-300;
-    @apply hover:scale-105 cursor-pointer;
+    @apply card transition-all duration-300;
+    @apply hover:scale-102 hover:-translate-y-1;
+    @apply cursor-default;
   }
+  
+  .stat-card {
+    @apply bg-white/5 rounded-lg p-4;
+    @apply transition-all duration-300 hover:bg-white/10;
+    @apply border border-transparent hover:border-white/20;
+  }
+  
+  .progress-bar {
+    @apply h-2 bg-white/10 rounded-full overflow-hidden;
+  }
+  
+  .progress-fill {
+    background: linear-gradient(90deg, #37d974 0%, #2ab85f 100%);
+    @apply h-full;
+    @apply transition-all duration-500 ease-out;
+  }
+  
+  .toast {
+    @apply fixed top-4 right-4 z-50;
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+    @apply rounded-lg p-4 shadow-2xl;
+    animation: slideInRight 0.3s ease-out;
+  }
+  
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+  
+  .shimmer::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 2s infinite;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .glow {
+    box-shadow: 0 0 20px rgba(55, 217, 116, 0.4);
+  }
+  
+  .glow-green {
+    box-shadow: 0 0 20px rgba(55, 217, 116, 0.4);
+  }
+  
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(55, 217, 116, 0.3);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(55, 217, 116, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(55, 217, 116, 0.8);
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }
