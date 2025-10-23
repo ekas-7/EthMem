@@ -165,10 +165,27 @@ export default function UnifiedDataViewer({ onMemoriesUpdate }) {
     if (!hasNewMemories && !hasUpdatedMemories) return
 
     try {
-      // Simple sync callback that just returns the memory ID
-      const extensionSyncCallback = async (memory) => {
-        console.log('[UnifiedDataViewer] Syncing memory:', memory)
-        return { id: memory.id }
+      // Sync callback: push memories into extension IndexedDB
+      const extensionSyncCallback = async (memories) => {
+        const list = Array.isArray(memories) ? memories : [memories]
+        // Flatten to plain extension memory structure
+        const toSave = list.map(m => ({
+          id: m.id || `mem-${Date.now()}-${Math.random().toString(36).slice(2,9)}`,
+          timestamp: m.timestamp || Date.now(),
+          category: m.category || 'general',
+          entity: m.entity || 'Contract Memory',
+          description: m.description || '',
+          source: m.source || 'Smart Contract',
+          status: 'synced',
+          metadata: {
+            ...(m.metadata || {}),
+            contractStored: true,
+            contractId: m.metadata?.contractId,
+            ipfsHash: m.metadata?.ipfsHash
+          }
+        }))
+        const ok = await extensionBridge.addMemories(toSave)
+        return { id: ok ? toSave[0].id : undefined }
       }
 
       const result = await syncNewMemories(extensionSyncCallback)

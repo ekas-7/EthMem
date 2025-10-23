@@ -154,12 +154,14 @@ class ExtensionBridge {
       if (message.type === 'GET_MEMORIES') action = 'GET_MEMORIES'
       else if (message.type === 'DELETE_MEMORY') action = 'DELETE_MEMORY'
       else if (message.type === 'CLEAR_ALL_MEMORIES') action = 'CLEAR_ALL_MEMORIES'
+      else if (message.type === 'ADD_MEMORIES') action = 'ADD_MEMORIES'
       
       window.postMessage({
         type: 'ETHMEM_REQUEST',
         action: action,
         requestId: requestId,
-        memoryId: message.payload?.id
+        memoryId: message.payload?.id,
+        memories: message.payload?.memories
       }, window.location.origin)
     })
   }
@@ -215,6 +217,20 @@ class ExtensionBridge {
       console.error('[ExtensionBridge] Error getting memories:', error)
       // Return empty array instead of throwing to prevent UI crashes
       return []
+    }
+  }
+
+  /**
+   * Add memories into extension IndexedDB
+   * @param {Array} memories - array of memory objects
+   */
+  async addMemories(memories) {
+    try {
+      const response = await this.sendMessageWithRetry({ type: 'ADD_MEMORIES', payload: { memories } })
+      return response?.success || false
+    } catch (error) {
+      console.error('[ExtensionBridge] Error adding memories:', error)
+      return false
     }
   }
 
