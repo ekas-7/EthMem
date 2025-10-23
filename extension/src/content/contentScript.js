@@ -1196,9 +1196,9 @@
     return btn;
   }
 
-  // Function to inject button into ChatGPT composer textbar
+  // Function to inject button into composer textbar
   function insertLogoInTextbar() {
-    if (!isChatGPT && !isClaude) return false; // Only for ChatGPT and Claude
+    if (!isChatGPT && !isClaude && !isGemini) return false; // For ChatGPT, Claude, and Gemini
     
     try {
       // ChatGPT: Find the composer footer actions container
@@ -1333,6 +1333,77 @@
         }
         
         console.log('[EthMem] Claude: textbar button injected successfully');
+        return true;
+      }
+      
+      // Gemini: Find the textarea wrapper and inject into leading actions
+      if (isGemini) {
+        // Look for the text input field wrapper - use attribute selector for dynamic Angular classes
+        let textareaWrapper = document.querySelector('[class*="text-input-field_textarea-wrapper"]');
+        
+        if (!textareaWrapper) {
+          // Try alternative selector - look for the main area and go up
+          const mainArea = document.querySelector('[class*="text-input-field-main-area"]');
+          if (mainArea) {
+            textareaWrapper = mainArea.parentElement;
+          }
+        }
+        
+        if (!textareaWrapper) {
+          // Try finding via rich-textarea element
+          const richTextarea = document.querySelector('rich-textarea');
+          if (richTextarea) {
+            textareaWrapper = richTextarea.closest('[class*="text-input-field_textarea-wrapper"]');
+          }
+        }
+        
+        if (!textareaWrapper) {
+          console.log('[EthMem] Gemini: textarea wrapper not found');
+          return false;
+        }
+        
+        // Find the leading actions wrapper (left side where upload button is)
+        let actionsContainer = textareaWrapper.querySelector('[class*="leading-actions-wrapper"]');
+        
+        if (!actionsContainer) {
+          // Alternative: look for uploader-button-container's parent
+          const uploaderContainer = document.querySelector('[class*="uploader-button-container"]');
+          if (uploaderContainer) {
+            actionsContainer = uploaderContainer.parentElement;
+            console.log('[EthMem] Gemini: Found actions container via uploader button');
+          }
+        }
+        
+        if (!actionsContainer) {
+          // Try to find any container with upload button
+          const uploadButton = document.querySelector('uploader');
+          if (uploadButton) {
+            actionsContainer = uploadButton.closest('[class*="actions-wrapper"]') || uploadButton.parentElement;
+            console.log('[EthMem] Gemini: Found actions container via uploader element');
+          }
+        }
+        
+        if (!actionsContainer) {
+          console.log('[EthMem] Gemini: actions container not found');
+          return false;
+        }
+        
+        // Check if already injected
+        if (actionsContainer.querySelector('.ext-logo-button-textbar')) {
+          console.log('[EthMem] Gemini: textbar button already present');
+          return true;
+        }
+        
+        // Create and insert the button
+        const ethmemButton = createLogoButton(true);
+        
+        // Add Gemini-specific styling to match their button style
+        ethmemButton.style.margin = '0 4px';
+        
+        // Insert at the end of the actions container (after upload button)
+        actionsContainer.appendChild(ethmemButton);
+        
+        console.log('[EthMem] Gemini: textbar button injected successfully');
         return true;
       }
       
@@ -1581,24 +1652,24 @@
     }
   }
 
-  // Auto-inject textbar button with retry logic (ChatGPT and Claude)
+  // Auto-inject textbar button with retry logic (ChatGPT, Claude, and Gemini)
   let textbarRetryCount = 0;
   const textbarMaxRetries = 30; // Increased retries for slower loading
   
   function tryInjectTextbar() {
-    if (!isChatGPT && !isClaude) return;
+    if (!isChatGPT && !isClaude && !isGemini) return;
     
     const success = insertLogoInTextbar();
     if (!success && textbarRetryCount < textbarMaxRetries) {
       textbarRetryCount++;
-      const platform = isChatGPT ? 'ChatGPT' : 'Claude';
+      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
       console.log(`[EthMem] ${platform} textbar injection attempt ${textbarRetryCount}/${textbarMaxRetries}`);
       setTimeout(tryInjectTextbar, 500); // Longer delay
     } else if (success) {
-      const platform = isChatGPT ? 'ChatGPT' : 'Claude';
+      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
       console.log(`[EthMem] ${platform} textbar button successfully injected`);
     } else {
-      const platform = isChatGPT ? 'ChatGPT' : 'Claude';
+      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
       console.warn(`[EthMem] Failed to inject ${platform} textbar button after`, textbarMaxRetries, 'attempts');
     }
   }
@@ -1618,36 +1689,21 @@
       }
       
       reinjectionTimeout = setTimeout(() => {
-        // For ChatGPT and Claude: watch textbar button
-        if (isChatGPT || isClaude) {
-          if (!document.querySelector('.ext-logo-button-textbar')) {
-            const platform = isChatGPT ? 'ChatGPT' : 'Claude';
-            console.log(`[EthMem] ${platform} textbar button removed, re-injecting...`);
-            
-            isReinjecting = true;
-            const success = insertLogoInTextbar();
-            
-            // Reset flag after a delay
-            setTimeout(() => {
-              isReinjecting = false;
-            }, 1000);
-            
-            if (!success) {
-              console.log(`[EthMem] ${platform} textbar re-injection failed, will retry on next mutation`);
-            }
-          }
-        } else {
-          // For Gemini: watch header button
-          if (!document.querySelector('.ext-logo-button')) {
-            console.log('[EthMem] Gemini header button removed, re-injecting...');
-            
-            isReinjecting = true;
-            const success = insertLogoInHeader();
-            
-            // Reset flag after a delay
-            setTimeout(() => {
-              isReinjecting = false;
-            }, 1000);
+        // For all platforms: watch textbar button
+        if (!document.querySelector('.ext-logo-button-textbar')) {
+          const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
+          console.log(`[EthMem] ${platform} textbar button removed, re-injecting...`);
+          
+          isReinjecting = true;
+          const success = insertLogoInTextbar();
+          
+          // Reset flag after a delay
+          setTimeout(() => {
+            isReinjecting = false;
+          }, 1000);
+          
+          if (!success) {
+            console.log(`[EthMem] ${platform} textbar re-injection failed, will retry on next mutation`);
           }
         }
       }, 250); // Debounce delay
@@ -1663,10 +1719,8 @@
   }
 
   // Start auto-injection
-  setTimeout(tryInjectHeader, 300);
-  
-  // Claude needs more time for DOM to load
-  const textbarDelay = isClaude ? 1000 : 500;
+  // For all platforms: use textbar injection
+  const textbarDelay = isClaude ? 1000 : (isGemini ? 800 : 500); // Claude and Gemini need more time
   setTimeout(tryInjectTextbar, textbarDelay);
 
 })();
