@@ -288,23 +288,32 @@ export async function uploadMemoriesToContract(memories, walletClient, onProgres
       throw new Error('No memories provided for upload')
     }
 
+    // Get user address for encryption
+    const accounts = await walletClient.getAddresses()
+    const userAddress = accounts[0]
+
     // Step 1: Prepare data for IPFS upload
     const uploadData = {
       memories: memories,
       metadata: {
         uploadTimestamp: new Date().toISOString(),
         totalMemories: memories.length,
-        version: '1.0'
+        version: '1.0',
+        owner: userAddress
       }
     }
 
     if (onProgress) onProgress({ step: 'preparing', message: 'Preparing data for upload...' })
 
-    // Step 2: Upload to IPFS
-    console.log('[Upload] Uploading to IPFS...')
-    if (onProgress) onProgress({ step: 'ipfs', message: 'Uploading to IPFS...' })
+    // Step 2: Upload to IPFS with encryption enabled
+    console.log('[Upload] Encrypting and uploading to IPFS...')
+    if (onProgress) onProgress({ step: 'ipfs', message: 'Encrypting and uploading to IPFS...' })
     
-    const ipfsHash = await uploadToIPFS(uploadData)
+    const ipfsHash = await uploadToIPFS(uploadData, {
+      encrypt: true,
+      walletClient,
+      ownerAddress: userAddress
+    })
     console.log('[Upload] IPFS upload successful. Hash:', ipfsHash)
 
     // Step 3: Store IPFS hash in smart contract

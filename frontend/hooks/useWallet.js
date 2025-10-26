@@ -58,6 +58,25 @@ export function useWallet() {
   }
 
   const disconnectWallet = () => {
+    // Clear decryption caches when disconnecting
+    if (typeof window !== 'undefined') {
+      try {
+        // Import and call cache clearing functions
+        import('../lib/ipfsService').then(module => {
+          if (module.clearDecryptionCache) {
+            module.clearDecryptionCache()
+          }
+        }).catch(err => console.warn('Could not clear IPFS cache:', err))
+        
+        import('../services/contractDataService').then(module => {
+          if (module.default?.clearCache) {
+            module.default.clearCache()
+          }
+        }).catch(err => console.warn('Could not clear contract cache:', err))
+      } catch (error) {
+        console.warn('Error clearing caches on disconnect:', error)
+      }
+    }
     disconnect()
   }
 

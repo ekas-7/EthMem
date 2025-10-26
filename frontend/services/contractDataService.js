@@ -128,13 +128,36 @@ class ContractDataService {
   async fetchContractMemories(memoryIds, walletClient) {
     const memories = []
     
+    // Get user address for decryption (only once)
+    const accounts = await walletClient.getAddresses()
+    const userAddress = accounts[0]
+    
     for (const memoryId of memoryIds) {
       try {
+        // Check cache first to prevent repeated decryption
+        const cacheKey = `${memoryId}-${userAddress}`
+        const now = Date.now()
+        const lastFetch = this.lastFetchTime.get(cacheKey)
+        
+        // If we fetched this recently, use cached version
+        if (lastFetch && (now - lastFetch) < this.MIN_FETCH_INTERVAL) {
+          const cachedMemory = this.fetchCache.get(cacheKey)
+          if (cachedMemory) {
+            console.log(`[ContractDataService] Using cached memory ${memoryId} (prevents re-decryption)`)
+            memories.push(cachedMemory)
+            continue
+          }
+        }
+        
         // Get memory data from contract
         const contractData = await getMemory(memoryId, walletClient)
         
-        // Fetch IPFS data
-        const ipfsData = await retrieveFromIPFS(contractData.ipfsHash)
+        // Fetch IPFS data with decryption support
+        // The retrieveFromIPFS has its own cache, but this adds rate limiting
+        const ipfsData = await retrieveFromIPFS(contractData.ipfsHash, {
+          walletClient,
+          userAddress
+        })
         
         // Transform to standard memory format
         const memory = {
@@ -145,6 +168,7 @@ class ContractDataService {
           ipfsHash: contractData.ipfsHash,
           source: 'Smart Contract',
           status: 'stored',
+          encrypted: true, // Mark as encrypted
           // Extract memories from IPFS data
           memories: ipfsData.memories || [],
           // Store the full IPFS data for display
@@ -156,9 +180,14 @@ class ContractDataService {
             contractStored: true,
             contractId: memoryId,
             ipfsHash: contractData.ipfsHash,
-            ipfsUrl: `https://gateway.pinata.cloud/ipfs/${contractData.ipfsHash}`
+            ipfsUrl: `https://gateway.pinata.cloud/ipfs/${contractData.ipfsHash}`,
+            encrypted: true
           }
         }
+        
+        // Cache the memory and update last fetch time
+        this.fetchCache.set(cacheKey, memory)
+        this.lastFetchTime.set(cacheKey, now)
         
         memories.push(memory)
         
@@ -338,6 +367,34 @@ class ContractDataService {
       this.checkInterval = null
       console.log('[ContractDataService] Stopped auto-check')
     }
+  }
+
+  /**
+   * Clear all caches
+   * Call this when user disconnects wallet or switches accounts
+   */
+  clearCache() {
+    this.fetchCache.clear()
+    this.lastFetchTime.clear()
+    console.log('[ContractDataService] All caches cleared')
+  }
+
+  /**
+   * Clear cache for specific user
+   * @param {string} userAddress - User's Ethereum address
+   */
+  clearCacheForUser(userAddress) {
+    const keysToDelete = []
+    this.fetchCache.forEach((_, key) => {
+      if (key.includes(userAddress.toLowerCase())) {
+        keysToDelete.push(key)
+      }
+    })
+    keysToDelete.forEach(key => {
+      this.fetchCache.delete(key)
+      this.lastFetchTime.delete(key)
+    })
+    console.log(`[ContractDataService] Cleared cache for user ${userAddress}`)
   }
 
   /**
