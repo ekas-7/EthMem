@@ -125,7 +125,8 @@ async function onKey(e) {
   
   // Platform detection for logging
   const isClaude = window.location.hostname.includes('claude.ai');
-  const platform = isClaude ? 'Claude' : window.location.hostname.includes('gemini.google.com') ? 'Gemini' : 'ChatGPT';
+  const isASI = window.location.hostname.includes('asi1.ai');
+  const platform = isClaude ? 'Claude' : isASI ? 'ASI' : window.location.hostname.includes('gemini.google.com') ? 'Gemini' : 'ChatGPT';
   
   console.log(`[SmartInjector] Intercept Enter key on ${platform}`);
   e.preventDefault();
@@ -159,7 +160,8 @@ async function onSubmit(e) {
   }
   
   const isClaude = window.location.hostname.includes('claude.ai');
-  const platform = isClaude ? 'Claude' : window.location.hostname.includes('gemini.google.com') ? 'Gemini' : 'ChatGPT';
+  const isASI = window.location.hostname.includes('asi1.ai');
+  const platform = isClaude ? 'Claude' : isASI ? 'ASI' : window.location.hostname.includes('gemini.google.com') ? 'Gemini' : 'ChatGPT';
   
   console.log(`[SmartInjector] Intercept form submit on ${platform}`);
   console.log('[SmartInjector] Message:', msg.substring(0, 50));
@@ -189,6 +191,7 @@ async function onClick(e) {
   const isClaude = window.location.hostname.includes('claude.ai');
   const isGemini = window.location.hostname.includes('gemini.google.com');
   const isChatGPT = window.location.hostname.includes('openai.com') || window.location.hostname.includes('chatgpt.com');
+  const isASI = window.location.hostname.includes('asi1.ai');
   
   // Check for send button - different platforms use different attributes
   let isSend = false;
@@ -223,6 +226,25 @@ async function onClick(e) {
     // ChatGPT: data-testid with 'send' or 'submit'
     isSend = btn.getAttribute('data-testid')?.includes('send') ||
              btn.type === 'submit';
+  } else if (isASI) {
+    // ASI: The send button is typically a rounded button with specific classes
+    // It has 'bg-base-primary' class and is in the right section
+    const hasPrimaryBg = btn.classList.contains('bg-base-primary');
+    const isRounded = btn.classList.contains('rounded-full');
+    const hasTransition = btn.classList.contains('transition-all');
+    
+    // Debug: log button details for ASI
+    if (hasPrimaryBg || isRounded || btn.type === 'submit') {
+      console.log('[SmartInjector] ASI button clicked:', {
+        hasPrimaryBg,
+        isRounded,
+        hasTransition,
+        type: btn.type,
+        className: btn.className
+      });
+    }
+    
+    isSend = (hasPrimaryBg && isRounded) || btn.type === 'submit';
   } else {
     // Fallback for any platform
     isSend = btn.getAttribute('data-testid')?.includes('send') || 
@@ -253,7 +275,7 @@ async function onClick(e) {
     return;
   }
   
-  console.log('[SmartInjector] Intercept btn click for', isClaude ? 'Claude' : isGemini ? 'Gemini' : isChatGPT ? 'ChatGPT' : 'unknown platform');
+  console.log('[SmartInjector] Intercept btn click for', isClaude ? 'Claude' : isGemini ? 'Gemini' : isChatGPT ? 'ChatGPT' : isASI ? 'ASI' : 'unknown platform');
   console.log('[SmartInjector] Message:', msg.substring(0, 50));
   e.preventDefault();
   e.stopPropagation();
@@ -275,10 +297,11 @@ async function process(el, msg, send) {
     const isGemini = window.location.hostname.includes('gemini.google.com');
     const isClaude = window.location.hostname.includes('claude.ai');
     const isChatGPT = window.location.hostname.includes('openai.com') || window.location.hostname.includes('chatgpt.com');
+    const isASI = window.location.hostname.includes('asi1.ai');
     
     // Two injection methods:
     // 1. Textarea injection (Gemini) - Modifies visible text before sending
-    // 2. API injection (ChatGPT, Claude) - Intercepts API call invisibly via pageScript.js
+    // 2. API injection (ChatGPT, Claude, ASI) - Intercepts API call invisibly via pageScript.js
     
     // For Gemini: Use textarea injection (Gemini's API is harder to intercept)
     if (isGemini) {
@@ -331,8 +354,8 @@ async function process(el, msg, send) {
       return;
     }
     
-    // For ChatGPT & Claude: use API-level injection (invisible, more robust)
-    if (isChatGPT || isClaude) {
+    // For ChatGPT & Claude & ASI: use API-level injection (invisible, more robust)
+    if (isChatGPT || isClaude || isASI) {
       if (res.success && res.injectionText) {
         console.log('[SmartInjector] Preparing invisible injection for', res.relevant.length, 'memories');
         

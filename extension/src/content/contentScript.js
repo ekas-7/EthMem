@@ -7,8 +7,9 @@
   const isChatGPT = window.location.hostname.includes('openai.com') || window.location.hostname.includes('chatgpt.com');
   const isClaude = window.location.hostname.includes('claude.ai');
   const isGemini = window.location.hostname.includes('gemini.google.com');
+  const isASI = window.location.hostname.includes('asi1.ai');
   
-  console.log('[EthMem] platform detection -', { isChatGPT, isClaude, isGemini });
+  console.log('[EthMem] platform detection -', { isChatGPT, isClaude, isGemini, isASI });
 
   // Track processed messages to avoid duplicates
   const processedMessages = new Set();
@@ -1019,8 +1020,8 @@
     btn.setAttribute('aria-label', 'EthMem Memories');
     btn.title = 'EthMem - View Your Memories';
 
-    if (isTextbar && (isChatGPT || isClaude)) {
-      // ChatGPT & Claude textbar button styling (matches platform buttons)
+    if (isTextbar && (isChatGPT || isClaude || isASI)) {
+      // ChatGPT & Claude & ASI textbar button styling (matches platform buttons)
       if (isChatGPT) {
         btn.style.cssText = `
           display: inline-flex;
@@ -1063,6 +1064,36 @@
           border: none;
           background: transparent;
           color: rgb(156, 163, 175);
+          font-size: 13px;
+          font-weight: 500;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          cursor: pointer;
+          transition: background 0.15s ease, opacity 0.15s ease;
+          white-space: nowrap;
+          gap: 4px;
+        `;
+        
+        btn.addEventListener('mouseenter', () => {
+          btn.style.background = 'rgba(0, 0, 0, 0.05)';
+          btn.style.opacity = '0.9';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.background = 'transparent';
+          btn.style.opacity = '1';
+        });
+      } else if (isASI) {
+        // ASI textbar button styling (matches ASI's button design)
+        btn.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 32px;
+          min-width: 32px;
+          padding: 6px 8px;
+          border-radius: 8px;
+          border: none;
+          background: transparent;
+          color: currentColor;
           font-size: 13px;
           font-weight: 500;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -1136,11 +1167,11 @@
     img.style.objectFit = 'contain';
     img.style.flexShrink = '0';
     
-    if (isTextbar && (isChatGPT || isClaude)) {
+    if (isTextbar && (isChatGPT || isClaude || isASI)) {
       img.style.width = '20px';
       img.style.height = '20px';
-      if (isClaude) {
-        img.style.borderRadius = '4px'; // Slightly rounded for Claude
+      if (isClaude || isASI) {
+        img.style.borderRadius = '4px'; // Slightly rounded for Claude and ASI
       }
     } else if (isGemini) {
       img.style.width = '20px';
@@ -1155,7 +1186,7 @@
     btn.appendChild(img);
 
     // Add label for textbar buttons or non-textbar
-    if (!isTextbar || (!isChatGPT && !isClaude)) {
+    if (!isTextbar || (!isChatGPT && !isClaude && !isASI)) {
       const label = document.createElement('span');
       label.className = 'ext-logo-label';
       label.textContent = 'ethmem';
@@ -1198,7 +1229,7 @@
 
   // Function to inject button into composer textbar
   function insertLogoInTextbar() {
-    if (!isChatGPT && !isClaude && !isGemini) return false; // For ChatGPT, Claude, and Gemini
+    if (!isChatGPT && !isClaude && !isGemini && !isASI) return false; // For ChatGPT, Claude, Gemini, and ASI
     
     try {
       // ChatGPT: Find the composer footer actions container
@@ -1404,6 +1435,71 @@
         actionsContainer.appendChild(ethmemButton);
         
         console.log('[EthMem] Gemini: textbar button injected successfully');
+        return true;
+      }
+      
+      // ASI: Find the buttons container in the footer
+      if (isASI) {
+        console.log('[EthMem] ASI: Starting button injection...');
+        
+        // Look for the footer container - it can be bg-layout-background or bg-base-surface
+        let footerContainer = document.querySelector('.bg-layout-background.flex.justify-between');
+        if (!footerContainer) {
+          footerContainer = document.querySelector('.bg-base-surface.flex.justify-between');
+        }
+        
+        if (!footerContainer) {
+          console.log('[EthMem] ASI: footer container not found');
+          return false;
+        }
+        
+        console.log('[EthMem] ASI: Found footer container with classes:', footerContainer.className);
+        
+        // Inside this footer, find the FIRST child div with: flex gap-1 md:gap-2 items-center overflow-x-auto
+        // This is the left side buttons container
+        let buttonsContainer = footerContainer.querySelector('.flex.gap-1.items-center.overflow-x-auto');
+        
+        // Fallback: try just finding by overflow-x-auto
+        if (!buttonsContainer) {
+          buttonsContainer = footerContainer.querySelector('.overflow-x-auto.flex.items-center');
+        }
+        
+        // Fallback 2: find any flex items-center with overflow-x-auto
+        if (!buttonsContainer) {
+          const allOverflow = footerContainer.querySelectorAll('.overflow-x-auto');
+          for (let container of allOverflow) {
+            if (container.classList.contains('flex') && container.classList.contains('items-center')) {
+              const buttons = container.querySelectorAll('button');
+              if (buttons.length >= 2) {
+                buttonsContainer = container;
+                console.log('[EthMem] ASI: Found container via overflow-x-auto fallback');
+                break;
+              }
+            }
+          }
+        }
+        
+        if (!buttonsContainer) {
+          console.log('[EthMem] ASI: buttons container not found inside footer');
+          return false;
+        }
+        
+        console.log('[EthMem] ASI: Found buttons container with classes:', buttonsContainer.className);
+        console.log('[EthMem] ASI: Button count:', buttonsContainer.querySelectorAll('button').length);
+        
+        // Check if already injected
+        if (buttonsContainer.querySelector('.ext-logo-button-textbar')) {
+          console.log('[EthMem] ASI: textbar button already present');
+          return true;
+        }
+        
+        // Create and insert the button
+        const ethmemButton = createLogoButton(true);
+        
+        // Insert at the end of the buttons container (after the last button)
+        buttonsContainer.appendChild(ethmemButton);
+        
+        console.log('[EthMem] ASI: ✅ textbar button injected successfully');
         return true;
       }
       
@@ -1630,14 +1726,14 @@
   injectSmartInjector();
   injectMemoryViewer();
 
-  // Auto-inject header button with retry logic (Gemini only, NOT ChatGPT or Claude)
+  // Auto-inject header button with retry logic (Gemini only, NOT ChatGPT, Claude or ASI)
   let retryCount = 0;
   const maxRetries = 20;
   
   function tryInjectHeader() {
-    // Skip header button for ChatGPT and Claude (we use textbar button instead)
-    if (isChatGPT || isClaude) {
-      console.log(`[EthMem] Skipping header button for ${isChatGPT ? 'ChatGPT' : 'Claude'} (using textbar button)`);
+    // Skip header button for ChatGPT, Claude, and ASI (we use textbar button instead)
+    if (isChatGPT || isClaude || isASI) {
+      console.log(`[EthMem] Skipping header button for ${isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : 'ASI'} (using textbar button)`);
       setupObserver();
       return;
     }
@@ -1652,24 +1748,26 @@
     }
   }
 
-  // Auto-inject textbar button with retry logic (ChatGPT, Claude, and Gemini)
+  // Auto-inject textbar button with retry logic (ChatGPT, Claude, Gemini, and ASI)
   let textbarRetryCount = 0;
-  const textbarMaxRetries = 30; // Increased retries for slower loading
+  const textbarMaxRetries = 5; // Limited retries to avoid hanging
   
   function tryInjectTextbar() {
-    if (!isChatGPT && !isClaude && !isGemini) return;
+    if (!isChatGPT && !isClaude && !isGemini && !isASI) return;
     
     const success = insertLogoInTextbar();
     if (!success && textbarRetryCount < textbarMaxRetries) {
       textbarRetryCount++;
-      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
+      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : isGemini ? 'Gemini' : 'ASI');
       console.log(`[EthMem] ${platform} textbar injection attempt ${textbarRetryCount}/${textbarMaxRetries}`);
-      setTimeout(tryInjectTextbar, 500); // Longer delay
+      // Longer delays: ASI gets 2s, others get 1s
+      const retryDelay = isASI ? 2000 : (isClaude || isGemini ? 1000 : 800);
+      setTimeout(tryInjectTextbar, retryDelay);
     } else if (success) {
-      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
+      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : isGemini ? 'Gemini' : 'ASI');
       console.log(`[EthMem] ${platform} textbar button successfully injected`);
     } else {
-      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
+      const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : isGemini ? 'Gemini' : 'ASI');
       console.warn(`[EthMem] Failed to inject ${platform} textbar button after`, textbarMaxRetries, 'attempts');
     }
   }
@@ -1688,25 +1786,29 @@
         clearTimeout(reinjectionTimeout);
       }
       
+      // Shorter debounce for ASI (faster DOM changes)
+      const debounceDelay = isASI ? 100 : 250;
+      
       reinjectionTimeout = setTimeout(() => {
         // For all platforms: watch textbar button
         if (!document.querySelector('.ext-logo-button-textbar')) {
-          const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : 'Gemini');
+          const platform = isChatGPT ? 'ChatGPT' : (isClaude ? 'Claude' : isGemini ? 'Gemini' : isASI ? 'ASI' : 'Unknown');
           console.log(`[EthMem] ${platform} textbar button removed, re-injecting...`);
           
           isReinjecting = true;
           const success = insertLogoInTextbar();
           
-          // Reset flag after a delay
+          // Reset flag after a delay (shorter for ASI)
+          const resetDelay = isASI ? 500 : 1000;
           setTimeout(() => {
             isReinjecting = false;
-          }, 1000);
+          }, resetDelay);
           
           if (!success) {
             console.log(`[EthMem] ${platform} textbar re-injection failed, will retry on next mutation`);
           }
         }
-      }, 250); // Debounce delay
+      }, debounceDelay);
     });
 
     observer.observe(document.body, {
@@ -1714,13 +1816,36 @@
       subtree: true
     });
 
-    const platformName = isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : 'Gemini';
+    const platformName = isChatGPT ? 'ChatGPT' : isClaude ? 'Claude' : isGemini ? 'Gemini' : isASI ? 'ASI' : 'Unknown';
     console.log(`[EthMem] MutationObserver set up for ${platformName} auto-injection`);
+  }
+
+  // ASI-specific: Continuous monitoring with interval check (more aggressive)
+  function setupASIContinuousMonitoring() {
+    console.log('[EthMem] ASI: Setting up continuous monitoring...');
+    
+    // Check every 1 second if button is present, if not, re-inject
+    setInterval(() => {
+      if (!document.querySelector('.ext-logo-button-textbar')) {
+        console.log('[EthMem] ASI: Button missing, attempting re-injection...');
+        insertLogoInTextbar();
+      }
+      else{
+        console.log('[EthMem] ASI: Button present, no action needed');
+      }
+    }, 1000); // Check every 1 second (faster response)
   }
 
   // Start auto-injection
   // For all platforms: use textbar injection
-  const textbarDelay = isClaude ? 1000 : (isGemini ? 800 : 500); // Claude and Gemini need more time
+  const textbarDelay = isClaude ? 1500 : (isGemini ? 1200 : isASI ? 2000 : 500); // ASI needs the most time
   setTimeout(tryInjectTextbar, textbarDelay);
+  
+  // For ASI: Also set up continuous monitoring after initial injection
+  if (isASI) {
+    setTimeout(() => {
+      setupASIContinuousMonitoring();
+    }, 3000); // Start continuous monitoring after 3 seconds (earlier start)
+  }
 
 })();
